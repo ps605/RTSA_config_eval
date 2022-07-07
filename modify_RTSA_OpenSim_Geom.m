@@ -55,13 +55,13 @@ R = diameter/2;
 % Rotation offsets in degrees
 
 % Anteroversion: +ive; Retroversion: -ive
-hemi_gle_offsets.y_ant_retro_version   = 0;
+hemi_gle_offsets.y_ant_retro_version    = 0;
 % Inferior inclination: - ive; Superior inclination: +ive
-hemi_gle_offsets.x_sup_inf_incl        = -25;
+hemi_gle_offsets.x_sup_inf_incl         = -25;
 
 % Translation offsets in meters (m)
-hemi_gle_offsets.x_ant_post   = 0;      % X-normal
-hemi_gle_offsets.y_prox_dist  = -0.006;   % Y-normal
+hemi_gle_offsets.x_ant_post   = 0;          % X-normal
+hemi_gle_offsets.y_prox_dist  = -0.006;     % Y-normal
 hemi_gle_offsets.z_base_off   = 0.006;      % Z-normal
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,14 +74,25 @@ hemi_cup_offsets.z_ant_retro_version   = 0;
 hemi_cup_offsets.x_sup_inf_incl        = 12.5;
 
 % Translation offsets in meters (m)
-hemi_cup_offsets.x_ant_post   = 0; % X-normal
-hemi_cup_offsets.y_base_off   = 0.012; % Y-normal
-hemi_cup_offsets.z_prox_dist  = 0; % Z-normal
+hemi_cup_offsets.x_ant_post   = 0;      % X-normal
+hemi_cup_offsets.y_base_off   = 0.012;  % Y-normal
+hemi_cup_offsets.z_prox_dist  = 0;      % Z-normal
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % If should plot intermediate plots for checking
 flag_checkPlots = false;
+
+% If replacing Muscles with Actuators
+flag_useTorque = false;
+
+% If removing Rotator Cuff muscles
+flag_keepRC =  false;
+
+flag_ReplaceMuscles = true;
+
+% Run Moco after model is defined?
+flag_runSim = true;
 
 % Create a random 11-char hash to reference model file X00yyy111zz 3e13
 rhash = [char(randi([65 90],1,1))...    
@@ -90,6 +101,7 @@ rhash = [char(randi([65 90],1,1))...
     char(randi([48 57],1,3))...         
     char(randi([97 122],1,2))];
 
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Call functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create internal functions here (one for humerus and one for scapula) that
 % plot and do all the positioning then only return necessary values and
@@ -97,12 +109,28 @@ rhash = [char(randi([65 90],1,1))...
 
 % Define parametric implant on .stl anatomy & extract parameters in global
 scapula = glenoidGeom(R, hemi_gle_offsets, rhash);
+
 % Define parametric implant on .stl anatomy & extract parameters in global
 humerus = humerusGeom(R, hemi_cup_offsets, rhash);
+
 % Read in defined implant parameters and .stl and calculate GHJ centre
 [GHJ_in_parent, GHJ_in_child] = jointCalculationGH(scapula,humerus);
+
 % Define OpenSim model with new GHJ parameters from 'Virtual Surgery'
-adjustOpenSimModelGHJ(GHJ_in_parent, GHJ_in_child, hemi_gle_offsets, hemi_cup_offsets, R, rhash)
+model_file = adjustOpenSimModelGHJ(GHJ_in_parent,...
+    GHJ_in_child,...
+    hemi_gle_offsets,...
+    hemi_cup_offsets,...
+    R,...
+    rhash,...
+    flag_useTorque,...
+    flag_keepRC,...
+    flag_ReplaceMuscles);
+
+if flag_runSim == true
+    runRTSAsims(model_file, rhash, flag_keepRC)
+end
+
 toc
 
 %% Calculate Joint frame positions with OpenSim definitions

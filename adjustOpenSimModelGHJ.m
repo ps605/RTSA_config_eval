@@ -1,24 +1,17 @@
-% Create new OpenSim model with the newly defined GHJ location and with the
-% generated parametric "implant geometries" (glenosphere and humeral cup).
-% Also export log of RTSA models indexed by 11-charecter alphanumeric hash
+function new_model_file = adjustOpenSimModelGHJ(GHJ_in_parent, GHJ_in_child, hemi_gle_offsets, hemi_cup_offsets, R, rhash, flag_useTorque, flag_keepRC, flag_ReplaceMuscles)
+% adjustOpenSimModelGHJ Create new OpenSim model with the newly defined GHJ
+% location and with the  generated parametric "implant geometries" 
+% (glenosphere and humeral cup). Also export log of RTSA models indexed by 
+% 11-charecter alphanumeric hash
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%% TO ADD  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % -
 %
 % Pavlos Silvestros, PhD - University of Victoria, CAN, June 2022
+%% Set-up
 
-function adjustOpenSimModelGHJ(GHJ_in_parent, GHJ_in_child, hemi_gle_offsets, hemi_cup_offsets, R, rhash)
 % Import OpenSim 4.3 libraries
 import org.opensim.modeling.*
-
-%% Flags and paths
-% If replacing Muscles with Actuators
-flag_useTorque = false;
-
-% If removing Rotator Cuff muscles
-flag_keepRC =  false;
-
-flag_ReplaceMuscles = false;
 
 % Baseline model file
 model_name = 'FullShoulderModel_glC.osim'; %'FullShoulderModelglC_understand_jointDefs_implant.osim';
@@ -217,6 +210,8 @@ if flag_ReplaceMuscles == true
 
     end
 end
+
+
 %% Add/correct meshfile names for the parametric implant geometries
 
 
