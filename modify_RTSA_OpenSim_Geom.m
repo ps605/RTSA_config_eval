@@ -55,27 +55,27 @@ R = 0.036/2;
 
 % Anteroversion: +ive; Retroversion: -ive
 hemi_gle_offsets.y_ant_retro_version   = 0;
-% Inferioversion: + ive; Superioversion: -ive
-hemi_gle_offsets.x_sup_inf_version    = 0;
+% Inferior inclination: + ive; Superior inclination: -ive
+hemi_gle_offsets.x_sup_inf_incl        = 45;
 
 % Translation offsets in meters (m)
-hemi_gle_offsets.x_ant_post   = 0.003;      % X-normal
-hemi_gle_offsets.y_prox_dist  = 0;   % Y-normal
-hemi_gle_offsets.z_base_off   = 0.003;      % Z-normal
+hemi_gle_offsets.x_ant_post   = 0;      % X-normal
+hemi_gle_offsets.y_prox_dist  = 0.003;   % Y-normal
+hemi_gle_offsets.z_base_off   = 0.009;      % Z-normal
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Rotation offsets in degrees
 
 % Anteroversion: -ive; Retroversion: +ive
-hemi_cup_offsets.z_ant_retro_version   = 10;
-% Inferioversion: - ive; Superioversion: +ive
-hemi_cup_offsets.x_sup_inf_version    = 0;
+hemi_cup_offsets.z_ant_retro_version   = 0;
+% Inferior inclination: - ive; Superior inclination: +ive
+hemi_cup_offsets.x_sup_inf_incl        = 45;
 
 % Translation offsets in meters (m)
 hemi_cup_offsets.x_ant_post   = 0; % X-normal
-hemi_cup_offsets.y_base_off   = 0; % Y-normal
-hemi_cup_offsets.z_prox_dist  = 0.01; % Z-normal
+hemi_cup_offsets.y_base_off   = 0.012; % Y-normal
+hemi_cup_offsets.z_prox_dist  = 0; % Z-normal
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -653,7 +653,7 @@ end
 % 2) Offset from resection surface
 % 3) Radius (wrt to glenosphere for congruent fit?)
 % 4) Depth
-% 5) Version
+% 5) Version/Inclination
 
 % Get mesh data for the hemisphere from Visualisation Object. This will
 % then be continuesly updated through "hemisphere" Surface variable
@@ -675,13 +675,7 @@ cup_centre_in_origin = (resection_plane_normals.y_n*R)';
 scatter3(cup_centre_in_origin(1), cup_centre_in_origin(2), cup_centre_in_origin(3),'red','filled','o')
 scatter3(cup_centre_in_humerus(1), cup_centre_in_humerus(2), cup_centre_in_humerus(3),'cyan','filled','o')
 
-%% Version of cup
-
-% % % % Rotation offsets in degrees
-% % % % Anteroversion: -ive; Retroversion: +ive
-% % % hemi_cup_offsets.z_ant_retro_version   = 0;
-% % % % Inferioversion: - ive; Superioversion: +ive
-% % % hemi_cup_offsets.x_sup_inf_version    = 0;
+%% Version/Inclination of cup
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Axes Rotation Order:
@@ -705,7 +699,7 @@ resection_plane_normals.x_n_r1 = resection_plane_normals.x_n_r1';
 
 scatter3(resection_plane_normals.x_n_r1(1)*R, resection_plane_normals.x_n_r1(2)*R, resection_plane_normals.x_n_r1(3)*R,'cyan','filled','o')
 
-% Supero-/Infero- version (about Anterior/Posterior axis)
+% Supero-/Infero- inclination (about Anterior/Posterior axis)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % For this rotation it will be rotated about the new X axis after first Z
 % rotation to keep topological meaning for the cup orientation. Can be
@@ -714,11 +708,11 @@ scatter3(resection_plane_normals.x_n_r1(1)*R, resection_plane_normals.x_n_r1(2)*
 
 rotate(hemisphere_hum,...
     resection_plane_normals.x_n_r1,...
-    hemi_cup_offsets.x_sup_inf_version,...  % Rotated X-axis
+    hemi_cup_offsets.x_sup_inf_incl,...  % Rotated X-axis
     resection_barycentre)
 
 % Rotate cup_centre_in_origin about resection_plane_normals.x_n_r1
-R_x = axang2rotm([resection_plane_normals.x_n_r1 deg2rad(hemi_cup_offsets.x_sup_inf_version)]);
+R_x = axang2rotm([resection_plane_normals.x_n_r1 deg2rad(hemi_cup_offsets.x_sup_inf_incl)]);
 cup_centre_in_origin = R_x*cup_centre_in_origin;
 scatter3(cup_centre_in_origin(1), cup_centre_in_origin(2), cup_centre_in_origin(3),'red','filled','o')
 
@@ -1115,9 +1109,9 @@ end
 
 % 1) Position on resection surface (superior/inferior, anterior/posterior)
 % 2) Offset from resection surface
-% 3) Radius (wrt to glenosphere for congruent fit?)
+% 3) Radius (wrt to glenosphere for congruent fit)
 % 4) Depth
-% 5) Version
+% 5) Version/Inclination
 
 % Get mesh data for the hemisphere from Visualisation Object. This will
 % then be continuesly updated through "hemisphere" Surface variable
@@ -1132,13 +1126,7 @@ hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
 % Translate cup centre to originate from origin
 CoR_glen = glenoid_barycentre;
 
-%% Version of cup about hemisphere normal axes
-
-% % % % Rotation offsets in degrees
-% % % % Anteroversion: +ive; Retroversion: -ive
-% % % hemi_gle_offsets.y_ant_retro_version   = 0;
-% % % % Inferioversion: + ive; Superioversion: -ive
-% % % hemi_gle_offsets.x_sup_inf_version    = 0;
+%% Version/Inclination of cup about hemisphere normal axes
 
 % Antero-/Postero- version (about Proximal/Distal axis)
 rotate(hemisphere_gle,...
@@ -1153,7 +1141,7 @@ R_y = axang2rotm([glenoid_plane_normals.y_n deg2rad(hemi_gle_offsets.y_ant_retro
 glenoid_plane_normals.x_n_r1 = R_y*glenoid_plane_normals.x_n';
 glenoid_plane_normals.x_n_r1 = glenoid_plane_normals.x_n_r1';
 
-% Supero-/Infero- version (about Anterior/Posterior axis)
+% Supero-/Infero- inclination (about Anterior/Posterior axis)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % For this rotation it will be rotated about the new X axis after first Z
 % rotation to keep topological meaning for the cup orientation. Can be
@@ -1162,18 +1150,11 @@ glenoid_plane_normals.x_n_r1 = glenoid_plane_normals.x_n_r1';
 
 rotate(hemisphere_gle,...
     glenoid_plane_normals.x_n_r1,...
-    hemi_gle_offsets.x_sup_inf_version,...
+    hemi_gle_offsets.x_sup_inf_incl,...
     glenoid_barycentre)
 
-% % % % Rotate CoR_glen about resection_plane_normals.x_n_r1
-% % % R_x = axang2rotm([glenoid_plane_normals.x_n_r1 deg2rad(hemi_gle_offsets.x_sup_inf_version)]);
 
 %% Position on glenoid surface (anterior/posterior, base offset, superior/inferior)
-
-% % % % Translation offsets in meters (m)
-% % % hemi_gle_offsets.x_ant_post   = 0;      % X-normal
-% % % hemi_gle_offsets.y_prox_dist  = 0;   % Y-normal
-% % % hemi_gle_offsets.z_base_off   = 0.021;      % Z-normal
 
 % X - Anterior / Posterior offsets
 hemisphere_gle.XData = hemisphere_gle.XData + glenoid_plane_normals.x_n(1)*hemi_gle_offsets.x_ant_post;
