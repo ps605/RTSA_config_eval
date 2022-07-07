@@ -57,7 +57,7 @@ R = diameter/2;
 % Anteroversion: +ive; Retroversion: -ive
 hemi_gle_offsets.y_ant_retro_version   = 0;
 % Inferior inclination: - ive; Superior inclination: +ive
-hemi_gle_offsets.x_sup_inf_incl        = -15;
+hemi_gle_offsets.x_sup_inf_incl        = -25;
 
 % Translation offsets in meters (m)
 hemi_gle_offsets.x_ant_post   = 0;      % X-normal
