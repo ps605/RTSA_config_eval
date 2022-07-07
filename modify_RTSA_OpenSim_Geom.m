@@ -46,8 +46,9 @@ clc;
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+diameter = 36;
 
-R = 0.036/2;
+R = diameter/2;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Glenosphere offsets %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -55,22 +56,22 @@ R = 0.036/2;
 
 % Anteroversion: +ive; Retroversion: -ive
 hemi_gle_offsets.y_ant_retro_version   = 0;
-% Inferior inclination: + ive; Superior inclination: -ive
-hemi_gle_offsets.x_sup_inf_incl        = 45;
+% Inferior inclination: - ive; Superior inclination: +ive
+hemi_gle_offsets.x_sup_inf_incl        = -15;
 
 % Translation offsets in meters (m)
 hemi_gle_offsets.x_ant_post   = 0;      % X-normal
-hemi_gle_offsets.y_prox_dist  = 0.003;   % Y-normal
+hemi_gle_offsets.y_prox_dist  = -0.005;   % Y-normal
 hemi_gle_offsets.z_base_off   = 0.009;      % Z-normal
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Rotation offsets in degrees
 
-% Anteroversion: -ive; Retroversion: +ive
+% Anteroversion: +ive; Retroversion: -ive
 hemi_cup_offsets.z_ant_retro_version   = 0;
 % Inferior inclination: - ive; Superior inclination: +ive
-hemi_cup_offsets.x_sup_inf_incl        = 45;
+hemi_cup_offsets.x_sup_inf_incl        = 12.5;
 
 % Translation offsets in meters (m)
 hemi_cup_offsets.x_ant_post   = 0; % X-normal
@@ -683,9 +684,11 @@ scatter3(cup_centre_in_humerus(1), cup_centre_in_humerus(2), cup_centre_in_humer
 
 % Antero-/Postero- version (about Proximal/Distal axis)
 % Rotate Mesh
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Negate (-) hemi_cup_offsets.z_ant_retro_version so that ant/version +ive
 rotate(hemisphere_hum,...
     resection_plane_normals.z_n,...
-    hemi_cup_offsets.z_ant_retro_version,...
+    -hemi_cup_offsets.z_ant_retro_version,...
     resection_barycentre)
 
 % Rotate cup_centre_in_origin about resection_plane_normals.z_n
@@ -1147,10 +1150,11 @@ glenoid_plane_normals.x_n_r1 = glenoid_plane_normals.x_n_r1';
 % rotation to keep topological meaning for the cup orientation. Can be
 % thought of as the orientation of the cup as it sat on the resection plane
 % and then rotated about first axes
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Negate (-) hemi_gle_offsets.x_sup_inf_incl so that positive is superior
 rotate(hemisphere_gle,...
     glenoid_plane_normals.x_n_r1,...
-    hemi_gle_offsets.x_sup_inf_incl,...
+    -hemi_gle_offsets.x_sup_inf_incl,...
     glenoid_barycentre)
 
 
