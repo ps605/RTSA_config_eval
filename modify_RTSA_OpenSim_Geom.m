@@ -57,7 +57,7 @@ R = diameter/2;
 % Anteroversion: +ive; Retroversion: -ive
 hemi_gle_offsets.y_ant_retro_version    = 0;
 % Inferior inclination: - ive; Superior inclination: +ive
-hemi_gle_offsets.x_sup_inf_incl         = -25;
+hemi_gle_offsets.x_sup_inf_incl         = -10;
 
 % Translation offsets in meters (m)
 hemi_gle_offsets.x_ant_post   = 0;          % X-normal
@@ -89,12 +89,13 @@ flag_useTorque = false;
 % If removing Rotator Cuff muscles
 flag_keepRC =  false;
 
+% Replace muscle models Millard2012Equilibrium with DeGrootFregly
 flag_ReplaceMuscles = true;
 
 % Run Moco after model is defined?
 flag_runSim = true;
 
-% Create a random 11-char hash to reference model file X00yyy111zz 3e13
+% Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
 rhash = [char(randi([65 90],1,1))...    
     char(randi([48 57],1,2))...         
     char(randi([97 122],1,3))...       
@@ -127,6 +128,7 @@ model_file = adjustOpenSimModelGHJ(GHJ_in_parent,...
     flag_keepRC,...
     flag_ReplaceMuscles);
 
+% Run OpenSim moco for predictive simulation
 if flag_runSim == true
     runRTSAsims(model_file, rhash, flag_keepRC)
 end

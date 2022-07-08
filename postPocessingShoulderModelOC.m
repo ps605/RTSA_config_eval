@@ -86,7 +86,7 @@ close;
 %%% Handle activation data
 
 % Check if Rotator Cuffs exist
-if contains(solution_file, 'RC_0')
+if ~any(contains(states.colheaders, 'SUPRA'))
     for i_mus = 5:numel(muscles_to_plot)
 
         % Get handle of mus to plot
