@@ -461,7 +461,7 @@ end
 function humerus = humerusGeom(R, hemi_cup_offsets,rhash)
 %% Set up
 % Load in and configure points of Humerurs .stl
-[x, y, z] = stlread('..\..\OpenSim\In\Geometry\humerus_resected_manifold_closed.stl');
+[x, y, z] = stlreadXYZ('..\..\OpenSim\In\Geometry\humerus_resected_manifold_closed.stl');
 
 figure(1);
 
@@ -852,7 +852,7 @@ end
 function scapula = glenoidGeom(R, hemi_gle_offsets, rhash)
 %% Set up
 % Load in and configure points of Humerurs .stl
-[x, y, z] = stlread('..\..\OpenSim\In\Geometry\scapula.stl');
+[x, y, z] = stlreadXYZ('..\..\OpenSim\In\Geometry\scapula.stl');
 
 figure(10);
 
@@ -947,7 +947,7 @@ J_inferior = @(y_m)sqrt((glenoid_inferior(1) - y_m(1))^2 + (glenoid_inferior(2) 
 % Initial Condition (point on plane)
 y_m_0 = [plane_mesh_data.x_plane(1) plane_mesh_data.y_plane(1) plane_mesh_data.z_plane(1)];
 
-options = optimset('MaxIter', 100, 'TolFun', 1e-4);
+ options = optimset('MaxIter', 100, 'TolFun', 1e-4);
 % Run fmincon
 [glenoid_inferior_on_plane,fval] = fmincon(J_inferior,...
     y_m_0,...
