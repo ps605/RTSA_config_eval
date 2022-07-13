@@ -63,8 +63,8 @@ scatter3(glenoid_points(min_gl_p,1), glenoid_points(min_gl_p,2), glenoid_points(
 % Generate PointCloud of slected points and barycentre
 glenoid_pointCloud = pointCloud(vertcat(glenoid_points, glenoid_barycentre));
 
-figure (2);
-pcshow(glenoid_pointCloud, 'MarkerSize', 100)
+% figure (2);
+% pcshow(glenoid_pointCloud, 'MarkerSize', 100)
 
 % Fit plane to the points
 [glenoid_plane,~,~, ~] = pcfitplane(glenoid_pointCloud, 0.0001);

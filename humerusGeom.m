@@ -45,8 +45,8 @@ resection_barycentre = mean(vertcat(p.resection_points(:).Position));
 % Generate PointCloud of slected points and barycentre
 resection_pointCloud = pointCloud(vertcat(p.resection_points(:).Position, resection_barycentre));
 
-figure (2);
-pcshow(resection_pointCloud, 'MarkerSize', 100)
+% figure (2);
+% pcshow(resection_pointCloud, 'MarkerSize', 100)
 
 % Fit plane to the points
 [resection_plane,~,~, ~] = pcfitplane(resection_pointCloud, 0.001);

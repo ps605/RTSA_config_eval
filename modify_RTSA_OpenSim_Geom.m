@@ -43,10 +43,10 @@ n_workers     = 2;
 n_threads      = 36/n_workers;
 
 % Specify maximum number of computational threads (?)
-maxNumCompThreads(n_threads);
+% maxNumCompThreads(n_threads);
 
 % Create parallel pool
-pool = parpool('threads', n_workers);
+pool = parpool('2Workers');
 
 design_param.diameter = [0.036...
     0.042];
