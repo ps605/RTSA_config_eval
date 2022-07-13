@@ -36,22 +36,19 @@ close all;
 clear;
 clc;
 
-%% Set-up Parallel Computing
+% % % %% Set-up Parallel Computing
+% % % 
+% % % % Number of Workers
+% % % n_workers     = 2;
+% % % n_threads      = 36/n_workers;
+% % % 
+% % % % Specify maximum number of computational threads (?)
+% % % maxNumCompThreads(n_threads);
+% % % 
+% % % % Create parallel pool
+% % % pool = parpool('threads', n_workers);
+% % % 
 
-% Number of Workers
-n_workers     = 2;
-n_threads      = 36/n_workers;
-
-% Specify maximum number of computational threads (?)
-maxNumCompThreads(n_threads);
-
-% Create parallel pool
-pool = parpool('threads', n_workers);
-
-design_param.diameter = [0.036...
-    0.042];
-
-parfor i_param = 1:numel(design_param.diameter)
 %% Define Parameters for hemisphere/cup gemetry and offsets
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -62,7 +59,7 @@ parfor i_param = 1:numel(design_param.diameter)
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-diameter = design_param.diameter(i_param);
+diameter = 0.036;
 
 R = diameter/2;
 
@@ -154,7 +151,7 @@ if flag_runSim == true
 end
 
 toc
-end
+
 %% Calculate Joint frame positions with OpenSim definitions
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
