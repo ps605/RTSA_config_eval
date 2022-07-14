@@ -25,9 +25,6 @@
 %       (https://www.mathworks.com/help/control/ug/build-app-with-interactive-plot-updates.html)
 % 3) Dynamic reading of .stl files (ALMOST - 20220630)
 % 4) Where the hemisphere and cup .stl are saved to 
-% 5) Link final GHJ outputs to OpenSim to create new model (COMPLETE
-%   20220629) - now to run simulation
-% 
 %
 % Pavlos Silvestros, PhD - University of Victoria, CAN, June 2022
 
@@ -48,10 +45,21 @@ n_threads      = 36/n_workers;
 % Create parallel pool
 pool = parpool('2Workers');
 
-design_param.diameter = [0.036...
-    0.039];
+%% Create parameter combinations for loops
+design_param.diameter       = [0.036 0.039];
+design_param.hemi_base_off  = [0 0.006 0.009];
 
-parfor i_param = 1:numel(design_param.diameter)
+% Create permutation matrix
+param_matrix= allcomb( ...
+    design_param.diameter,...
+    design_param.hemi_base_off ...
+    );
+
+% Split matrix 
+p1 = param_matrix(:,1);
+p2 = param_matrix(:,2);
+
+parfor i_param = 1:size(param_matrix,1)
 %% Define Parameters for hemisphere/cup gemetry and offsets
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -62,7 +70,7 @@ parfor i_param = 1:numel(design_param.diameter)
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-diameter = design_param.diameter(i_param);
+diameter = p1(i_param);
 
 R = diameter/2;
 
@@ -80,7 +88,7 @@ hemi_gle_offsets.x_sup_inf_incl         = -10;
 % Translation offsets in meters (m)
 hemi_gle_offsets.x_ant_post   = 0;          % X-normal
 hemi_gle_offsets.y_prox_dist  = -0.006;     % Y-normal
-hemi_gle_offsets.z_base_off   = 0.006;      % Z-normal
+hemi_gle_offsets.z_base_off   = p2(i_param);      % Z-normal
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -147,6 +155,8 @@ model_file = adjustOpenSimModelGHJ(GHJ_in_parent,...
     flag_useTorque,...
     flag_keepRC,...
     flag_ReplaceMuscles);
+
+close all
 
 % Run OpenSim moco for predictive simulation
 if flag_runSim == true
