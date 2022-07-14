@@ -46,11 +46,10 @@ n_threads      = 36/n_workers;
 % maxNumCompThreads(n_threads);
 
 % Create parallel pool
-pool = parpool('3Workers');
+pool = parpool('2Workers');
 
 design_param.diameter = [0.036...
-    0.042...
-    0.048];
+    0.039];
 
 parfor i_param = 1:numel(design_param.diameter)
 %% Define Parameters for hemisphere/cup gemetry and offsets
