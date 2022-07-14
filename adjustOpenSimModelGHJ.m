@@ -271,7 +271,7 @@ osim_model.finalizeConnections();
 
 %% Print this bad boy
 
-% Add random pause between 0.25 and 1 seconds to print to files in parfor
+% Add random pause between 0.25-1 seconds to print files in parfor
 pause(0.250 + rand*0.75)
 
 date_time_now = datestr(datetime);

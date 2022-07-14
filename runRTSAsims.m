@@ -170,6 +170,8 @@ tic;
 predicted_solution = study.solve();
 toc;
 
+% Add random pause between 0.25-1 seconds to print files in parfor
+pause(0.250 + rand*0.075)
 %% Post-processing
 
 % If failed, unseal
