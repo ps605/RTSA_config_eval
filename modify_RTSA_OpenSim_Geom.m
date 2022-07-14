@@ -43,7 +43,7 @@ n_threads      = 36/n_workers;
 % maxNumCompThreads(n_threads);
 
 % Create parallel pool
-pool = parpool('2Workers');
+% pool = parpool('2Workers');
 
 %% Create parameter combinations for loops
 design_param.diameter       = [0.036 0.039];
