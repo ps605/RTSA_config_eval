@@ -43,11 +43,11 @@ n_threads      = 36/n_workers;
 % maxNumCompThreads(n_threads);
 
 % Create parallel pool
-% pool = parpool('2Workers');
+pool = parpool('2Workers');
 
 %% Create parameter combinations for loops
-design_param.diameter       = [0.036 0.039];
-design_param.hemi_base_off  = [0 0.006 0.009];
+design_param.diameter       = [0.036 0.042];
+design_param.hemi_base_off  = [0 0.003 0.006];
 
 % Create permutation matrix
 param_matrix= allcomb( ...
