@@ -2,13 +2,13 @@
 <OpenSimDocument Version="40000">
 	<AnalyzeTool name="Moco">
 		<!--Name of the .osim file used to construct a model.-->
-		<model_file>..\..\OpenSim\In\Models\RTSA_Adjusted\FSModel_GHJoint_R74ddk616yd.osim</model_file>
+		<model_file>..\..\OpenSim\In\Models\RTSA_Adjusted\FSModel_GHJoint_G91bak511xl.osim</model_file>
 		<!--Replace the model's force set with sets specified in <force_set_files>? If false, the force set is appended to.-->
 		<replace_force_set>false</replace_force_set>
 		<!--List of xml files used to construct a force set for the model.-->
 		<force_set_files />
 		<!--Directory used for writing results.-->
-		<results_directory>..\..\OpenSim\Out\Moco\sim_R74ddk616yd\</results_directory>
+		<results_directory>..\..\OpenSim\Out\Moco\sim_G91bak511xl\</results_directory>
 		<!--Output precision.  It is 8 by default.-->
 		<output_precision>8</output_precision>
 		<!--Initial time for the simulation.-->
@@ -59,7 +59,7 @@
 		<!--XML file (.xml) containing the forces applied to the model as ExternalLoads.-->
 		<external_loads_file />
 		<!--Storage file (.sto) containing the time history of states for the model. This file often contains multiple rows of data, each row being a time-stamped array of states. The first column contains the time.  The rest of the columns contain the states in the order appropriate for the model. In a storage file, unlike a motion file (.mot), non-uniform time spacing is allowed.  If the user-specified initial time for a simulation does not correspond exactly to one of the time stamps in this file, interpolation is NOT used because it is sometimes necessary to use an exact set of states for analyses.  Instead, the closest earlier set of states is used.-->
-		<states_file>..\..\OpenSim\Out\Moco\sim_R74ddk616yd\MocoSol_LatReach.sto</states_file>
+		<states_file>..\..\OpenSim\Out\Moco\sim_G91bak511xl\MocoSol_LatReach.sto</states_file>
 		<!--Motion file (.mot) or storage file (.sto) containing the time history of the generalized coordinates for the model. These can be specified in place of the states file.-->
 		<coordinates_file />
 		<!--Storage file (.sto) containing the time history of the generalized speeds for the model. If coordinates_file is used in place of states_file, these can be optionally set as well to give the speeds. If not specified, speeds will be computed from coordinates by differentiation.-->

@@ -32,6 +32,8 @@ close all;
 clear;
 clc;
 
+% Time the run
+time_i = datetime;
 %% Set-up
 
 %%%%%%%%%%%%%%%%% Create parameter combinations for loops %%%%%%%%%%%%%%%%%
@@ -67,8 +69,6 @@ flag_ReplaceMuscles = true;
 % Run Moco after model is defined?
 flag_runSim = true;
 
-% Start timer for entire simulation batch run
-tic
 %% Pass setup parameters and prepare models/simulations
 if flag_useParallel == true
 
@@ -259,5 +259,11 @@ elseif flag_useParallel == false
 end
 
 % Show entire time of simulation batch
-disp('Overall simulation batch....');
-toc
+time_f = datetime;
+run_time = time_f - time_i;
+
+disp('#######################################################');
+disp('Overall simulation batch took....');
+disp(' ');
+disp(run_time);
+disp('#######################################################');
