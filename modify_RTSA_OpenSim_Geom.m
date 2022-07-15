@@ -24,29 +24,17 @@
 %       visualiser and data to pass onto next step?
 %       (https://www.mathworks.com/help/control/ug/build-app-with-interactive-plot-updates.html)
 % 3) Dynamic reading of .stl files (ALMOST - 20220630)
-% 4) Where the hemisphere and cup .stl are saved to 
+% 4) Where the hemisphere and cup .stl are saved to
 %
 % Pavlos Silvestros, PhD - University of Victoria, CAN, June 2022
 
-tic
 close all;
 clear;
 clc;
 
+%% Set-up
 
-%% Set-up Parallel Computing
-
-% Number of Workers
-n_workers     = 2;
-n_threads      = 36/n_workers;
-
-% Specify maximum number of computational threads (?)
-% maxNumCompThreads(n_threads);
-
-% Create parallel pool
-pool = parpool('2Workers');
-
-%% Create parameter combinations for loops
+%%%%%%%%%%%%%%%%% Create parameter combinations for loops %%%%%%%%%%%%%%%%%
 design_param.diameter       = [0.036 0.042];
 design_param.hemi_base_off  = [0 0.003 0.006];
 
@@ -56,58 +44,13 @@ param_matrix= allcomb( ...
     design_param.hemi_base_off ...
     );
 
-% Split matrix 
+% Split matrix
 p1 = param_matrix(:,1);
 p2 = param_matrix(:,2);
 
-parfor i_param = 1:size(param_matrix,1)
-%% Define Parameters for hemisphere/cup gemetry and offsets
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-diameter = p1(i_param);
-
-R = diameter/2;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%% Glenosphere offsets %%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-hemi_gle_offsets = struct();
-
-% Rotation offsets in degrees
-
-% Anteroversion: +ive; Retroversion: -ive
-hemi_gle_offsets.y_ant_retro_version    = 0;
-% Inferior inclination: - ive; Superior inclination: +ive
-hemi_gle_offsets.x_sup_inf_incl         = -10;
-
-% Translation offsets in meters (m)
-hemi_gle_offsets.x_ant_post   = 0;          % X-normal
-hemi_gle_offsets.y_prox_dist  = -0.006;     % Y-normal
-hemi_gle_offsets.z_base_off   = p2(i_param);      % Z-normal
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-hemi_cup_offsets = struct();
-
-% Rotation offsets in degrees
-
-% Anteroversion: +ive; Retroversion: -ive
-hemi_cup_offsets.z_ant_retro_version   = 0;
-% Inferior inclination: - ive; Superior inclination: +ive
-hemi_cup_offsets.x_sup_inf_incl        = 12.5;
-
-% Translation offsets in meters (m)
-hemi_cup_offsets.x_ant_post   = 0;      % X-normal
-hemi_cup_offsets.y_base_off   = 0.012;  % Y-normal
-hemi_cup_offsets.z_prox_dist  = 0;      % Z-normal
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If use parallel with 2 workers (18 threads/worker) to batch job
+flag_useParallel = false;
 
 % If should plot intermediate plots for checking
 flag_checkPlots = false;
@@ -124,78 +67,197 @@ flag_ReplaceMuscles = true;
 % Run Moco after model is defined?
 flag_runSim = true;
 
-% Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
-% Add random pause between 0.25-0.50 seconds to print files in parfor
-pause(0.250 + rand*0.250)
-rng('shuffle');
-rhash = [char(randi([65 90],1,1))...    
-    char(randi([48 57],1,2))...         
-    char(randi([97 122],1,3))...       
-    char(randi([48 57],1,3))...         
-    char(randi([97 122],1,2))];
+% Start timer for entire simulation batch run
+tic
+%% Pass setup parameters and prepare models/simulations
+if flag_useParallel == true
 
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Call functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Create internal functions here (one for humerus and one for scapula) that
-% plot and do all the positioning then only return necessary values and
-% data.
+    %%%%%%%%%%%%%%%%%%%%%%%%% Parallel Computing %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Define parametric implant on .stl anatomy & extract parameters in global
-scapula = glenoidGeom(R, hemi_gle_offsets, rhash);
+    % Number of Workers
+    n_workers     = 2;
+    n_threads      = 36/n_workers;
 
-% Define parametric implant on .stl anatomy & extract parameters in global
-humerus = humerusGeom(R, hemi_cup_offsets, rhash);
+    % Specify maximum number of computational threads (?)
+    % maxNumCompThreads(n_threads);
 
-% Read in defined implant parameters and .stl and calculate GHJ centre
-[GHJ_in_parent, GHJ_in_child] = jointCalculationGH(scapula,humerus);
+    % Create parallel pool
+    pool = parpool('2Workers');
 
-% Define OpenSim model with new GHJ parameters from 'Virtual Surgery'
-model_file = adjustOpenSimModelGHJ(GHJ_in_parent,...
-    GHJ_in_child,...
-    hemi_gle_offsets,...
-    hemi_cup_offsets,...
-    R,...
-    rhash,...
-    flag_useTorque,...
-    flag_keepRC,...
-    flag_ReplaceMuscles);
+    parfor i_param = 1:size(param_matrix,1)
+        %% Define Parameters for hemisphere/cup gemetry and offsets
+       
+        %%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%%
+        diameter = p1(i_param);
 
-close all
+        R = diameter/2;
 
-% Run OpenSim moco for predictive simulation
-if flag_runSim == true
-    runRTSAsims(model_file, rhash, flag_keepRC)
+        %%%%%%%%%%%%%%%%%%%%%%% Glenosphere offsets %%%%%%%%%%%%%%%%%%%%%%%
+
+        hemi_gle_offsets = struct();
+
+        % Rotation offsets in degrees
+
+        % Anteroversion: +ive; Retroversion: -ive
+        hemi_gle_offsets.y_ant_retro_version    = 0;
+        % Inferior inclination: - ive; Superior inclination: +ive
+        hemi_gle_offsets.x_sup_inf_incl         = -10;
+
+        % Translation offsets in meters (m)
+        hemi_gle_offsets.x_ant_post   = 0;          % X-normal
+        hemi_gle_offsets.y_prox_dist  = -0.006;     % Y-normal
+        hemi_gle_offsets.z_base_off   = p2(i_param);      % Z-normal
+
+        %%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%
+
+        hemi_cup_offsets = struct();
+
+        % Rotation offsets in degrees
+
+        % Anteroversion: +ive; Retroversion: -ive
+        hemi_cup_offsets.z_ant_retro_version   = 0;
+        % Inferior inclination: - ive; Superior inclination: +ive
+        hemi_cup_offsets.x_sup_inf_incl        = 12.5;
+
+        % Translation offsets in meters (m)
+        hemi_cup_offsets.x_ant_post   = 0;      % X-normal
+        hemi_cup_offsets.y_base_off   = 0.012;  % Y-normal
+        hemi_cup_offsets.z_prox_dist  = 0;      % Z-normal
+
+
+        % Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
+        % Add random pause between 0.25-0.50 seconds to print files in parfor
+        pause(0.250 + rand*0.250)
+        rng('shuffle');
+        rhash = [char(randi([65 90],1,1))...
+            char(randi([48 57],1,2))...
+            char(randi([97 122],1,3))...
+            char(randi([48 57],1,3))...
+            char(randi([97 122],1,2))];
+
+        %%
+        %%%%%%%%%%%%%%%%%%%%%%%%%% Call functions %%%%%%%%%%%%%%%%%%%%%%%%%
+        % Create internal functions here (one for humerus and one for scapula) that
+        % plot and do all the positioning then only return necessary values and
+        % data.
+
+        % Define parametric implant on .stl anatomy & extract parameters in global
+        scapula = glenoidGeom(R, hemi_gle_offsets, rhash);
+
+        % Define parametric implant on .stl anatomy & extract parameters in global
+        humerus = humerusGeom(R, hemi_cup_offsets, rhash);
+
+        % Read in defined implant parameters and .stl and calculate GHJ centre
+        [GHJ_in_parent, GHJ_in_child] = jointCalculationGH(scapula,humerus);
+
+        % Define OpenSim model with new GHJ parameters from 'Virtual Surgery'
+        model_file = adjustOpenSimModelGHJ(GHJ_in_parent,...
+            GHJ_in_child,...
+            hemi_gle_offsets,...
+            hemi_cup_offsets,...
+            R,...
+            rhash,...
+            flag_useTorque,...
+            flag_keepRC,...
+            flag_ReplaceMuscles);
+
+        close all
+
+        % Run OpenSim moco for predictive simulation
+        if flag_runSim == true
+            runRTSAsims(model_file, rhash, flag_keepRC)
+        end
+
+    end
+
+elseif flag_useParallel == false
+    for i_param = 1:size(param_matrix,1)
+        %% Define Parameters for hemisphere/cup gemetry and offsets
+   
+        %%%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%
+        diameter = p1(i_param);
+
+        R = diameter/2;
+
+        %%%%%%%%%%%%%%%%%%%%%%% Glenosphere offsets %%%%%%%%%%%%%%%%%%%%%%%
+
+        hemi_gle_offsets = struct();
+
+        % Rotation offsets in degrees
+
+        % Anteroversion: +ive; Retroversion: -ive
+        hemi_gle_offsets.y_ant_retro_version    = 0;
+        % Inferior inclination: - ive; Superior inclination: +ive
+        hemi_gle_offsets.x_sup_inf_incl         = -10;
+
+        % Translation offsets in meters (m)
+        hemi_gle_offsets.x_ant_post   = 0;          % X-normal
+        hemi_gle_offsets.y_prox_dist  = -0.006;     % Y-normal
+        hemi_gle_offsets.z_base_off   = p2(i_param);      % Z-normal
+
+        %%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%
+
+        hemi_cup_offsets = struct();
+
+        % Rotation offsets in degrees
+
+        % Anteroversion: +ive; Retroversion: -ive
+        hemi_cup_offsets.z_ant_retro_version   = 0;
+        % Inferior inclination: - ive; Superior inclination: +ive
+        hemi_cup_offsets.x_sup_inf_incl        = 12.5;
+
+        % Translation offsets in meters (m)
+        hemi_cup_offsets.x_ant_post   = 0;      % X-normal
+        hemi_cup_offsets.y_base_off   = 0.012;  % Y-normal
+        hemi_cup_offsets.z_prox_dist  = 0;      % Z-normal
+
+
+        % Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
+        % Add random pause between 0.25-0.50 seconds to print files in parfor
+        pause(0.250 + rand*0.250)
+        rng('shuffle');
+        rhash = [char(randi([65 90],1,1))...
+            char(randi([48 57],1,2))...
+            char(randi([97 122],1,3))...
+            char(randi([48 57],1,3))...
+            char(randi([97 122],1,2))];
+
+        %%
+        %%%%%%%%%%%%%%%%%%%%%%%%%% Call functions %%%%%%%%%%%%%%%%%%%%%%%%%
+        % Create internal functions here (one for humerus and one for scapula) that
+        % plot and do all the positioning then only return necessary values and
+        % data.
+
+        % Define parametric implant on .stl anatomy & extract parameters in global
+        scapula = glenoidGeom(R, hemi_gle_offsets, rhash);
+
+        % Define parametric implant on .stl anatomy & extract parameters in global
+        humerus = humerusGeom(R, hemi_cup_offsets, rhash);
+
+        % Read in defined implant parameters and .stl and calculate GHJ centre
+        [GHJ_in_parent, GHJ_in_child] = jointCalculationGH(scapula,humerus);
+
+        % Define OpenSim model with new GHJ parameters from 'Virtual Surgery'
+        model_file = adjustOpenSimModelGHJ(GHJ_in_parent,...
+            GHJ_in_child,...
+            hemi_gle_offsets,...
+            hemi_cup_offsets,...
+            R,...
+            rhash,...
+            flag_useTorque,...
+            flag_keepRC,...
+            flag_ReplaceMuscles);
+
+        close all
+
+        % Run OpenSim moco for predictive simulation
+        if flag_runSim == true
+            runRTSAsims(model_file, rhash, flag_keepRC)
+        end
+
+    end
 end
 
+% Show entire time of simulation batch
+disp('Overall simulation batch....');
 toc
-end
-%% Calculate Joint frame positions with OpenSim definitions
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-
-%% For the humerus
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-
-%% For the scapula
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-
-
