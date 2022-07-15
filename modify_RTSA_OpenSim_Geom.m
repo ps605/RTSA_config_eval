@@ -33,6 +33,7 @@ close all;
 clear;
 clc;
 
+
 %% Set-up Parallel Computing
 
 % Number of Workers
@@ -124,6 +125,9 @@ flag_ReplaceMuscles = true;
 flag_runSim = true;
 
 % Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
+% Add random pause between 0.25-0.50 seconds to print files in parfor
+pause(0.250 + rand*0.250)
+rng('shuffle');
 rhash = [char(randi([65 90],1,1))...    
     char(randi([48 57],1,2))...         
     char(randi([97 122],1,3))...       
