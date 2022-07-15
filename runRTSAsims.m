@@ -148,7 +148,7 @@ solver.set_verbosity(2);
 solver.set_optim_solver('ipopt');
 solver.set_optim_convergence_tolerance(1e-1);
 solver.set_optim_constraint_tolerance(1e-3);
-solver.set_optim_max_iterations(5000);
+solver.set_optim_max_iterations(1);
 
 % % %             % Create an initial guess
 % % %             in_guess=solver.createGuess();
@@ -169,6 +169,8 @@ tic;
 predicted_solution = study.solve();
 toc;
 
+% Add random pause between 0.25-1 seconds to print files in parfor
+pause(0.250 + rand*0.075)
 %% Post-processing
 
 % If failed, unseal
