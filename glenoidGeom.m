@@ -1,7 +1,7 @@
 function scapula = glenoidGeom(R, hemi_gle_offsets, rhash)
 %% Set up
 % Load in and configure points of Humerurs .stl
-[x, y, z] = stlread('..\..\OpenSim\In\Geometry\scapula.stl');
+[x, y, z] = stlreadXYZ('..\..\OpenSim\In\Geometry\scapula.stl');
 
 figure(10);
 

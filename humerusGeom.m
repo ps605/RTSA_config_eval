@@ -1,7 +1,7 @@
 function humerus = humerusGeom(R, hemi_cup_offsets,rhash)
 %% Set up
 % Load in and configure points of Humerurs .stl
-[x, y, z] = stlread('..\..\OpenSim\In\Geometry\humerus_resected_manifold_closed.stl');
+[x, y, z] = stlreadXYZ('..\..\OpenSim\In\Geometry\humerus_resected_manifold_closed.stl');
 
 figure(1);
 
