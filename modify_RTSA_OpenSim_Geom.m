@@ -67,7 +67,7 @@ flag_keepRC =  false;
 flag_ReplaceMuscles = true;
 
 % Run Moco after model is defined?
-flag_runSim = true;
+flag_runSim = false;
 
 %% Pass setup parameters and prepare models/simulations
 if flag_useParallel == true

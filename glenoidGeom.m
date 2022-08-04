@@ -1,7 +1,7 @@
 function scapula = glenoidGeom(R, hemi_gle_offsets, rhash)
 %% Set up
-% Load in and configure points of Humerurs .stl
-[x, y, z] = stlreadXYZ('..\..\OpenSim\In\Geometry\scapula.stl');
+% Load in and configure points of Scapula .stl
+[x, y, z] = stlreadXYZ('..\..\SSM\Scapulas\stl_outputs\m1_0_m2_0_m3_0_.stl');
 
 figure(10);
 
@@ -37,11 +37,11 @@ hold on;
 % Get from base workspace because the object exports data tip there...
 % glenoid_points = evalin('base', 'cursor_info');
 
-p = load('glenoid_points_checked.mat');
+p = load('average_SSM_gl_rim_locs.mat');
 %% Fit plane to glenoid rim points
 
 % Glenoid rim points X-Y-Z
-glenoid_points = vertcat(p.glenoid_points(:).Position);
+glenoid_points = p.indexed_data_coordinates;
 % Calculate the mean of the points
 glenoid_barycentre = mean(glenoid_points);
 
@@ -63,11 +63,26 @@ scatter3(glenoid_points(min_gl_p,1), glenoid_points(min_gl_p,2), glenoid_points(
 % Generate PointCloud of slected points and barycentre
 glenoid_pointCloud = pointCloud(vertcat(glenoid_points, glenoid_barycentre));
 
-% figure (2);
-% pcshow(glenoid_pointCloud, 'MarkerSize', 100)
+figure (2);
+pcshow(glenoid_pointCloud, 'MarkerSize', 100)
 
-% Fit plane to the points
-[glenoid_plane,~,~, ~] = pcfitplane(glenoid_pointCloud, 0.0001);
+% Linear Regresion method to fit plane
+x_gp = glenoid_points(:,1);
+y_gp = glenoid_points(:,2);
+z_gp = glenoid_points(:,3);
+
+DM = [x_gp, y_gp, ones(size(z_gp))];
+B = DM\z_gp;
+
+% Create meshgrid of plane from Linear Regresion
+[X,Y] = meshgrid(linspace(min(x_gp),max(x_gp),50), linspace(min(y_gp),max(y_gp),50));
+Z = B(1)*X + B(2)*Y + B(3)*ones(size(X));
+
+% Create point cloud Linear Regression plane (consistensy with following code)
+plane_pointCloud = pointCloud([X(:), Y(:), Z(:)]);
+% Fit plane to the Linear Regresion plane points
+[glenoid_plane,~,~, ~] = pcfitplane(plane_pointCloud, 0.0001, 'MaxNumTrials', 1e6);
+
 % Get normal to handle it later
 % This is the Z-axis
 glenoid_normal = glenoid_plane.Normal;
