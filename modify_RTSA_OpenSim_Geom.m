@@ -40,7 +40,7 @@ time_i = datetime;
 design_param.diameter       = {0.036 0.042};
 design_param.hemi_base_off  = {0 0.003 0.006};
 
-scapula_morphologies = {'m1_2_m2_2_m3_2_', 'm1_0_m2_0_m3_0_'};
+scapula_morphologies = {'m1_0_m2_0_m3_0_', 'm1_2_m2_2_m3_2_'};
 
 % Create permutation matrix
 param_matrix= allcomb( ...
