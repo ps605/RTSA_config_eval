@@ -1,4 +1,4 @@
-function new_model_file = adjustOpenSimModelGHJ(GHJ_in_parent, GHJ_in_child, hemi_gle_offsets, hemi_cup_offsets, R, rhash, flag_useTorque, flag_keepRC, flag_ReplaceMuscles)
+function new_model_file = adjustOpenSimModelGHJ(GHJ_in_parent, GHJ_in_child, hemi_gle_offsets, hemi_cup_offsets, R, rhash, model_SSM, flag_useTorque, flag_keepRC, flag_ReplaceMuscles)
 % adjustOpenSimModelGHJ Create new OpenSim model with the newly defined GHJ
 % location and with the  generated parametric "implant geometries" 
 % (glenosphere and humeral cup). Also export log of RTSA models indexed by 
@@ -186,6 +186,75 @@ for i_joint = 1:numel(joints_to_alter)
         baseline_rot_c.get(2) + conds_GHJ_geom.rot(1, 6)));
 end
 
+% SSM scapula muscle locations
+muscle_locs = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM 'muscle_coords.txt'], ' ');
+muscle_names = {'DELT2',...
+    'DELT3', ...
+    'TRAP2',...
+    'TRAP3', ...
+    'TRAP4',...
+    'RMN',...
+    'RMJ1',...
+    'RMJ2',...
+    'CORB',...
+    'TMAJ',...
+    'PMN',...
+    'SRA1',...
+    'SRA2',...
+    'SRA3',...
+    'LVS'};
+
+
+% Get OpenSim muscle set
+muscle_set = osim_model.getMuscles();
+
+% Loop through muscles 
+for i_muscle = 0:muscle_set.getSize()-1
+    % Get muscle
+    muscle = muscle_set.get(i_muscle);
+    % Index muscle path point data
+    idx_muscle_data = find(strcmp(muscle_names(:), char(muscle.getName)));
+
+    % Skip if muscle isn't of <scapula> 
+    if isempty(idx_muscle_data)
+        continue
+    end
+    
+    % Get muscle path points
+    muscle_PathPointSet = muscle.getGeometryPath().getPathPointSet();
+    
+    for i_point = 0:muscle_PathPointSet.getSize()-1
+        
+        point = muscle_PathPointSet.get(i_point);
+
+        body_of_point = point.getBody().getName();
+        
+        % Skip if point isn' attached to <scapula>
+        if ~strcmp(char(body_of_point), 'scapula')
+            continue
+        end
+
+        % Skip if it is a via point
+        point_name = char(point.getName());
+        if strcmp(point_name(end-2:end), 'via')
+            continue
+        end
+
+        point_concrete_class = char(point.getConcreteClassName());
+        
+        if strcmp(point_concrete_class, 'PathPoint') || strcmp(point_concrete_class, 'ConditionalPathPoint')
+            % Downcast AbstractPathPoint to PathPoint to set new xyz
+            % location
+            point_downCast = PathPoint.safeDownCast(point);
+            location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1), muscle_locs(idx_muscle_data,2), muscle_locs(idx_muscle_data,3));
+            point_downCast.set_location(location_Vec3);
+        else
+            error('ERROR: Check path points')
+        end
+
+    end
+end
+
 % Skip if not replaceing muscle model
 if flag_ReplaceMuscles == true
 
@@ -222,6 +291,8 @@ end
 
 % Get the first geometry Scapula
 sca_OS_geom = osim_model.getBodySet.get('scapula').get_attached_geometry(0);
+sca_OS_mesh = Mesh.safeDownCast(sca_OS_geom);
+sca_OS_mesh.set_mesh_file([model_SSM 'downsample.stl'])
 % Clone
 sca_OS_geom_clone= sca_OS_geom.clone();
 % DownCast to <Mesh>
