@@ -1,7 +1,7 @@
-function scapula = glenoidGeom(R, hemi_gle_offsets, rhash)
+function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash)
 %% Set up
 % Load in and configure points of Scapula .stl
-[x, y, z] = stlreadXYZ('..\..\SSM\Scapulas\stl_outputs\m1_0_m2_0_m3_0_.stl');
+[x, y, z] = stlreadXYZ(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '.stl']);
 
 figure(10);
 
@@ -30,18 +30,11 @@ axis equal
 view(3)
 hold on;
 
-% Pause to select points on .stl where "resection" was made and load in from
-% plot
-% % % keyboard;
 
-% Get from base workspace because the object exports data tip there...
-% glenoid_points = evalin('base', 'cursor_info');
-
-p = load('average_SSM_gl_rim_locs.mat');
 %% Fit plane to glenoid rim points
 
 % Glenoid rim points X-Y-Z
-glenoid_points = p.indexed_data_coordinates;
+glenoid_points = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM 'rim_coords.txt'], ' ');
 % Calculate the mean of the points
 glenoid_barycentre = mean(glenoid_points);
 
@@ -59,6 +52,7 @@ axial_normal = -(bc_to_inferior_p/norm(bc_to_inferior_p));
 
 scatter3(glenoid_points(:,1), glenoid_points(:,2), glenoid_points(:,3), 'filled', 'o', 'cyan');
 scatter3(glenoid_points(min_gl_p,1), glenoid_points(min_gl_p,2), glenoid_points(min_gl_p,3), 'filled', 'o', 'magenta');
+scatter3(glenoid_barycentre(:,1), glenoid_barycentre(:,2), glenoid_barycentre(:,3), 'filled', 'o', 'magenta');
 
 % Generate PointCloud of slected points and barycentre
 glenoid_pointCloud = pointCloud(vertcat(glenoid_points, glenoid_barycentre));
@@ -164,9 +158,9 @@ x_sca_mean = mean(x,'all');
 y_sca_mean = mean(y,'all');
 z_sca_mean = mean(z,'all');
 
-sca_bary = [x_sca_mean y_sca_mean z_sca_mean];
+scap_barycentre = [x_sca_mean y_sca_mean z_sca_mean];
 
-scatter3(sca_bary(1), sca_bary(2), sca_bary(3),'cyan', 'filled','o')
+scatter3(scap_barycentre(1), scap_barycentre(2), scap_barycentre(3),'cyan', 'filled','o')
 
 % Pass .stl x-y-z to structure to then export
 stl_scap = struct('x', x,...
@@ -176,12 +170,12 @@ stl_scap = struct('x', x,...
 % What is the angle between the norm and the vector from the norm origine to glenoid vertex barycentre
 
 % Vector from glenoid barycentre to humeral verteces barrycentre
-gle_bary_vec = sca_bary - glenoid_barycentre;
+gle_bary_vec = scap_barycentre - glenoid_barycentre;
 
 % Connect with line to visualise vector
-line([glenoid_barycentre(1) sca_bary(1)],...
-    [glenoid_barycentre(2) sca_bary(2)],...
-    [glenoid_barycentre(3) sca_bary(3)], ...
+line([glenoid_barycentre(1) scap_barycentre(1)],...
+    [glenoid_barycentre(2) scap_barycentre(2)],...
+    [glenoid_barycentre(3) scap_barycentre(3)], ...
     'LineWidth',4,'Color','cyan');
 
 norm_check_angle = vrrotvec(gle_bary_vec, glenoid_normal);

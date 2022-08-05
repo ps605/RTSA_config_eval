@@ -37,18 +37,22 @@ time_i = datetime;
 %% Set-up
 
 %%%%%%%%%%%%%%%%% Create parameter combinations for loops %%%%%%%%%%%%%%%%%
-design_param.diameter       = [0.036 0.042];
-design_param.hemi_base_off  = [0 0.003 0.006];
+design_param.diameter       = {0.036 0.042};
+design_param.hemi_base_off  = {0 0.003 0.006};
+
+scapula_morphologies = {'m1_2_m2_2_m3_2_', 'm1_0_m2_0_m3_0_'};
 
 % Create permutation matrix
 param_matrix= allcomb( ...
     design_param.diameter,...
-    design_param.hemi_base_off ...
+    design_param.hemi_base_off, ...
+    scapula_morphologies...
     );
 
 % Split matrix
 p1 = param_matrix(:,1);
 p2 = param_matrix(:,2);
+p3 = param_matrix(:,3);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % If use parallel with 2 workers (18 threads/worker) to batch job
@@ -88,7 +92,7 @@ if flag_useParallel == true
         %% Define Parameters for hemisphere/cup gemetry and offsets
        
         %%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%%
-        diameter = p1(i_param);
+        diameter = p1{i_param};
 
         R = diameter/2;
 
@@ -106,7 +110,7 @@ if flag_useParallel == true
         % Translation offsets in meters (m)
         hemi_gle_offsets.x_ant_post   = 0;          % X-normal
         hemi_gle_offsets.y_prox_dist  = -0.006;     % Y-normal
-        hemi_gle_offsets.z_base_off   = p2(i_param);      % Z-normal
+        hemi_gle_offsets.z_base_off   = p2{i_param};      % Z-normal
 
         %%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%
 
@@ -124,6 +128,8 @@ if flag_useParallel == true
         hemi_cup_offsets.y_base_off   = 0.012;  % Y-normal
         hemi_cup_offsets.z_prox_dist  = 0;      % Z-normal
 
+        %%%%%%%%%%%%%%%%%%%%%%%% Model morphology %%%%%%%%%%%%%%%%%%%%%%%%%
+        model_SSM = p3{i_param};
 
         % Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
         % Add random pause between 0.25-0.50 seconds to print files in parfor
@@ -142,7 +148,7 @@ if flag_useParallel == true
         % data.
 
         % Define parametric implant on .stl anatomy & extract parameters in global
-        scapula = glenoidGeom(R, hemi_gle_offsets, rhash);
+        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash);
 
         % Define parametric implant on .stl anatomy & extract parameters in global
         humerus = humerusGeom(R, hemi_cup_offsets, rhash);
@@ -175,7 +181,7 @@ elseif flag_useParallel == false
         %% Define Parameters for hemisphere/cup gemetry and offsets
    
         %%%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%
-        diameter = p1(i_param);
+        diameter = p1{i_param};
 
         R = diameter/2;
 
@@ -193,7 +199,7 @@ elseif flag_useParallel == false
         % Translation offsets in meters (m)
         hemi_gle_offsets.x_ant_post   = 0;          % X-normal
         hemi_gle_offsets.y_prox_dist  = -0.006;     % Y-normal
-        hemi_gle_offsets.z_base_off   = p2(i_param);      % Z-normal
+        hemi_gle_offsets.z_base_off   = p2{i_param};      % Z-normal
 
         %%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%
 
@@ -210,7 +216,9 @@ elseif flag_useParallel == false
         hemi_cup_offsets.x_ant_post   = 0;      % X-normal
         hemi_cup_offsets.y_base_off   = 0.012;  % Y-normal
         hemi_cup_offsets.z_prox_dist  = 0;      % Z-normal
-
+        
+        %%%%%%%%%%%%%%%%%%%%%%%% Model morphology %%%%%%%%%%%%%%%%%%%%%%%%%
+        model_SSM = p3{i_param};
 
         % Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
         % Add random pause between 0.25-0.50 seconds to print files in parfor
@@ -229,7 +237,7 @@ elseif flag_useParallel == false
         % data.
 
         % Define parametric implant on .stl anatomy & extract parameters in global
-        scapula = glenoidGeom(R, hemi_gle_offsets, rhash);
+        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash);
 
         % Define parametric implant on .stl anatomy & extract parameters in global
         humerus = humerusGeom(R, hemi_cup_offsets, rhash);
