@@ -234,20 +234,50 @@ for i_muscle = 0:muscle_set.getSize()-1
             continue
         end
 
-        % Skip if it is a via point
         point_name = char(point.getName());
-        if strcmp(point_name(end-2:end), 'via')
-            continue
-        end
-
+        
         point_concrete_class = char(point.getConcreteClassName());
         
         if strcmp(point_concrete_class, 'PathPoint') || strcmp(point_concrete_class, 'ConditionalPathPoint')
             % Downcast AbstractPathPoint to PathPoint to set new xyz
             % location
             point_downCast = PathPoint.safeDownCast(point);
-            location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1), muscle_locs(idx_muscle_data,2), muscle_locs(idx_muscle_data,3));
-            point_downCast.set_location(location_Vec3);
+            
+            if strcmp(point_name(end-2:end), 'via') && strcmp('DELT2', char(muscle.getName))
+
+                % Via point offset from the scap muscle attachement -
+                % calculated manually offline
+                delt2_via_off = [-0.001, -0.0016, 0.0169];
+                location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1) + delt2_via_off(1),...
+                    muscle_locs(idx_muscle_data,2) + delt2_via_off(2),...
+                    muscle_locs(idx_muscle_data,3) + delt2_via_off(3));
+                point_downCast.set_location(location_Vec3);
+
+            elseif strcmp(point_name(end-2:end), 'via') && strcmp('DELT3', char(muscle.getName))
+
+                % Via point offset from the scap muscle attachement -
+                % calculated manually offline
+                delt3_via_off = [-0.0131, -0.0222, 0.0444];
+                location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1) + delt3_via_off(1),...
+                    muscle_locs(idx_muscle_data,2) + delt3_via_off(2),...
+                    muscle_locs(idx_muscle_data,3) + delt3_via_off(3));
+                point_downCast.set_location(location_Vec3);
+
+            elseif strcmp(point_name(end-2:end), 'via') && strcmp('TMAJ', char(muscle.getName))
+
+                % Via point offset from the scap muscle attachement -
+                % calculated manually offline
+                tmaj_via_off = [0.0594, 0.0015, 0.0687];
+                location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1) + tmaj_via_off(1),...
+                    muscle_locs(idx_muscle_data,2) + tmaj_via_off(2),...
+                    muscle_locs(idx_muscle_data,3) + tmaj_via_off(3));
+                point_downCast.set_location(location_Vec3);  
+
+            else
+                location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1), muscle_locs(idx_muscle_data,2), muscle_locs(idx_muscle_data,3));
+                point_downCast.set_location(location_Vec3);
+
+            end
         else
             error('ERROR: Check path points')
         end
