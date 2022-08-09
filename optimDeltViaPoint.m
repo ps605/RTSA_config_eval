@@ -81,8 +81,15 @@ delt3_via1_loc_i = [delt3_via1_downCast.get_location().get(0),...
 %% Optimisation - MA calculation after via point and joint modulation
 
 % Call to fmincon optim somewhere here
+for i_angle = 1:length(data_RTSA.angles)
+    
+    % Set model to have shoulder_elv value analysed
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, data_RTSA.angles(i_angle))
+    osim_model.realizePosition(init_state)
 
-osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, 1)
-osim_model.realizePosition(init_state)
+    % Compute moment arms
+
+
+end
 
 end
