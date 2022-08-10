@@ -109,14 +109,22 @@ end
 
 %% Optimisation - MA calculation after via point and joint modulation
 % Search radius around init location
-radius = 0.015;
+radius = 0.10;
 p_sim_0 = delt1_via_loc;
+
+ub = [0.5, 0.5, 0.5]
+lb = [-0.5, -0.5, -0.5]
+
+figure(1);
+scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
+hold on
+
 % Inequality constraint to keep new via point location with radius of x of
 % original via point
 f_con = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
 J = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT1', delt1_via_downCast);
 
-options = optimset('MaxIter', 100, 'TolFun', 1e-4);
+options = optimset('MaxIter', 100, 'TolFun', 1e-4, 'Display', 'iter');
 
 % Run fmincon
 [p_sim, fval] = fmincon(J,...
@@ -125,25 +133,33 @@ options = optimset('MaxIter', 100, 'TolFun', 1e-4);
     [],...
     [],...
     [],...
-    [],...
-    [],...
+    lb,...
+    ub,...
     f_con,...
     options);
 
+figure(1);
+scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
+scatter3(p_sim(1), p_sim(2), p_sim(3), 'o', 'filled','red')
+xlim([p_sim_0(1)-radius,p_sim_0(1)+radius])
+ylim([p_sim_0(2)-radius,p_sim_0(2)+radius])
+zlim([p_sim_0(3)-radius,p_sim_0(3)+radius])
 
-
-
-% Set model to have shoulder_elv value analysed
-osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(2)));
-osim_model.realizePosition(init_state);
-
-% %     new_state = osim_model.initSystem()
-% %     shoulder_elv.getValue(init_state)
-% Compute moment arms
-moment_arms.delt1 = delt1_GP.computeMomentArm(init_state, shoulder_elv);
-moment_arms.delt2 = delt2_GP.computeMomentArm(init_state, shoulder_elv);
-moment_arms.delt3 = delt3_GP.computeMomentArm(init_state, shoulder_elv);
-moment_arms
+figure(2);
+scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
+hold on
+scatter3(p_sim(1), p_sim(2), p_sim(3), 'o', 'filled','cyan')
+% % % Set model to have shoulder_elv value analysed
+% % osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(2)));
+% % osim_model.realizePosition(init_state);
+% % 
+% % % %     new_state = osim_model.initSystem()
+% % % %     shoulder_elv.getValue(init_state)
+% % % Compute moment arms
+% % moment_arms.delt1 = delt1_GP.computeMomentArm(init_state, shoulder_elv);
+% % moment_arms.delt2 = delt2_GP.computeMomentArm(init_state, shoulder_elv);
+% % moment_arms.delt3 = delt3_GP.computeMomentArm(init_state, shoulder_elv);
+% % moment_arms
 
 
 end
