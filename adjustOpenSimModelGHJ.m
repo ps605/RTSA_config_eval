@@ -103,7 +103,9 @@ if flag_keepRC == false
     osim_model.updForceSet.remove(osim_model.getMuscles.get('INFSP'));
     osim_model.updForceSet.remove(osim_model.updMuscles.get('SUBSC'));
     osim_model.updForceSet.remove(osim_model.updMuscles.get('TMIN'));
-
+    
+    % Update so that model has -4 muscles and not empty
+    osim_model.finalizeConnections()
 end
 
 %% Re-define the GH joints' JCS
@@ -231,6 +233,7 @@ for i_muscle = 0:muscle_set.getSize()-1
         
         % Skip if point isn' attached to <scapula>
         if ~strcmp(char(body_of_point), 'scapula')
+            clear muscle muscle_PathPointSet point body_of_point
             continue
         end
 
@@ -281,7 +284,7 @@ for i_muscle = 0:muscle_set.getSize()-1
         else
             error('ERROR: Check path points')
         end
-
+        clear muscle muscle_PathPointSet point body_of_point point_downCast location_Vec3
     end
 end
 

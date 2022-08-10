@@ -245,6 +245,8 @@ elseif flag_useParallel == false
         % Read in defined implant parameters and .stl and calculate GHJ centre
         [GHJ_in_parent, GHJ_in_child] = jointCalculationGH(scapula,humerus);
 
+        close all
+
         % Define OpenSim model with new GHJ parameters from 'Virtual Surgery'
         model_file = adjustOpenSimModelGHJ(GHJ_in_parent,...
             GHJ_in_child,...
@@ -257,8 +259,8 @@ elseif flag_useParallel == false
             flag_keepRC,...
             flag_ReplaceMuscles);
 
-        close all
-
+        optimDeltViaPoint(model_file)
+        
         % Run OpenSim moco for predictive simulation
         if flag_runSim == true
             runRTSAsims(model_file, rhash, flag_keepRC)

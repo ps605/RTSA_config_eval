@@ -84,11 +84,15 @@ delt3_via1_loc_i = [delt3_via1_downCast.get_location().get(0),...
 for i_angle = 1:length(data_RTSA.angles)
     
     % Set model to have shoulder_elv value analysed
-    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, data_RTSA.angles(i_angle))
-    osim_model.realizePosition(init_state)
-
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(1)));
+    osim_model.realizePosition(init_state);
+    
+% %     new_state = osim_model.initSystem()
+% %     shoulder_elv.getValue(init_state)
     % Compute moment arms
-
+    moment_arms.delt1 = delt1_GP.computeMomentArm(init_state, shoulder_elv)
+    moment_arms.delt2 = delt2_GP.computeMomentArm(init_state, shoulder_elv)
+    moment_arms.delt3 = delt3_GP.computeMomentArm(init_state, shoulder_elv)
 
 end
 
