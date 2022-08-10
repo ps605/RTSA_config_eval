@@ -6,6 +6,7 @@ function new_model_file = optimDeltViaPoint(model_file)
 import org.opensim.modeling.*
 
 osim_model = Model(model_file);
+init_state = osim_model.initSystem();
 
 % Ackland et al (2010) RTSA MA data
 
@@ -33,17 +34,26 @@ delt1_GP = delt1.getGeometryPath();
 delt1_PPS = delt1_GP.getPathPointSet();
 delt1_PPS_size = delt1_PPS.getSize();
 
-% Some check for it being via point HERE
+% Loop through PathPointSet to get via point
+for i_point = 0:delt1_PPS_size-1
 
-% Get via point and downcast to get/set location
-delt1_via1 = delt1_PPS.get(0);
-delt1_via1_downCast = PathPoint.safeDownCast(delt1_via1);
+    point = delt1_PPS.get(i_point);
+    point_name = char(point.getName());
 
-% Get via point location as vector for handling- not Vec3
-delt1_via1_loc_i = [delt1_via1_downCast.get_location().get(0),...
-    delt1_via1_downCast.get_location().get(1),...
-    delt1_via1_downCast.get_location().get(2)];
+    if strcmp(point_name(end-2:end), 'via')
 
+        % Get via point and downcast to get/set location
+        delt1_via1_downCast = PathPoint.safeDownCast(point);
+
+        % Get via point location as vector for handling- not Vec3
+        delt1_via_loc = [delt1_via1_downCast.get_location().get(0),...
+            delt1_via1_downCast.get_location().get(1),...
+            delt1_via1_downCast.get_location().get(2)];
+
+    else
+        continue
+    end
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get GeometryPath to calculate MomentArm later
 delt2_GP = delt2.getGeometryPath();
@@ -51,49 +61,67 @@ delt2_PPS = delt2_GP.getPathPointSet();
 delt2_PPS_size = delt2_PPS.getSize();
 
 % Some check for it being via point HERE
+% Loop through PathPointSet to get via point
+for i_point = 0:delt2_PPS_size-1
 
-% Get via point and downcast to get/set location
-delt2_via1 = delt2_PPS.get(0);
-delt2_via1_downCast = PathPoint.safeDownCast(delt2_via1);
+    point = delt2_PPS.get(i_point);
+    point_name = char(point.getName());
 
-% Get via point location as vector for handling- not Vec3
-delt2_via1_loc_i = [delt2_via1_downCast.get_location().get(0),...
-    delt2_via1_downCast.get_location().get(1),...
-    delt2_via1_downCast.get_location().get(2)];
+    if strcmp(point_name(end-2:end), 'via')
 
+        % Get via point and downcast to get/set location
+        delt2_via1_downCast = PathPoint.safeDownCast(point);
+
+        % Get via point location as vector for handling- not Vec3
+        delt2_via_loc = [delt2_via1_downCast.get_location().get(0),...
+            delt2_via1_downCast.get_location().get(1),...
+            delt2_via1_downCast.get_location().get(2)];
+
+    else
+        continue
+    end
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get GeometryPath to calculate MomentArm later
 delt3_GP = delt3.getGeometryPath();
 delt3_PPS = delt3_GP.getPathPointSet();
 delt3_PPS_size = delt3_PPS.getSize();
 
-% Some check for it being via point HERE
+for i_point = 0:delt3_PPS_size-1
 
-% Get via point and downcast to get/set location
-delt3_via1 = delt3_PPS.get(0);
-delt3_via1_downCast = PathPoint.safeDownCast(delt3_via1);
+    point = delt3_PPS.get(i_point);
+    point_name = char(point.getName());
 
-% Get via point location as vector for handling- not Vec3
-delt3_via1_loc_i = [delt3_via1_downCast.get_location().get(0),...
-    delt3_via1_downCast.get_location().get(1),...
-    delt3_via1_downCast.get_location().get(2)];
+    if strcmp(point_name(end-2:end), 'via')
+
+        % Get via point and downcast to get/set location
+        delt3_via1_downCast = PathPoint.safeDownCast(point);
+
+        % Get via point location as vector for handling- not Vec3
+        delt3_via_loc = [delt3_via1_downCast.get_location().get(0),...
+            delt3_via1_downCast.get_location().get(1),...
+            delt3_via1_downCast.get_location().get(2)];
+
+    else
+        continue
+    end
+end
 
 %% Optimisation - MA calculation after via point and joint modulation
 
-% Call to fmincon optim somewhere here
-for i_angle = 1:length(data_RTSA.angles)
-    
-    % Set model to have shoulder_elv value analysed
-    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(1)));
-    osim_model.realizePosition(init_state);
-    
-% %     new_state = osim_model.initSystem()
-% %     shoulder_elv.getValue(init_state)
-    % Compute moment arms
-    moment_arms.delt1 = delt1_GP.computeMomentArm(init_state, shoulder_elv)
-    moment_arms.delt2 = delt2_GP.computeMomentArm(init_state, shoulder_elv)
-    moment_arms.delt3 = delt3_GP.computeMomentArm(init_state, shoulder_elv)
 
-end
+
+    % Set model to have shoulder_elv value analysed
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(2)));
+    osim_model.realizePosition(init_state);
+
+    % %     new_state = osim_model.initSystem()
+    % %     shoulder_elv.getValue(init_state)
+    % Compute moment arms
+    moment_arms.delt1 = delt1_GP.computeMomentArm(init_state, shoulder_elv);
+    moment_arms.delt2 = delt2_GP.computeMomentArm(init_state, shoulder_elv);
+    moment_arms.delt3 = delt3_GP.computeMomentArm(init_state, shoulder_elv);
+    moment_arms
+
 
 end

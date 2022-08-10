@@ -233,7 +233,6 @@ for i_muscle = 0:muscle_set.getSize()-1
         
         % Skip if point isn' attached to <scapula>
         if ~strcmp(char(body_of_point), 'scapula')
-            clear muscle muscle_PathPointSet point body_of_point
             continue
         end
 
@@ -284,8 +283,9 @@ for i_muscle = 0:muscle_set.getSize()-1
         else
             error('ERROR: Check path points')
         end
-        clear muscle muscle_PathPointSet point body_of_point point_downCast location_Vec3
+        clear point body_of_point point_downCast location_Vec3
     end
+    clear muscle muscle_PathPointSet point body_of_point point_downCast location_Vec3
 end
 
 % Skip if not replaceing muscle model
