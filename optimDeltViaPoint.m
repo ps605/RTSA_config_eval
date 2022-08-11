@@ -109,11 +109,11 @@ end
 
 %% Optimisation - MA calculation after via point and joint modulation
 % Search radius around init location
-radius = 0.10;
+radius = 0.05;
 p_sim_0 = delt1_via_loc;
 
-ub = [0.5, 0.5, 0.5]
-lb = [-0.5, -0.5, -0.5]
+ub = [0.5, 0.5, 0.5];
+lb = [-0.5, -0.5, -0.5];
 
 figure(1);
 scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
@@ -122,9 +122,11 @@ hold on
 % Inequality constraint to keep new via point location with radius of x of
 % original via point
 f_con = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
+% Cost function to minimise moment arm differances between simulated and
+% calculated conditions 
 J = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT1', delt1_via_downCast);
 
-options = optimset('MaxIter', 100, 'TolFun', 1e-4, 'Display', 'iter');
+options = optimset('MaxIter', 100, 'TolFun', 1e-6, 'Display', 'iter');
 
 % Run fmincon
 [p_sim, fval] = fmincon(J,...
