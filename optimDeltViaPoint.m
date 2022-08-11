@@ -10,10 +10,13 @@ init_state = osim_model.initSystem();
 
 % Ackland et al (2010) RTSA MA data
 
-data_RTSA.angles =  [2.5, 30, 60, 90, 120];
-data_RTSA.DELT1 =   [15.6, 25.2,32.5, 35.8, 33.3]*0.001;
-data_RTSA.DELT2 =   [30.2, 33.9, 42.2, 46.2, 39.8]*0.001;
-data_RTSA.DELT3 =   [1.3, 3.5, 7.3, 11.4, 14.1]*0.001;
+data_RTSA.angles        = [2.5, 30, 60, 90, 120];
+data_RTSA.DELT1_mean    = [15.6, 25.2,32.5, 35.8, 33.3]*0.001;
+data_RTSA.DELT1_sd      = [2.3, 2.5, 1.8, 3.4, 2.7]*0.001;
+data_RTSA.DELT2_mean    = [30.2, 33.9, 42.2, 46.2, 39.8]*0.001;
+data_RTSA.DELT2_sd      = [6.6, 5.5, 5.5, 4.2, 5.8]*0.001;
+data_RTSA.DELT3_mean    = [1.3, 3.5, 7.3, 11.4, 14.1]*0.001;
+data_RTSA.DELT3_sd      = [1.4, 1.0, 1.7, 2.5, 3.6]*0.001;
 
 %% Handle model
 

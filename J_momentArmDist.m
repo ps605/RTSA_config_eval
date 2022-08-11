@@ -4,6 +4,13 @@ import org.opensim.modeling.*
 
 init_state = osim_model.initSystem();
 
+% Weights for joint positions
+w1  = 1;
+w2  = 0;
+w3  = 0;
+w4  = 0;
+w5  = 0;
+
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
 
@@ -68,6 +75,6 @@ delt_MA.diff5 = delt_MA.pos5 - exp_MA(5);
 
 %% Calculate sum of moment arm difference 
 
-J = delt_MA.diff1^2 + delt_MA.diff2^2 + delt_MA.diff3^2 + delt_MA.diff4^2 + delt_MA.diff5^2;
+J = (w1*delt_MA.diff1^2 + w2*delt_MA.diff2^2 + w3*delt_MA.diff3^2 + w4*delt_MA.diff4^2 + w5*delt_MA.diff5^2)/(w1 + w2 + w3+ w4 + w5);
 
 end
