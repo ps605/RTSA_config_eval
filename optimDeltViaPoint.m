@@ -129,11 +129,12 @@ end
 delt3_MA_init = delt3_GP.computeMomentArm(init_state,shoulder_elv);
 %% Optimisation - MA calculation after via point and joint modulation
 % Search radius around init location
-radius = 0.025;
+radius = 0.075;
 p_sim_0 = delt1_via_loc;
 
-ub = delt1_via_loc + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
-lb = delt1_via_loc - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
+ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
+lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
+lb(3) = p_sim_0(3);
 
 figure(101);
 hold on
@@ -163,12 +164,15 @@ fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
 fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT1', delt1_via_downCast);
 
 % Set-up options
-options = optimoptions('ga', 'Display', 'iter');
-options.FunctionTolerance       = 1e-20;
+options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
+options.FunctionTolerance       = 1e-6;
 options.ConstraintTolerance     = 1e-6;
 options.MaxGenerations          = 10;
-options.PopulationSize          = 20;
-% options.ObjectiveLimit          = 0.001;
+options.PopulationSize          = 40;
+options.EliteCount              = ceil(0.1*options.PopulationSize);
+options.FitnessLimit            = 0.002;
+options.InitialPopulationMatrix = [-0.0258, 0.0189, 0.0198];
+options.CreationFcn             =  'gacreationuniform';
 % options.MaxFunctionEvaluations  = 1000;
 % options.StepTolerance           = 1e-20;
 % options.FiniteDifferenceStepSize = 0.001;
@@ -194,6 +198,21 @@ figure(101);
 scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','red')
 scatter3(p_sim(1), p_sim(2), p_sim(3), 'o', 'filled','black')
 
+% Plot sphere to visualise constraint violation
+theta = (0:0.01:1)*2*pi;
+phi = (0:0.01:1)*pi;
+
+[THETA,PHI]=meshgrid(theta,phi);
+X1=radius.*cos(THETA).*sin(PHI) + p_sim_0(1);
+Y1=radius.*sin(THETA).*sin(PHI) + p_sim_0(2);
+Z1=radius.*cos(PHI) + p_sim_0(3);
+
+figure(101);
+surf(X1,Y1,Z1,...
+    'FaceColor',[ 1 1 0],...
+    'FaceAlpha', 0.2,...
+    'EdgeColor', [0 0 0 ],...
+    'EdgeAlpha', 0.1);
 
 % figure(2);
 % title('via point initial and final locations in x-y-z space (m)')
@@ -207,6 +226,7 @@ scatter3(p_sim(1), p_sim(2), p_sim(3), 'o', 'filled','black')
 % For shoulder_elv = 2.5 deg put model back in that Pose
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(1)));
 osim_model.realizePosition(init_state);
+delt1_via_downCast.set_location(Vec3(p_sim(1), p_sim(2), p_sim(3)));
 
 figure(3)
 % Initial MA
