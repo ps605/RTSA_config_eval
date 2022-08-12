@@ -245,7 +245,7 @@ elseif flag_useParallel == false
         % Read in defined implant parameters and .stl and calculate GHJ centre
         [GHJ_in_parent, GHJ_in_child] = jointCalculationGH(scapula,humerus);
 
-        close all
+        close 10 20 2
 
         % Define OpenSim model with new GHJ parameters from 'Virtual Surgery'
         model_file = adjustOpenSimModelGHJ(GHJ_in_parent,...

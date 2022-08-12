@@ -17,21 +17,23 @@ shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
 % Get muscle handles
 deltx = osim_model.getMuscles.get(muscle_name);
 
-figure(1);
+figure(101);
 scatter3(p_sim(1), p_sim(2), p_sim(3), 'o', 'filled','cyan')
 hold on
 
 % Get GeometryPaths
 if strcmp(muscle_name, 'DELT1')
     delt_GP = deltx.getGeometryPath();
-    exp_MA = data_RTSA.DELT1;
-    
+    exp_MA_mean = data_RTSA.DELT1_mean;
+    exp_MA_sd   = data_RTSA.DELT1_sd;
 elseif strcmp(muscle_name, 'DELT2') 
     delt_GP = deltx.getGeometryPath();
-    exp_MA = data_RTSA.DELT2;
+    exp_MA_mean = data_RTSA.DELT2_mean;
+    exp_MA_sd   = data_RTSA.DELT2_sd;
 elseif strcmp(muscle_name, 'DELT3')
     delt_GP = deltx.getGeometryPath();
-    exp_MA = data_RTSA.DELT3;
+    exp_MA_mean = data_RTSA.DELT3_mean;
+    exp_MA_sd   = data_RTSA.DELT3_sd;
 end
 
 % Set new location for DeltX via point
@@ -43,38 +45,47 @@ osim_model.realizePosition(init_state);
 
 
 delt_MA.pos1 = delt_GP.computeMomentArm(init_state, shoulder_elv);
-delt_MA.diff1 = delt_MA.pos1 - exp_MA(1);
+delt_MA.diff1 = delt_MA.pos1 - exp_MA_mean(1);
+
+figure(3);
+scatter(data_RTSA.angles(1), delt_MA.pos1,'filled','o','cyan');
+hold on
+
+if delt_MA.pos1 >= exp_MA_mean(1) - exp_MA_sd(1) && delt_MA.pos1 <= exp_MA_mean(1) + exp_MA_sd(1)
+    disp('lol')
+    %keyboard
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 2 - 30 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(2)));
 osim_model.realizePosition(init_state);
 
 delt_MA.pos2 = delt_GP.computeMomentArm(init_state, shoulder_elv);
-delt_MA.diff2 = delt_MA.pos2 - exp_MA(2);
+delt_MA.diff2 = delt_MA.pos2 - exp_MA_mean(2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 3 - 60 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(3)));
 osim_model.realizePosition(init_state);
 
 delt_MA.pos3 = delt_GP.computeMomentArm(init_state, shoulder_elv);
-delt_MA.diff3 = delt_MA.pos3 - exp_MA(3);
+delt_MA.diff3 = delt_MA.pos3 - exp_MA_mean(3);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 4 - 90 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(4)));
 osim_model.realizePosition(init_state);
 
 delt_MA.pos4 = delt_GP.computeMomentArm(init_state, shoulder_elv);
-delt_MA.diff4 = delt_MA.pos4 - exp_MA(4);
+delt_MA.diff4 = delt_MA.pos4 - exp_MA_mean(4);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 5 - 120 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(5)));
 osim_model.realizePosition(init_state);
 
 delt_MA.pos5 = delt_GP.computeMomentArm(init_state, shoulder_elv);
-delt_MA.diff5 = delt_MA.pos5 - exp_MA(5);
+delt_MA.diff5 = delt_MA.pos5 - exp_MA_mean(5);
 
 %% Calculate sum of moment arm difference 
-
-J = (w1*delt_MA.diff1^2 + w2*delt_MA.diff2^2 + w3*delt_MA.diff3^2 + w4*delt_MA.diff4^2 + w5*delt_MA.diff5^2)/(w1 + w2 + w3+ w4 + w5);
+J = (abs(w1*delt_MA.diff1) + abs(w2*delt_MA.diff2) + abs(w3*delt_MA.diff3) + abs(w4*delt_MA.diff4) + abs(w5*delt_MA.diff5))/(w1 + w2 + w3+ w4 + w5);
+% J = 1000*(sqrt(w1*delt_MA.diff1^2 + w2*delt_MA.diff2^2 + w3*delt_MA.diff3^2 + w4*delt_MA.diff4^2 + w5*delt_MA.diff5^2))/(w1 + w2 + w3+ w4 + w5);
 
 end
