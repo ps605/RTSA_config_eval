@@ -168,9 +168,9 @@ options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplot
 options.FunctionTolerance       = 1e-6;
 options.ConstraintTolerance     = 1e-6;
 options.MaxGenerations          = 10;
-options.PopulationSize          = 40;
-options.EliteCount              = ceil(0.1*options.PopulationSize);
-options.FitnessLimit            = 0.002;
+options.PopulationSize          = 50;
+options.EliteCount              = ceil(0.05*options.PopulationSize);
+options.FitnessLimit            = 0.5;
 options.InitialPopulationMatrix = [-0.0258, 0.0189, 0.0198];
 options.CreationFcn             =  'gacreationuniform';
 % options.MaxFunctionEvaluations  = 1000;
@@ -188,15 +188,15 @@ problem.Aeq         =   [];
 problem.beq         =   [];
 problem.lb          =   lb;
 problem.ub          =   ub;
-problem.nonlcon     =   fCon;
+problem.nonlcon     =   [];
 problem.solver      =   'ga';
 
 % Run fmincon
-[p_sim, fval, exitflag, output] = ga(problem);
+[p_sim_opt] = ga(problem);
 
 figure(101);
 scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','red')
-scatter3(p_sim(1), p_sim(2), p_sim(3), 'o', 'filled','black')
+scatter3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3), 'o', 'filled','black')
 
 % Plot sphere to visualise constraint violation
 theta = (0:0.01:1)*2*pi;
@@ -216,17 +216,18 @@ surf(X1,Y1,Z1,...
 
 % figure(2);
 % title('via point initial and final locations in x-y-z space (m)')
-% scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
+% scatter3(p_sim_opt_0(1), p_sim_opt_0(2), p_sim_opt_0(3), 'o', 'filled','magenta')
 % hold on
-% scatter3(p_sim(1), p_sim(2), p_sim(3), 'o', 'filled','cyan')
+% scatter3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3), 'o', 'filled','cyan')
 
+point_opt = osim_model.getMuscles.get('DELT1').getGeometryPath().getPathPointSet().get('DELT1-P3_via');
 
 % Plot initial and optimised DELT1 MA
 
 % For shoulder_elv = 2.5 deg put model back in that Pose
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(1)));
 osim_model.realizePosition(init_state);
-delt1_via_downCast.set_location(Vec3(p_sim(1), p_sim(2), p_sim(3)));
+delt1_via_downCast.set_location(Vec3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3)));
 
 figure(3)
 % Initial MA
@@ -247,5 +248,6 @@ scatter(data_RTSA.angles(angle_to_plot) , model_MA_optim.DELT1(angle_to_plot),'f
 % % moment_arms.delt3 = delt3_GP.computeMomentArm(init_state, shoulder_elv);
 % % moment_arms
 
+osim_model.print([model_file(1:end-5) '_wtf.osim'])
 
 end
