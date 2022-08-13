@@ -91,7 +91,7 @@ delt_MA.diff5 = delt_MA.pos5 - exp_MA_mean(5);
 % Assemble model
 osim_model.assemble(new_state)
 %% Calculate sum of moment arm difference 
-J = 1000*(abs(w1*delt_MA.diff1) + abs(w2*delt_MA.diff2) + abs(w3*delt_MA.diff3) + abs(w4*delt_MA.diff4) + abs(w5*delt_MA.diff5))/(w1 + w2 + w3+ w4 + w5);
+J = (abs(w1*delt_MA.diff1) + abs(w2*delt_MA.diff2) + abs(w3*delt_MA.diff3) + abs(w4*delt_MA.diff4) + abs(w5*delt_MA.diff5))/(w1 + w2 + w3+ w4 + w5);
 % J = 1000*(sqrt(w1*delt_MA.diff1^2 + w2*delt_MA.diff2^2 + w3*delt_MA.diff3^2 + w4*delt_MA.diff4^2 + w5*delt_MA.diff5^2))/(w1 + w2 + w3+ w4 + w5);
 
 % figure(102);

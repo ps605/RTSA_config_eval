@@ -170,7 +170,7 @@ options.ConstraintTolerance     = 1e-6;
 options.MaxGenerations          = 10;
 options.PopulationSize          = 50;
 options.EliteCount              = ceil(0.05*options.PopulationSize);
-options.FitnessLimit            = 0.5;
+options.FitnessLimit            = 0.0005;
 options.InitialPopulationMatrix = [-0.0258, 0.0189, 0.0198];
 options.CreationFcn             =  'gacreationuniform';
 % options.MaxFunctionEvaluations  = 1000;
@@ -229,11 +229,16 @@ osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(d
 osim_model.realizePosition(init_state);
 delt1_via_downCast.set_location(Vec3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3)));
 
+% Call ::Model.finalizeConnections() to....
+osim_model.finalizeConnections();
+% Re initialise the system to allow computing moment arm
+new_state = osim_model.initSystem;
+
 figure(3)
 % Initial MA
 scatter(data_RTSA.angles(angle_to_plot) , model_MA_init.DELT1(angle_to_plot ),'filled','o','red');
 % Optimised MA
-model_MA_optim.DELT1(1) = delt1_GP.computeMomentArm(init_state,shoulder_elv);
+model_MA_optim.DELT1(1) = delt1_GP.computeMomentArm(new_state,shoulder_elv);
 scatter(data_RTSA.angles(angle_to_plot) , model_MA_optim.DELT1(angle_to_plot),'filled','o','black');
 
 % % % Set model to have shoulder_elv value analysed
