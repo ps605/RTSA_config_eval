@@ -98,7 +98,13 @@ for i_point = 0:delt2_PPS_size-1
 end
 
 % DELT2 moment arm before any optimisation
-delt2_MA_init = delt2_GP.computeMomentArm(init_state,shoulder_elv);
+for i_angle = 1:length(data_RTSA.angles)
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)));
+    osim_model.realizePosition(init_state);
+
+    delt2_MA_init = delt2_GP.computeMomentArm(init_state,shoulder_elv);
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get GeometryPath to calculate MomentArm later
 delt3_GP = delt3.getGeometryPath();
@@ -126,7 +132,12 @@ for i_point = 0:delt3_PPS_size-1
 end
 
 % DELT3 moment arm before any optimisation
-delt3_MA_init = delt3_GP.computeMomentArm(init_state,shoulder_elv);
+for i_angle = 1:length(data_RTSA.angles)
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)));
+    osim_model.realizePosition(init_state);
+
+    delt3_MA_init = delt3_GP.computeMomentArm(init_state,shoulder_elv);
+end
 %% Optimisation - MA calculation after via point and joint modulation
 % Search radius around init location
 radius = 0.025;
@@ -168,7 +179,7 @@ options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplot
 options.FunctionTolerance       = 1e-9;
 options.ConstraintTolerance     = 1e-6;
 options.MaxGenerations          = 30;
-options.PopulationSize          = 110;
+options.PopulationSize          = 50;
 options.EliteCount              = ceil(0.05*options.PopulationSize);
 options.FitnessLimit            = 1e-5;
 options.InitialPopulationMatrix = [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
@@ -196,6 +207,9 @@ problem.solver      =   'ga';
 [p_sim_opt,J_opt,exit_flag,outputs] = ga(problem);
 
 %% Visualise after via point optimisation
+
+plotViaOptResults('DELT1', p_sim_0, p_sim_opt, delt_via_downCast, delt_GP, shoulder_elv, osim_model, data_RTSA, J_opt)
+
 figure(101);
 scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','red')
 scatter3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3), 'o', 'filled','black')
@@ -216,13 +230,6 @@ surf(X1,Y1,Z1,...
     'EdgeColor', [0 0 0 ],...
     'EdgeAlpha', 0.1);
 
-% figure(2);
-% title('via point initial and final locations in x-y-z space (m)')
-% scatter3(p_sim_opt_0(1), p_sim_opt_0(2), p_sim_opt_0(3), 'o', 'filled','magenta')
-% hold on
-% scatter3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3), 'o', 'filled','cyan')
-
-point_opt = osim_model.getMuscles.get('DELT1').getGeometryPath().getPathPointSet().get('DELT1-P3_via');
 
 % Plot initial and optimised DELT1 MA
 
@@ -302,18 +309,6 @@ scatter(data_RTSA.angles(5) , data_RTSA.DELT1_mean(5) - data_RTSA.DELT1_sd(5), '
 
 txt = ['\leftarrow J at optimum via point = ' num2str(J_opt)];
 text(data_RTSA.angles(angle_to_plot)+0.01,model_MA_optim.DELT1(angle_to_plot),txt)
-
-% % % Set model to have shoulder_elv value analysed
-% % osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(2)));
-% % osim_model.realizePosition(init_state);
-% % 
-% % % %     new_state = osim_model.initSystem()
-% % % %     shoulder_elv.getValue(init_state)
-% % % Compute moment arms
-% % moment_arms.delt1 = delt1_GP.computeMomentArm(init_state, shoulder_elv);
-% % moment_arms.delt2 = delt2_GP.computeMomentArm(init_state, shoulder_elv);
-% % moment_arms.delt3 = delt3_GP.computeMomentArm(init_state, shoulder_elv);
-% % moment_arms
 
 osim_model.print([model_file(1:end-5) '_wtf.osim'])
 p_sim_opt
