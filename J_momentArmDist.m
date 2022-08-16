@@ -5,12 +5,17 @@ import org.opensim.modeling.*
 init_state = osim_model.initSystem();
 
 % Weights for joint positions
-w1  = 2;
-w2  = 4;
+w1  = 10;
+w2  = 10;
 w3  = 10;
 w4  = 10;
-w5  = 4;
+w5  = 10;
 
+% % w1  = 2;
+% % w2  = 4;
+% % w3  = 10;
+% % w4  = 10;
+% % w5  = 4;
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
 
@@ -51,15 +56,6 @@ osim_model.realizePosition(new_state);
 delt_MA.pos1 = delt_GP.computeMomentArm(new_state, shoulder_elv);
 delt_MA.diff1 = delt_MA.pos1 - exp_MA_mean(1);
 
-% % figure(3);
-% % scatter(data_RTSA.angles(1), delt_MA.pos1,'filled','o','cyan');
-% % hold on
-
-% if delt_MA.pos1 >= exp_MA_mean(1) - exp_MA_sd(1) && delt_MA.pos1 <= exp_MA_mean(1) + exp_MA_sd(1)
-%     disp('lol')
-%     %keyboard
-% end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 2 - 30 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(2)), true);
 osim_model.realizePosition(new_state);
@@ -93,11 +89,5 @@ osim_model.assemble(new_state)
 %% Calculate sum of moment arm difference 
 J = (abs(w1*delt_MA.diff1) + abs(w2*delt_MA.diff2) + abs(w3*delt_MA.diff3) + abs(w4*delt_MA.diff4) + abs(w5*delt_MA.diff5))/(w1 + w2 + w3+ w4 + w5);
 % J = 1000*(sqrt(w1*delt_MA.diff1^2 + w2*delt_MA.diff2^2 + w3*delt_MA.diff3^2 + w4*delt_MA.diff4^2 + w5*delt_MA.diff5^2))/(w1 + w2 + w3+ w4 + w5);
-
-% figure(102);
-% title('J')
-% scatter(1, J, 'o', 'filled', 'cyan')
-% ylim([-0.01 0.05])
-% hold on
 
 end
