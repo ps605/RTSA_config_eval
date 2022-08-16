@@ -129,7 +129,7 @@ end
 delt3_MA_init = delt3_GP.computeMomentArm(init_state,shoulder_elv);
 %% Optimisation - MA calculation after via point and joint modulation
 % Search radius around init location
-radius = 0.015;
+radius = 0.025;
 p_sim_0 = delt1_via_loc;
 
 ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
@@ -147,7 +147,7 @@ scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
 
 figure(3);
 hold on
-title('deltoid moment arm to shldr per iteration for ith joint position (m)')
+title('deltoid moment arm for ith joint position (m)')
 xlabel('Joint position');
 ylabel('Moment arm');
 % Experimental Mean +/- SD
@@ -167,13 +167,13 @@ fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT1', delt1_via_
 options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
 options.FunctionTolerance       = 1e-9;
 options.ConstraintTolerance     = 1e-6;
-options.MaxGenerations          = 20;
-options.PopulationSize          = 100;
+options.MaxGenerations          = 30;
+options.PopulationSize          = 110;
 options.EliteCount              = ceil(0.05*options.PopulationSize);
-options.FitnessLimit            = 1e-1;
-options.InitialPopulationMatrix = [0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
-options.CreationFcn             =  [];
-options.MaxStallGenerations     =  [19];
+options.FitnessLimit            = 1e-5;
+options.InitialPopulationMatrix = [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
+options.CreationFcn             = [];
+options.MaxStallGenerations     = 15;
 % options.MaxFunctionEvaluations  = 1000;
 % options.StepTolerance           = 1e-20;
 % options.FiniteDifferenceStepSize = 0.001;
@@ -195,6 +195,7 @@ problem.solver      =   'ga';
 % Run fmincon
 [p_sim_opt,J_opt,exit_flag,outputs] = ga(problem);
 
+%% Visualise after via point optimisation
 figure(101);
 scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','red')
 scatter3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3), 'o', 'filled','black')
@@ -232,16 +233,72 @@ osim_model.finalizeConnections();
 % Re initialise the system to allow computing moment arm
 new_state = osim_model.initSystem;
 
-% For shoulder_elv = 2.5 deg put model back in that Pose
-osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(1)));
+% Re-calculate moment arms at each of the poses
+%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 1 - 2.5 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(1)), true);
 osim_model.realizePosition(init_state);
+model_MA_optim.DELT1(1) = delt1_GP.computeMomentArm(new_state,shoulder_elv);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 2 - 30 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(2)), true);
+osim_model.realizePosition(new_state);
+model_MA_optim.DELT1(2) = delt1_GP.computeMomentArm(new_state,shoulder_elv);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 3 - 60 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(3)), true);
+osim_model.realizePosition(new_state);
+model_MA_optim.DELT1(3) = delt1_GP.computeMomentArm(new_state,shoulder_elv);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 4 - 90 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(4)), true);
+osim_model.realizePosition(new_state);
+model_MA_optim.DELT1(4) = delt1_GP.computeMomentArm(new_state,shoulder_elv);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 5 - 120 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(5)), true);
+osim_model.realizePosition(new_state);
+model_MA_optim.DELT1(5) = delt1_GP.computeMomentArm(new_state,shoulder_elv);
+
 
 figure(3)
+hold on
 % Initial MA
 scatter(data_RTSA.angles(angle_to_plot) , model_MA_init.DELT1(angle_to_plot),'filled','o','red');
 % Optimised MA
-model_MA_optim.DELT1(1) = delt1_GP.computeMomentArm(new_state,shoulder_elv);
+%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 1 - 2.5 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
 scatter(data_RTSA.angles(angle_to_plot) , model_MA_optim.DELT1(angle_to_plot),'filled','o','black');
+
+scatter(data_RTSA.angles(angle_to_plot), data_RTSA.DELT1_mean(1),'filled','o','magenta');
+scatter(data_RTSA.angles(angle_to_plot) , data_RTSA.DELT1_mean(angle_to_plot) + data_RTSA.DELT1_sd(angle_to_plot),'+','magenta');
+scatter(data_RTSA.angles(angle_to_plot) , data_RTSA.DELT1_mean(angle_to_plot) - data_RTSA.DELT1_sd(angle_to_plot), '+','magenta');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 2 - 30 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
+scatter(data_RTSA.angles(2) , model_MA_optim.DELT1(2),'filled','o','black');
+
+scatter(data_RTSA.angles(2), data_RTSA.DELT1_mean(2),'filled','o','magenta');
+scatter(data_RTSA.angles(2) , data_RTSA.DELT1_mean(2) + data_RTSA.DELT1_sd(2),'+','magenta');
+scatter(data_RTSA.angles(2) , data_RTSA.DELT1_mean(2) - data_RTSA.DELT1_sd(2), '+','magenta');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 3 - 60 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
+scatter(data_RTSA.angles(3) , model_MA_optim.DELT1(3),'filled','o','black');
+
+scatter(data_RTSA.angles(3), data_RTSA.DELT1_mean(3),'filled','o','magenta');
+scatter(data_RTSA.angles(3) , data_RTSA.DELT1_mean(3) + data_RTSA.DELT1_sd(3),'+','magenta');
+scatter(data_RTSA.angles(3) , data_RTSA.DELT1_mean(3) - data_RTSA.DELT1_sd(3), '+','magenta');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 4 - 90 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
+scatter(data_RTSA.angles(4) , model_MA_optim.DELT1(4),'filled','o','black');
+
+scatter(data_RTSA.angles(4), data_RTSA.DELT1_mean(4),'filled','o','magenta');
+scatter(data_RTSA.angles(4) , data_RTSA.DELT1_mean(4) + data_RTSA.DELT1_sd(4),'+','magenta');
+scatter(data_RTSA.angles(4) , data_RTSA.DELT1_mean(4) - data_RTSA.DELT1_sd(4), '+','magenta');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 5 - 120 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
+scatter(data_RTSA.angles(5) , model_MA_optim.DELT1(5),'filled','o','black');
+
+scatter(data_RTSA.angles(5), data_RTSA.DELT1_mean(5),'filled','o','magenta');
+scatter(data_RTSA.angles(5) , data_RTSA.DELT1_mean(5) + data_RTSA.DELT1_sd(5),'+','magenta');
+scatter(data_RTSA.angles(5) , data_RTSA.DELT1_mean(5) - data_RTSA.DELT1_sd(5), '+','magenta');
 
 txt = ['\leftarrow J at optimum via point = ' num2str(J_opt)];
 text(data_RTSA.angles(angle_to_plot)+0.01,model_MA_optim.DELT1(angle_to_plot),txt)
@@ -259,5 +316,5 @@ text(data_RTSA.angles(angle_to_plot)+0.01,model_MA_optim.DELT1(angle_to_plot),tx
 % % moment_arms
 
 osim_model.print([model_file(1:end-5) '_wtf.osim'])
-
+p_sim_opt
 end

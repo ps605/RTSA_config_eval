@@ -5,11 +5,11 @@ import org.opensim.modeling.*
 init_state = osim_model.initSystem();
 
 % Weights for joint positions
-w1  = 1;
-w2  = 0;
-w3  = 0;
-w4  = 0;
-w5  = 0;
+w1  = 2;
+w2  = 4;
+w3  = 10;
+w4  = 10;
+w5  = 4;
 
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
@@ -44,7 +44,7 @@ osim_model.finalizeConnections();
 new_state = osim_model.initSystem;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 1 - 2.5 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
-osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(1)), false);
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(1)), true);
 osim_model.realizePosition(new_state);
 
 
@@ -61,28 +61,28 @@ delt_MA.diff1 = delt_MA.pos1 - exp_MA_mean(1);
 % end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 2 - 30 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
-osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(2)), false);
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(2)), true);
 osim_model.realizePosition(new_state);
 
 delt_MA.pos2 = delt_GP.computeMomentArm(new_state, shoulder_elv);
 delt_MA.diff2 = delt_MA.pos2 - exp_MA_mean(2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 3 - 60 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
-osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(3)), false);
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(3)), true);
 osim_model.realizePosition(new_state);
 
 delt_MA.pos3 = delt_GP.computeMomentArm(new_state, shoulder_elv);
 delt_MA.diff3 = delt_MA.pos3 - exp_MA_mean(3);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 4 - 90 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
-osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(4)), false);
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(4)), true);
 osim_model.realizePosition(new_state);
 
 delt_MA.pos4 = delt_GP.computeMomentArm(new_state, shoulder_elv);
 delt_MA.diff4 = delt_MA.pos4 - exp_MA_mean(4);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 5 - 120 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
-osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(5)), false);
+osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(5)), true);
 osim_model.realizePosition(new_state);
 
 delt_MA.pos5 = delt_GP.computeMomentArm(new_state, shoulder_elv);
