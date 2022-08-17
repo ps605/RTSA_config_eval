@@ -37,8 +37,8 @@ time_i = datetime;
 %% Set-up
 
 %%%%%%%%%%%%%%%%% Create parameter combinations for loops %%%%%%%%%%%%%%%%%
-design_param.diameter       = {0.036 0.042};
-design_param.hemi_base_off  = {0 0.003 0.006};
+design_param.diameter       = {0.036};
+design_param.hemi_base_off  = {0};
 
 scapula_morphologies = {'m1_0_m2_0_m3_0_'};
 
@@ -73,6 +73,11 @@ flag_ReplaceMuscles = true;
 % Run Moco after model is defined?
 flag_runSim = false;
 
+% Optimise DELT1, DELT2 and DELT3 via points
+flag_viaPointOpt = true;
+flag_DELT1 = false;
+flag_DELT2 = true;
+flag_DELT3 = false;
 %% Pass setup parameters and prepare models/simulations
 if flag_useParallel == true
 
@@ -258,8 +263,10 @@ elseif flag_useParallel == false
             flag_useTorque,...
             flag_keepRC,...
             flag_ReplaceMuscles);
-
-        optimDeltViaPoint(model_file)
+        
+        if flag_viaPointOpt  == true
+            optimDeltViaPoint(model_file, flag_DELT1, flag_DELT2, flag_DELT3)
+        end
         
         % Run OpenSim moco for predictive simulation
         if flag_runSim == true

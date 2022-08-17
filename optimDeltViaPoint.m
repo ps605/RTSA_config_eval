@@ -1,4 +1,4 @@
-function new_model_file = optimDeltViaPoint(model_file)
+function optimDeltViaPoint(model_file, flag_DELT1, flag_DELT2, flag_DELT3)
 %optimDeltViaPoint Defines DELT1, DELT2 and DELT3 via poit locations
 %   Detailed explanation goes here
 
@@ -18,7 +18,6 @@ data_RTSA.DELT2_sd      = [6.6, 5.5, 5.5, 4.2, 5.8]*0.001;
 data_RTSA.DELT3_mean    = [1.3, 3.5, 7.3, 11.4, 14.1]*0.001;
 data_RTSA.DELT3_sd      = [1.4, 1.0, 1.7, 2.5, 3.6]*0.001;
 
-angle_to_plot = 1;
 %% Handle model
 
 % Get muscle handles
@@ -28,11 +27,11 @@ delt3 = osim_model.getMuscles.get('DELT3');
 
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
-coord = 'shoulder_elv';
 
 % Get PathPointSet(s)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Get GeometryPath to calculate MomentArm later
 delt1_GP = delt1.getGeometryPath();
 delt1_PPS = delt1_GP.getPathPointSet();
@@ -67,6 +66,7 @@ for i_angle = 1:length(data_RTSA.angles)
     model_MA_init.DELT1(i_angle) = delt1_GP.computeMomentArm(init_state,shoulder_elv);
 
 end
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -138,69 +138,237 @@ for i_angle = 1:length(data_RTSA.angles)
 
     model_MA_init.DELT3(i_angle) = delt3_GP.computeMomentArm(init_state,shoulder_elv);
 end
+
+
 %% Optimisation - MA calculation after via point and joint modulation
-% Search radius around init location
-radius = 0.025;
-p_sim_0 = delt3_via_loc;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if flag_DELT1 == true
+    % Search radius around init location
+    radius = 0.025;
+    p_sim_0 = delt1_via_loc;
 
-ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
-lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
-lb(3) = p_sim_0(3);
+    ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
+    lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
+    lb(3) = p_sim_0(3);
 
-figure(101);
-hold on
-title('via point location in x-y-z space (m)')
-xlabel('X-axis');
-ylabel('Y-axis');
-zlabel('Z-axis');
-scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
+    figure(101);
+    hold on
+    title('via point location in x-y-z space (m)')
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    zlabel('Z-axis');
+    scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
 
 
-% Inequality constraint to keep new via point location with radius of x of
-% original via point
-fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
-% Cost function to minimise moment arm differances between simulated and
-% calculated conditions 
-fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT3', delt3_via_downCast);
+    % Inequality constraint to keep new via point location with radius of x of
+    % original via point
+    %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
+    % Cost function to minimise moment arm differances between simulated and
+    % calculated conditions
+    fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT1', delt1_via_downCast);
 
-% Set-up options
-options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
-options.FunctionTolerance       = 1e-6;
-options.ConstraintTolerance     = 1e-6;
-options.MaxGenerations          = 30;
-options.PopulationSize          = 40;
-options.EliteCount              = ceil(0.05*options.PopulationSize);
-options.FitnessLimit            = 1e-5;
-options.InitialPopulationMatrix = []; % [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
-options.CreationFcn             = [];
-options.MaxStallGenerations     = 15;
-% options.MaxFunctionEvaluations  = 1000;
-% options.StepTolerance           = 1e-20;
-% options.FiniteDifferenceStepSize = 0.001;
+    % Set-up options
+    options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
+    options.FunctionTolerance       = 1e-6;
+    options.ConstraintTolerance     = 1e-6;
+    options.MaxGenerations          = 30;
+    options.PopulationSize          = 40;
+    options.EliteCount              = ceil(0.05*options.PopulationSize);
+    options.FitnessLimit            = 1e-5;
+    options.InitialPopulationMatrix = []; % [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
+    options.CreationFcn             = [];
+    options.MaxStallGenerations     = 15;
+    % options.MaxFunctionEvaluations  = 1000;
+    % options.StepTolerance           = 1e-20;
+    % options.FiniteDifferenceStepSize = 0.001;
 
-% Create problem structure to back to optimiser
-problem.fitnessfcn   =   fObj;
-problem.nvars       =   3;
-problem.options     =   options;
-problem.x0          =   p_sim_0;
-problem.Aineq       =   [];
-problem.bineq       =   [];
-problem.Aeq         =   [];
-problem.beq         =   [];
-problem.lb          =   lb;
-problem.ub          =   ub;
-problem.nonlcon     =   [];
-problem.solver      =   'ga';
+    % Create problem structure to back to optimiser
+    problem.fitnessfcn   =   fObj;
+    problem.nvars       =   3;
+    problem.options     =   options;
+    problem.x0          =   p_sim_0;
+    problem.Aineq       =   [];
+    problem.bineq       =   [];
+    problem.Aeq         =   [];
+    problem.beq         =   [];
+    problem.lb          =   lb;
+    problem.ub          =   ub;
+    problem.nonlcon     =   [];
+    problem.solver      =   'ga';
 
-% Run fmincon
-[p_sim_opt,J_opt,exit_flag,outputs] = ga(problem);
+    % Run fmincon
+    [p_sim_opt,J_opt,~,~] = ga(problem);
 
-%% Visualise after via point optimisation
+    % Optimised point for DELT1
+    opt_via(1,1:3) = p_sim_opt;
+    clear('p_sim_opt')
 
-plotViaOptResults('DELT1', p_sim_0, p_sim_opt, delt1_via_downCast, delt1_GP, shoulder_elv, osim_model, data_RTSA, model_MA_init.DELT1, J_opt, radius)
-plotViaOptResults('DELT2', p_sim_0, p_sim_opt, delt2_via_downCast, delt2_GP, shoulder_elv, osim_model, data_RTSA, model_MA_init.DELT2, J_opt, radius)
-plotViaOptResults('DELT3', p_sim_0, p_sim_opt, delt3_via_downCast, delt3_GP, shoulder_elv, osim_model, data_RTSA, model_MA_init.DELT3, J_opt, radius)
+    plotViaOptResults('DELT1',...
+        p_sim_0,...
+        opt_via(1,1:3),...
+        delt1_via_downCast,...
+        delt1_GP,...
+        shoulder_elv,...
+        osim_model,...
+        data_RTSA,...
+        model_MA_init.DELT1,...
+        J_opt,...
+        radius);
+
+
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif flag_DELT2 == true
+    % Search radius around init location
+    radius = 0.025;
+    p_sim_0 = delt2_via_loc;
+
+    ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
+    lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
+    lb(3) = p_sim_0(3);
+
+    figure(101);
+    hold on
+    title('via point location in x-y-z space (m)')
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    zlabel('Z-axis');
+    scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
+
+
+    % Inequality constraint to keep new via point location with radius of x of
+    % original via point
+    %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
+    % Cost function to minimise moment arm differances between simulated and
+    % calculated conditions
+    fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT2', delt2_via_downCast);
+
+    % Set-up options
+    options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
+    options.FunctionTolerance       = 1e-6;
+    options.ConstraintTolerance     = 1e-6;
+    options.MaxGenerations          = 30;
+    options.PopulationSize          = 40;
+    options.EliteCount              = ceil(0.05*options.PopulationSize);
+    options.FitnessLimit            = 1e-5;
+    options.InitialPopulationMatrix = []; % [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
+    options.CreationFcn             = [];
+    options.MaxStallGenerations     = 15;
+    % options.MaxFunctionEvaluations  = 1000;
+    % options.StepTolerance           = 1e-20;
+    % options.FiniteDifferenceStepSize = 0.001;
+
+    % Create problem structure to back to optimiser
+    problem.fitnessfcn   =   fObj;
+    problem.nvars       =   3;
+    problem.options     =   options;
+    problem.x0          =   p_sim_0;
+    problem.Aineq       =   [];
+    problem.bineq       =   [];
+    problem.Aeq         =   [];
+    problem.beq         =   [];
+    problem.lb          =   lb;
+    problem.ub          =   ub;
+    problem.nonlcon     =   [];
+    problem.solver      =   'ga';
+
+    % Run ga
+    [p_sim_opt, J_opt, ~, ~] = ga(problem);
+
+    % Optimised point for DELT2
+    opt_via(2,1:3) = p_sim_opt;
+    clear('p_sim_opt')
+
+    plotViaOptResults('DELT2',...
+        p_sim_0,...
+        opt_via(2,1:3),...
+        delt2_via_downCast,...
+        delt2_GP,...
+        shoulder_elv,...
+        osim_model,...
+        data_RTSA,...
+        model_MA_init.DELT2,...
+        J_opt,...
+        radius);
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+elseif flag_DELT3 == true
+    % Search radius around init location
+    radius = 0.025;
+    p_sim_0 = delt3_via_loc;
+
+    ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
+    lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
+    lb(3) = p_sim_0(3);
+
+    figure(101);
+    hold on
+    title('via point location in x-y-z space (m)')
+    xlabel('X-axis');
+    ylabel('Y-axis');
+    zlabel('Z-axis');
+    scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
+
+
+    % Inequality constraint to keep new via point location with radius of x of
+    % original via point
+    %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
+    % Cost function to minimise moment arm differances between simulated and
+    % calculated conditions
+    fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT3', delt3_via_downCast);
+
+    % Set-up options
+    options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
+    options.FunctionTolerance       = 1e-6;
+    options.ConstraintTolerance     = 1e-6;
+    options.MaxGenerations          = 30;
+    options.PopulationSize          = 40;
+    options.EliteCount              = ceil(0.05*options.PopulationSize);
+    options.FitnessLimit            = 1e-5;
+    options.InitialPopulationMatrix = []; % [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
+    options.CreationFcn             = [];
+    options.MaxStallGenerations     = 15;
+    % options.MaxFunctionEvaluations  = 1000;
+    % options.StepTolerance           = 1e-20;
+    % options.FiniteDifferenceStepSize = 0.001;
+
+    % Create problem structure to back to optimiser
+    problem.fitnessfcn   =   fObj;
+    problem.nvars       =   3;
+    problem.options     =   options;
+    problem.x0          =   p_sim_0;
+    problem.Aineq       =   [];
+    problem.bineq       =   [];
+    problem.Aeq         =   [];
+    problem.beq         =   [];
+    problem.lb          =   lb;
+    problem.ub          =   ub;
+    problem.nonlcon     =   [];
+    problem.solver      =   'ga';
+
+    % Run ga
+    [p_sim_opt, J_opt, ~, ~] = ga(problem);
+
+    % Optimised point for DELT1
+    opt_via(3,1:3) = p_sim_opt;
+    clear('p_sim_opt')
+
+    plotViaOptResults('DELT3',...
+        p_sim_0,...
+        opt_via(3,1:3),...
+        delt3_via_downCast,...
+        delt3_GP,...
+        shoulder_elv,...
+        osim_model,...
+        data_RTSA,...
+        model_MA_init.DELT3,...
+        J_opt,...
+        radius);
+end
+%% Print out model
 
 osim_model.print([model_file(1:end-5) '_wtf.osim'])
-p_sim_opt
+
+disp(opt_via);
 end
