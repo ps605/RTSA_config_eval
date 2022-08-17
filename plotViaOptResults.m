@@ -50,7 +50,7 @@ osim_model.finalizeConnections();
 % Re initialise the system to allow computing moment arm
 new_state = osim_model.initSystem;
 
-figure(3);
+figure;
 hold on
 title([muscle_name ' MA across shoulder elevation after via point opt'])
 xlabel('Shoulder elevation angle (deg)');

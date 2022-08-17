@@ -75,9 +75,10 @@ flag_runSim = false;
 
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt = true;
-flag_DELT1 = false;
+
+flag_DELT1 = true;
 flag_DELT2 = true;
-flag_DELT3 = false;
+flag_DELT3 = true;
 %% Pass setup parameters and prepare models/simulations
 if flag_useParallel == true
 
@@ -267,7 +268,7 @@ elseif flag_useParallel == false
         if flag_viaPointOpt  == true
             optimDeltViaPoint(model_file, flag_DELT1, flag_DELT2, flag_DELT3)
         end
-        
+
         % Run OpenSim moco for predictive simulation
         if flag_runSim == true
             runRTSAsims(model_file, rhash, flag_keepRC)

@@ -22,10 +22,6 @@ shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
 % Get muscle handles
 deltx = osim_model.getMuscles.get(muscle_name);
 
-figure(101);
-scatter3(p_sim(1), p_sim(2), p_sim(3), 'o', 'filled','cyan')
-hold on
-
 % Get GeometryPaths
 if strcmp(muscle_name, 'DELT1')
     delt_GP = deltx.getGeometryPath();

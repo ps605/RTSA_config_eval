@@ -3,6 +3,12 @@ function optimDeltViaPoint(model_file, flag_DELT1, flag_DELT2, flag_DELT3)
 %   Detailed explanation goes here
 
 %% Set-up
+
+% Flags
+
+flag_DELT3_viaToOrigin = true;
+
+% Get model
 import org.opensim.modeling.*
 
 osim_model = Model(model_file);
@@ -216,8 +222,6 @@ if flag_DELT1 == true
         radius);
 
 
-
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 elseif flag_DELT2 == true
     % Search radius around init location
@@ -295,12 +299,13 @@ elseif flag_DELT2 == true
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 elseif flag_DELT3 == true
     % Search radius around init location
-    radius = 0.025;
+    radius = 0.055;
     p_sim_0 = delt3_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
-    lb(3) = p_sim_0(3);
+    ub(1) = p_sim_0(1);
+    %     lb(3) = p_sim_0(3);
 
     figure(101);
     hold on
@@ -323,10 +328,10 @@ elseif flag_DELT3 == true
     options.FunctionTolerance       = 1e-6;
     options.ConstraintTolerance     = 1e-6;
     options.MaxGenerations          = 30;
-    options.PopulationSize          = 40;
+    options.PopulationSize          = 110;
     options.EliteCount              = ceil(0.05*options.PopulationSize);
     options.FitnessLimit            = 1e-5;
-    options.InitialPopulationMatrix = []; % [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
+    options.InitialPopulationMatrix = [-0.0590, -0.0090, -0.0400]; % DELT3 insertion [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
     options.CreationFcn             = [];
     options.MaxStallGenerations     = 15;
     % options.MaxFunctionEvaluations  = 1000;
@@ -347,24 +352,45 @@ elseif flag_DELT3 == true
     problem.nonlcon     =   [];
     problem.solver      =   'ga';
 
-    % Run ga
-    [p_sim_opt, J_opt, ~, ~] = ga(problem);
+    
+    if flag_DELT3_viaToOrigin == true
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Optimised point for DELT3 - THIS IS DELT3 ORIGIN (needs deletion
+        % but best workaround for best [physiological] result)
+        opt_via(3,1:3) = [-0.0590, -0.0090, -0.0400]; 
+        
+        plotViaOptResults('DELT3',...
+            p_sim_0,...
+            opt_via(3,1:3),...
+            delt3_via_downCast,...
+            delt3_GP,...
+            shoulder_elv,...
+            osim_model,...
+            data_RTSA,...
+            model_MA_init.DELT3,...
+            0,...
+            radius);
+    else
+        % Run ga
+        [p_sim_opt, J_opt, ~, ~] = ga(problem);
 
-    % Optimised point for DELT1
-    opt_via(3,1:3) = p_sim_opt;
-    clear('p_sim_opt')
+        % Optimised point for DELT1
+        opt_via(3,1:3) = p_sim_opt;
+        clear('p_sim_opt')
 
-    plotViaOptResults('DELT3',...
-        p_sim_0,...
-        opt_via(3,1:3),...
-        delt3_via_downCast,...
-        delt3_GP,...
-        shoulder_elv,...
-        osim_model,...
-        data_RTSA,...
-        model_MA_init.DELT3,...
-        J_opt,...
-        radius);
+        plotViaOptResults('DELT3',...
+            p_sim_0,...
+            opt_via(3,1:3),...
+            delt3_via_downCast,...
+            delt3_GP,...
+            shoulder_elv,...
+            osim_model,...
+            data_RTSA,...
+            model_MA_init.DELT3,...
+            J_opt,...
+            radius);
+    end
+    
 end
 %% Print out model
 
