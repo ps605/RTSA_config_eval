@@ -15,7 +15,7 @@ creation_fcn             = [];
 max_stallGenerations     = 15;
 
 % Flags
-flag_DELT2_viaToOrigin = false;
+flag_DELT2_viaToOrigin = true;
 flag_DELT3_viaToOrigin = true;
 
 % Get model
@@ -108,6 +108,14 @@ for i_point = 0:delt2_PPS_size-1
             delt2_via_downCast.get_location().get(1),...
             delt2_via_downCast.get_location().get(2)];
 
+    elseif strcmp(point_name(end-5:end), 'origin')
+        % Get origin point and downcast to get/set location
+        delt2_origin_downCast = PathPoint.safeDownCast(point);
+
+        % Get via point location as vector for handling- not Vec3
+        delt2_origin_loc = [delt2_origin_downCast.get_location().get(0),...
+            delt2_origin_downCast.get_location().get(1),...
+            delt2_origin_downCast.get_location().get(2)];
     else
         continue
     end
@@ -142,6 +150,14 @@ for i_point = 0:delt3_PPS_size-1
             delt3_via_downCast.get_location().get(1),...
             delt3_via_downCast.get_location().get(2)];
 
+    elseif strcmp(point_name(end-5:end), 'origin')
+        % Get origin point and downcast to get/set location
+        delt3_origin_downCast = PathPoint.safeDownCast(point);
+
+        % Get via point location as vector for handling- not Vec3
+        delt3_origin_loc = [delt3_origin_downCast.get_location().get(0),...
+            delt3_origin_downCast.get_location().get(1),...
+            delt3_origin_downCast.get_location().get(2)];
     else
         continue
     end
@@ -256,7 +272,7 @@ if flag_DELT2 == true
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Optimised point for DELT2 - THIS IS DELT2 ORIGIN (needs deletion
         % but best workaround for best [physiological] result)
-        opt_via(2,1:3) = [-0.028, -0.002, 0.015];
+        opt_via(2,1:3) = delt2_origin_loc;
 
         error_MA_DELT2 = J_momentArmDist(opt_via(2,1:3), data_RTSA, osim_model, 'DELT2', delt2_via_downCast);
 
@@ -358,7 +374,7 @@ if flag_DELT3 == true
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Optimised point for DELT3 - THIS IS DELT3 ORIGIN (needs deletion
         % but best workaround for best [physiological] result)
-        opt_via(3,1:3) = [-0.0590, -0.0090, -0.0400];
+        opt_via(3,1:3) = delt3_origin_loc;
 
         error_MA_DELT3 = J_momentArmDist(opt_via(3,1:3), data_RTSA, osim_model, 'DELT3', delt3_via_downCast);
 
