@@ -3,9 +3,19 @@ function optimDeltViaPoint(model_file, flag_DELT1, flag_DELT2, flag_DELT3)
 %   Detailed explanation goes here
 
 %% Set-up
+% GA setup
+function_tolerance       = 1e-6;
+constraint_colerance     = 1e-6;
+max_generations          = 50;
+population_size          = 120;
+elite_count              = ceil(0.05*population_size);
+fitness_limit            = 1e-5;
+initial_populationMatrix = []; % DELT3 insertion [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
+creation_fcn             = [];
+max_stallGenerations     = 15;
 
 % Flags
-
+flag_DELT2_viaToOrigin = false;
 flag_DELT3_viaToOrigin = true;
 
 % Get model
@@ -175,15 +185,15 @@ if flag_DELT1 == true
 
     % Set-up options
     options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
-    options.FunctionTolerance       = 1e-6;
-    options.ConstraintTolerance     = 1e-6;
-    options.MaxGenerations          = 30;
-    options.PopulationSize          = 40;
-    options.EliteCount              = ceil(0.05*options.PopulationSize);
-    options.FitnessLimit            = 1e-5;
-    options.InitialPopulationMatrix = []; % [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
-    options.CreationFcn             = [];
-    options.MaxStallGenerations     = 15;
+    options.FunctionTolerance       = function_tolerance;
+    options.ConstraintTolerance     = constraint_colerance;
+    options.MaxGenerations          = max_generations;
+    options.PopulationSize          = population_size;
+    options.EliteCount              = elite_count;
+    options.FitnessLimit            = fitness_limit;
+    options.InitialPopulationMatrix = initial_populationMatrix; 
+    options.CreationFcn             = creation_fcn;
+    options.MaxStallGenerations     = max_stallGenerations;
     % options.MaxFunctionEvaluations  = 1000;
     % options.StepTolerance           = 1e-20;
     % options.FiniteDifferenceStepSize = 0.001;
@@ -221,11 +231,11 @@ if flag_DELT1 == true
         J_opt,...
         radius);
 
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-elseif flag_DELT2 == true
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if flag_DELT2 == true
     % Search radius around init location
-    radius = 0.025;
+    radius = 0.015;
     p_sim_0 = delt2_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
@@ -241,63 +251,88 @@ elseif flag_DELT2 == true
     scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
 
 
-    % Inequality constraint to keep new via point location with radius of x of
-    % original via point
-    %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
-    % Cost function to minimise moment arm differances between simulated and
-    % calculated conditions
-    fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT2', delt2_via_downCast);
 
-    % Set-up options
-    options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
-    options.FunctionTolerance       = 1e-6;
-    options.ConstraintTolerance     = 1e-6;
-    options.MaxGenerations          = 30;
-    options.PopulationSize          = 40;
-    options.EliteCount              = ceil(0.05*options.PopulationSize);
-    options.FitnessLimit            = 1e-5;
-    options.InitialPopulationMatrix = []; % [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
-    options.CreationFcn             = [];
-    options.MaxStallGenerations     = 15;
-    % options.MaxFunctionEvaluations  = 1000;
-    % options.StepTolerance           = 1e-20;
-    % options.FiniteDifferenceStepSize = 0.001;
+    if flag_DELT2_viaToOrigin == true
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Optimised point for DELT2 - THIS IS DELT2 ORIGIN (needs deletion
+        % but best workaround for best [physiological] result)
+        opt_via(2,1:3) = [-0.028, -0.002, 0.015];
 
-    % Create problem structure to back to optimiser
-    problem.fitnessfcn   =   fObj;
-    problem.nvars       =   3;
-    problem.options     =   options;
-    problem.x0          =   p_sim_0;
-    problem.Aineq       =   [];
-    problem.bineq       =   [];
-    problem.Aeq         =   [];
-    problem.beq         =   [];
-    problem.lb          =   lb;
-    problem.ub          =   ub;
-    problem.nonlcon     =   [];
-    problem.solver      =   'ga';
+        error_MA_DELT2 = J_momentArmDist(opt_via(2,1:3), data_RTSA, osim_model, 'DELT2', delt2_via_downCast);
 
-    % Run ga
-    [p_sim_opt, J_opt, ~, ~] = ga(problem);
+        plotViaOptResults('DELT2',...
+            p_sim_0,...
+            opt_via(2,1:3),...
+            delt2_via_downCast,...
+            delt2_GP,...
+            shoulder_elv,...
+            osim_model,...
+            data_RTSA,...
+            model_MA_init.DELT2,...
+            error_MA_DELT2,...
+            radius);
+    else
+        % Inequality constraint to keep new via point location with radius of x of
+        % original via point
+        %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
+        % Cost function to minimise moment arm differances between simulated and
+        % calculated conditions
+        fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT2', delt2_via_downCast);
 
-    % Optimised point for DELT2
-    opt_via(2,1:3) = p_sim_opt;
-    clear('p_sim_opt')
+        % Set-up options
+        options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
+        options.FunctionTolerance       = function_tolerance;
+        options.ConstraintTolerance     = constraint_colerance;
+        options.MaxGenerations          = max_generations;
+        options.PopulationSize          = population_size;
+        options.EliteCount              = elite_count;
+        options.FitnessLimit            = fitness_limit;
+        options.InitialPopulationMatrix = initial_populationMatrix;
+        options.CreationFcn             = creation_fcn;
+        options.MaxStallGenerations     = max_stallGenerations;
+        % options.MaxFunctionEvaluations  = 1000;
+        % options.StepTolerance           = 1e-20;
+        % options.FiniteDifferenceStepSize = 0.001;
 
-    plotViaOptResults('DELT2',...
-        p_sim_0,...
-        opt_via(2,1:3),...
-        delt2_via_downCast,...
-        delt2_GP,...
-        shoulder_elv,...
-        osim_model,...
-        data_RTSA,...
-        model_MA_init.DELT2,...
-        J_opt,...
-        radius);
+        % Create problem structure to back to optimiser
+        problem.fitnessfcn   =   fObj;
+        problem.nvars       =   3;
+        problem.options     =   options;
+        problem.x0          =   p_sim_0;
+        problem.Aineq       =   [];
+        problem.bineq       =   [];
+        problem.Aeq         =   [];
+        problem.beq         =   [];
+        problem.lb          =   lb;
+        problem.ub          =   ub;
+        problem.nonlcon     =   [];
+        problem.solver      =   'ga';
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-elseif flag_DELT3 == true
+
+        % Run ga
+        [p_sim_opt, J_opt, ~, ~] = ga(problem);
+
+        % Optimised point for DELT1
+        opt_via(2,1:3) = p_sim_opt;
+        clear('p_sim_opt')
+
+        plotViaOptResults('DELT2',...
+            p_sim_0,...
+            opt_via(2,1:3),...
+            delt2_via_downCast,...
+            delt2_GP,...
+            shoulder_elv,...
+            osim_model,...
+            data_RTSA,...
+            model_MA_init.DELT2,...
+            J_opt,...
+            radius);
+    end
+
+
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if flag_DELT3 == true
     % Search radius around init location
     radius = 0.055;
     p_sim_0 = delt3_via_loc;
@@ -316,49 +351,17 @@ elseif flag_DELT3 == true
     scatter3(p_sim_0(1), p_sim_0(2), p_sim_0(3), 'o', 'filled','magenta')
 
 
-    % Inequality constraint to keep new via point location with radius of x of
-    % original via point
-    %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
-    % Cost function to minimise moment arm differances between simulated and
-    % calculated conditions
-    fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT3', delt3_via_downCast);
 
-    % Set-up options
-    options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
-    options.FunctionTolerance       = 1e-6;
-    options.ConstraintTolerance     = 1e-6;
-    options.MaxGenerations          = 30;
-    options.PopulationSize          = 110;
-    options.EliteCount              = ceil(0.05*options.PopulationSize);
-    options.FitnessLimit            = 1e-5;
-    options.InitialPopulationMatrix = [-0.0590, -0.0090, -0.0400]; % DELT3 insertion [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
-    options.CreationFcn             = [];
-    options.MaxStallGenerations     = 15;
-    % options.MaxFunctionEvaluations  = 1000;
-    % options.StepTolerance           = 1e-20;
-    % options.FiniteDifferenceStepSize = 0.001;
 
-    % Create problem structure to back to optimiser
-    problem.fitnessfcn   =   fObj;
-    problem.nvars       =   3;
-    problem.options     =   options;
-    problem.x0          =   p_sim_0;
-    problem.Aineq       =   [];
-    problem.bineq       =   [];
-    problem.Aeq         =   [];
-    problem.beq         =   [];
-    problem.lb          =   lb;
-    problem.ub          =   ub;
-    problem.nonlcon     =   [];
-    problem.solver      =   'ga';
 
-    
     if flag_DELT3_viaToOrigin == true
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Optimised point for DELT3 - THIS IS DELT3 ORIGIN (needs deletion
         % but best workaround for best [physiological] result)
-        opt_via(3,1:3) = [-0.0590, -0.0090, -0.0400]; 
-        
+        opt_via(3,1:3) = [-0.0590, -0.0090, -0.0400];
+
+        error_MA_DELT3 = J_momentArmDist(opt_via(3,1:3), data_RTSA, osim_model, 'DELT3', delt3_via_downCast);
+
         plotViaOptResults('DELT3',...
             p_sim_0,...
             opt_via(3,1:3),...
@@ -368,9 +371,46 @@ elseif flag_DELT3 == true
             osim_model,...
             data_RTSA,...
             model_MA_init.DELT3,...
-            0,...
+            error_MA_DELT3,...
             radius);
     else
+
+        % Inequality constraint to keep new via point location with radius of x of
+        % original via point
+        %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
+        % Cost function to minimise moment arm differances between simulated and
+        % calculated conditions
+        fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT3', delt3_via_downCast);
+
+        % Set-up options
+        options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
+        options.FunctionTolerance       = function_tolerance;
+        options.ConstraintTolerance     = constraint_colerance;
+        options.MaxGenerations          = max_generations;
+        options.PopulationSize          = population_size;
+        options.EliteCount              = elite_count;
+        options.FitnessLimit            = fitness_limit;
+        options.InitialPopulationMatrix = initial_populationMatrix;
+        options.CreationFcn             = creation_fcn;
+        options.MaxStallGenerations     = max_stallGenerations;
+        % options.MaxFunctionEvaluations  = 1000;
+        % options.StepTolerance           = 1e-20;
+        % options.FiniteDifferenceStepSize = 0.001;
+
+        % Create problem structure to back to optimiser
+        problem.fitnessfcn   =   fObj;
+        problem.nvars       =   3;
+        problem.options     =   options;
+        problem.x0          =   p_sim_0;
+        problem.Aineq       =   [];
+        problem.bineq       =   [];
+        problem.Aeq         =   [];
+        problem.beq         =   [];
+        problem.lb          =   lb;
+        problem.ub          =   ub;
+        problem.nonlcon     =   [];
+        problem.solver      =   'ga';
+
         % Run ga
         [p_sim_opt, J_opt, ~, ~] = ga(problem);
 
@@ -390,7 +430,7 @@ elseif flag_DELT3 == true
             J_opt,...
             radius);
     end
-    
+
 end
 %% Print out model
 
