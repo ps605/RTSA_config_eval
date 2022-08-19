@@ -1,4 +1,4 @@
-function J = J_momentArmDist(p_sim, data_RTSA, osim_model, muscle_name, delt_via_downCast )
+function J = J_momentArmDist(p_sim, data_RTSA, osim_model, muscle_name, delt_via_downCast, via_delete )
 
 import org.opensim.modeling.*
 
@@ -37,12 +37,16 @@ elseif strcmp(muscle_name, 'DELT3')
     exp_MA_sd   = data_RTSA.DELT3_sd;
 end
 
-% Set new location for DeltX via point
-delt_via_downCast.set_location(Vec3(p_sim(1), p_sim(2), p_sim(3)))
-% Call ::Model.finalizeConnections() to....
-osim_model.finalizeConnections();
-% Re initialise the system to allow computing moment arm
-new_state = osim_model.initSystem;
+if via_delete == false
+    % Set new location for DeltX via point
+    delt_via_downCast.set_location(Vec3(p_sim(1), p_sim(2), p_sim(3)))
+    % Call ::Model.finalizeConnections() to....
+    osim_model.finalizeConnections();
+    % Re initialise the system to allow computing moment arm
+    new_state = osim_model.initSystem;
+else
+    new_state = osim_model.initSystem;    
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 1 - 2.5 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(1)), true);

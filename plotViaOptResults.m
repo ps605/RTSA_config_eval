@@ -48,7 +48,7 @@ delt_via_downCast.set_location(Vec3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3)));
 % Call ::Model.finalizeConnections() to....
 osim_model.finalizeConnections();
 % Re initialise the system to allow computing moment arm
-new_state = osim_model.initSystem;
+osim_model.initSystem;
 
 figure;
 hold on
@@ -64,9 +64,9 @@ for i_angle = 1:length(data_RTSA.angles)
    
     % Re-calculate moment arms at each of the poses
     %%%%%%%%%%%%%%%%%%% POS 1-5 - 2.5/30/60/90/120 DEG %%%%%%%%%%%%%%%%%%%%
-    osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_RTSA.angles(i_angle)), true);
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)), true);
     osim_model.realizePosition(init_state);
-    model_MA_optim.DELTx(i_angle) = delt_GP.computeMomentArm(new_state,shoulder_elv);
+    model_MA_optim.DELTx(i_angle) = delt_GP.computeMomentArm(init_state,shoulder_elv);
     
     % Initial MA
     scatter(data_RTSA.angles(i_angle) , model_MA_init(i_angle),'filled','o','red');

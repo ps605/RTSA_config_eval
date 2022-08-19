@@ -15,8 +15,9 @@ creation_fcn             = [];
 max_stallGenerations     = 15;
 
 % Flags
-flag_DELT2_viaToOrigin = true;
-flag_DELT3_viaToOrigin = true;
+flag_delt1ViaDelete = false;
+flag_delt2ViaDelete = true;
+flag_delt3ViaDelete = true;
 
 % Get model
 import org.opensim.modeling.*
@@ -197,7 +198,7 @@ if flag_DELT1 == true
     %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
     % Cost function to minimise moment arm differances between simulated and
     % calculated conditions
-    fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT1', delt1_via_downCast);
+    fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT1', delt1_via_downCast, flag_delt1ViaDelete);
 
     % Set-up options
     options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
@@ -268,13 +269,13 @@ if flag_DELT2 == true
 
 
 
-    if flag_DELT2_viaToOrigin == true
+    if flag_delt2ViaDelete == true
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Optimised point for DELT2 - THIS IS DELT2 ORIGIN (needs deletion
         % but best workaround for best [physiological] result)
         opt_via(2,1:3) = delt2_origin_loc;
 
-        error_MA_DELT2 = J_momentArmDist(opt_via(2,1:3), data_RTSA, osim_model, 'DELT2', delt2_via_downCast);
+        error_MA_DELT2 = J_momentArmDist(opt_via(2,1:3), data_RTSA, osim_model, 'DELT2', delt2_via_downCast, flag_delt2ViaDelete);
 
         plotViaOptResults('DELT2',...
             p_sim_0,...
@@ -370,13 +371,13 @@ if flag_DELT3 == true
 
 
 
-    if flag_DELT3_viaToOrigin == true
+    if flag_delt3ViaDelete == true
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Optimised point for DELT3 - THIS IS DELT3 ORIGIN (needs deletion
         % but best workaround for best [physiological] result)
         opt_via(3,1:3) = delt3_origin_loc;
 
-        error_MA_DELT3 = J_momentArmDist(opt_via(3,1:3), data_RTSA, osim_model, 'DELT3', delt3_via_downCast);
+        error_MA_DELT3 = J_momentArmDist(opt_via(3,1:3), data_RTSA, osim_model, 'DELT3', delt3_via_downCast, flag_delt3ViaDelete);
 
         plotViaOptResults('DELT3',...
             p_sim_0,...
