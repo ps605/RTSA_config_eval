@@ -100,6 +100,8 @@ for i_point = 0:delt2_PPS_size-1
     point_name = char(point.getName());
 
     if strcmp(point_name(end-2:end), 'via')
+        
+        point_count_3 = i_point;
 
         % Get via point and downcast to get/set location
         delt2_via_downCast = PathPoint.safeDownCast(point);
@@ -109,14 +111,6 @@ for i_point = 0:delt2_PPS_size-1
             delt2_via_downCast.get_location().get(1),...
             delt2_via_downCast.get_location().get(2)];
 
-    elseif strcmp(point_name(end-5:end), 'origin')
-        % Get origin point and downcast to get/set location
-        delt2_origin_downCast = PathPoint.safeDownCast(point);
-
-        % Get via point location as vector for handling- not Vec3
-        delt2_origin_loc = [delt2_origin_downCast.get_location().get(0),...
-            delt2_origin_downCast.get_location().get(1),...
-            delt2_origin_downCast.get_location().get(2)];
     else
         continue
     end
@@ -128,6 +122,14 @@ for i_angle = 1:length(data_RTSA.angles)
     osim_model.realizePosition(init_state);
 
     model_MA_init.DELT2(i_angle) = delt2_GP.computeMomentArm(init_state,shoulder_elv);
+end
+
+% Delete via point
+if flag_delt2ViaDelete == true
+   delt2_GP.deletePathPoint(init_state, point_count_3);
+   osim_model.initSystem();
+   osim_model.finalizeConnections();
+   osim_model.initSystem();
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -143,6 +145,8 @@ for i_point = 0:delt3_PPS_size-1
 
     if strcmp(point_name(end-2:end), 'via')
 
+        point_count_3 = i_point;
+
         % Get via point and downcast to get/set location
         delt3_via_downCast = PathPoint.safeDownCast(point);
 
@@ -151,14 +155,6 @@ for i_point = 0:delt3_PPS_size-1
             delt3_via_downCast.get_location().get(1),...
             delt3_via_downCast.get_location().get(2)];
 
-    elseif strcmp(point_name(end-5:end), 'origin')
-        % Get origin point and downcast to get/set location
-        delt3_origin_downCast = PathPoint.safeDownCast(point);
-
-        % Get via point location as vector for handling- not Vec3
-        delt3_origin_loc = [delt3_origin_downCast.get_location().get(0),...
-            delt3_origin_downCast.get_location().get(1),...
-            delt3_origin_downCast.get_location().get(2)];
     else
         continue
     end
@@ -172,7 +168,13 @@ for i_angle = 1:length(data_RTSA.angles)
     model_MA_init.DELT3(i_angle) = delt3_GP.computeMomentArm(init_state,shoulder_elv);
 end
 
-
+% Delete via point
+if flag_delt3ViaDelete == true
+   delt3_GP.deletePathPoint(init_state, point_count_3);
+   osim_model.initSystem();
+   osim_model.finalizeConnections();
+   osim_model.initSystem();
+end
 %% Optimisation - MA calculation after via point and joint modulation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT1 == true
@@ -273,7 +275,7 @@ if flag_DELT2 == true
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Optimised point for DELT2 - THIS IS DELT2 ORIGIN (needs deletion
         % but best workaround for best [physiological] result)
-        opt_via(2,1:3) = delt2_origin_loc;
+        opt_via(2,1:3) = [0, 0, 0];
 
         error_MA_DELT2 = J_momentArmDist(opt_via(2,1:3), data_RTSA, osim_model, 'DELT2', delt2_via_downCast, flag_delt2ViaDelete);
 
@@ -287,7 +289,8 @@ if flag_DELT2 == true
             data_RTSA,...
             model_MA_init.DELT2,...
             error_MA_DELT2,...
-            radius);
+            radius,...
+            flag_delt2ViaDelete);
     else
         % Inequality constraint to keep new via point location with radius of x of
         % original via point
@@ -375,7 +378,7 @@ if flag_DELT3 == true
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Optimised point for DELT3 - THIS IS DELT3 ORIGIN (needs deletion
         % but best workaround for best [physiological] result)
-        opt_via(3,1:3) = delt3_origin_loc;
+        opt_via(3,1:3) = [0, 0, 0];
 
         error_MA_DELT3 = J_momentArmDist(opt_via(3,1:3), data_RTSA, osim_model, 'DELT3', delt3_via_downCast, flag_delt3ViaDelete);
 
@@ -389,7 +392,8 @@ if flag_DELT3 == true
             data_RTSA,...
             model_MA_init.DELT3,...
             error_MA_DELT3,...
-            radius);
+            radius,...
+            flag_delt3ViaDelete);
     else
 
         % Inequality constraint to keep new via point location with radius of x of

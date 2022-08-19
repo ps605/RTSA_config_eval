@@ -14,7 +14,7 @@ function new_model_file = adjustOpenSimModelGHJ(GHJ_in_parent, GHJ_in_child, hem
 import org.opensim.modeling.*
 
 % Baseline model file
-model_name = 'FullShoulderModel_glC.osim'; %'FullShoulderModelglC_understand_jointDefs_implant.osim';
+model_name = 'FullShoulderModel_glC_via.osim'; %'FullShoulderModelglC_understand_jointDefs_implant.osim';
 
 % To change JCS position and relative geometry
 conds_GHJ_geom.tran = [

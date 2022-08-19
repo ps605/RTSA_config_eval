@@ -1,4 +1,4 @@
-function J = J_momentArmDist(p_sim, data_RTSA, osim_model, muscle_name, delt_via_downCast, via_delete )
+function J = J_momentArmDist(p_sim, data_RTSA, osim_model, muscle_name, delt_via_downCast, flag_via_delete )
 
 import org.opensim.modeling.*
 
@@ -37,7 +37,7 @@ elseif strcmp(muscle_name, 'DELT3')
     exp_MA_sd   = data_RTSA.DELT3_sd;
 end
 
-if via_delete == false
+if flag_via_delete == false
     % Set new location for DeltX via point
     delt_via_downCast.set_location(Vec3(p_sim(1), p_sim(2), p_sim(3)))
     % Call ::Model.finalizeConnections() to....

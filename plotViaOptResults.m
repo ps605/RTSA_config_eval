@@ -1,4 +1,4 @@
-function plotViaOptResults(muscle_name, p_sim_0, p_sim_opt, delt_via_downCast, delt_GP, shoulder_elv, osim_model, data_RTSA, model_MA_init, J_opt, radius)
+function plotViaOptResults(muscle_name, p_sim_0, p_sim_opt, delt_via_downCast, delt_GP, shoulder_elv, osim_model, data_RTSA, model_MA_init, J_opt, radius, flag_via_delete)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -42,13 +42,14 @@ surf(X1,Y1,Z1,...
     'EdgeColor', [0 0 0 ],...
     'EdgeAlpha', 0.1);
 
-
-% Set via point to be the correct optimised position p_sim_opt
-delt_via_downCast.set_location(Vec3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3)));
-% Call ::Model.finalizeConnections() to....
-osim_model.finalizeConnections();
-% Re initialise the system to allow computing moment arm
-osim_model.initSystem;
+if flag_via_delete == false
+    % Set via point to be the correct optimised position p_sim_opt
+    delt_via_downCast.set_location(Vec3(p_sim_opt(1), p_sim_opt(2), p_sim_opt(3)));
+    % Call ::Model.finalizeConnections() to....
+    osim_model.finalizeConnections();
+    % Re initialise the system to allow computing moment arm
+    osim_model.initSystem;
+end
 
 figure;
 hold on
