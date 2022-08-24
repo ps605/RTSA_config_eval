@@ -76,7 +76,7 @@ flag_runSim = false;
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt = true;
 
-flag_DELT1 = false;
+flag_DELT1 = true;
 flag_DELT2 = true;
 flag_DELT3 = true;
 

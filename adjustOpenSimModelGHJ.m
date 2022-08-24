@@ -108,7 +108,7 @@ if flag_keepRC == false
     osim_model.finalizeConnections()
 end
 
-%% Re-define the GH joints' JCS
+%% Re-define the GH and unrotscap joints' JCS
 %%% Loop through "Descritised" shoulder model joints
 %%% This methods alters position/orientation of Parent and
 %%% Child (PhysicalOffsetFrames) of Joint but keeps Child
@@ -118,6 +118,7 @@ end
 % "Glenohumeral Joint" (shoulder0, shoulder1, shoulder2)
 % definitions
 joints_to_alter = {'unrothum',...
+    'unrotscap',...
     'shoulder0',...                % 'elv_angle'
     'shoulder1',...                % 'shoulder_elv' and 'shoulder_rot_2'
     'shoulder2'};                  % 'shoulder_rot'
@@ -138,15 +139,30 @@ for i_joint = 1:numel(joints_to_alter)
     % the joints' JCS can be defined based on the offset
     % from the body to Child POF.
     if strcmp(joints_to_alter{i_joint},'unrothum')
+        
         osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(0).set_translation(Vec3(...
             baseline_tran_p.get(0) + conds_GHJ_geom.tran(1, 1),...
             baseline_tran_p.get(1) + conds_GHJ_geom.tran(1, 2),...
             baseline_tran_p.get(2) + conds_GHJ_geom.tran(1, 3)));
-    else
+   
+    elseif strcmp(joints_to_alter{i_joint},'shoulder0')|| strcmp(joints_to_alter{i_joint},'shoulder1') || strcmp(joints_to_alter{i_joint},'shoulder2')
         osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(0).set_translation(Vec3(...
             baseline_tran_p.get(0) + conds_GHJ_geom.tran(1, 4),...
             baseline_tran_p.get(1) + conds_GHJ_geom.tran(1, 5),...
             baseline_tran_p.get(2) + conds_GHJ_geom.tran(1, 6)));
+
+    elseif strcmp(joints_to_alter{i_joint},'unrotscap')
+
+        % Acromion offset
+        acromion_offset = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM 'acromion_offset.txt'], ' ');
+
+        unrotscap_inParent_tran = osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(0).get_translation();
+
+        osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(0).set_translation(Vec3(...
+            unrotscap_inParent_tran.get(0) + acromion_offset(1),...
+            unrotscap_inParent_tran.get(1) + acromion_offset(2),...
+            unrotscap_inParent_tran.get(2) + acromion_offset(3)));
+
     end
 
     % Get baseline translation in Child
@@ -155,11 +171,12 @@ for i_joint = 1:numel(joints_to_alter)
 
     % Update JCS translation in Child
     % Note: Doesn't have to be negated about Z-axis
-    osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(1).set_translation(Vec3(...
-        baseline_tran_c.get(0) + conds_GHJ_geom.tran(1, 4),...
-        baseline_tran_c.get(1) + conds_GHJ_geom.tran(1, 5),...
-        baseline_tran_c.get(2) + conds_GHJ_geom.tran(1, 6))); % Note: Negate? Not needed due to SpatialTransform (0 0 -1)
-
+    if ~strcmp(joints_to_alter{i_joint},'unrotscap')
+        osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(1).set_translation(Vec3(...
+            baseline_tran_c.get(0) + conds_GHJ_geom.tran(1, 4),...
+            baseline_tran_c.get(1) + conds_GHJ_geom.tran(1, 5),...
+            baseline_tran_c.get(2) + conds_GHJ_geom.tran(1, 6))); % Note: Negate? Not needed due to SpatialTransform (0 0 -1)
+    end
     %%% JCS orientation/rotation in Parent and Child Body %%%
 
     % Get baseline rotation in Parent
@@ -172,7 +189,7 @@ for i_joint = 1:numel(joints_to_alter)
             baseline_rot_p.get(0) + conds_GHJ_geom.rot(1, 1),...
             baseline_rot_p.get(1) + conds_GHJ_geom.rot(1, 2),...
             baseline_rot_p.get(2) + conds_GHJ_geom.rot(1, 3)));
-    else
+    elseif strcmp(joints_to_alter{i_joint},'shoulder0')|| strcmp(joints_to_alter{i_joint},'shoulder1') || strcmp(joints_to_alter{i_joint},'shoulder2')
         osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(0).set_orientation(Vec3(...
             baseline_rot_p.get(0) + conds_GHJ_geom.rot(1, 4),...
             baseline_rot_p.get(1) + conds_GHJ_geom.rot(1, 5),...
@@ -186,8 +203,11 @@ for i_joint = 1:numel(joints_to_alter)
         baseline_rot_c.get(0) + conds_GHJ_geom.rot(1, 4),...
         baseline_rot_c.get(1) + conds_GHJ_geom.rot(1, 5),...
         baseline_rot_c.get(2) + conds_GHJ_geom.rot(1, 6)));
+
+
 end
 
+%% Update muscle locationtions and (initial) via-point locations
 % SSM scapula muscle locations
 muscle_locs = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM 'muscle_coords.txt'], ' ');
 muscle_names = {'DELT2',...
