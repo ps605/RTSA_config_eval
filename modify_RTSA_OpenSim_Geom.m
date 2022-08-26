@@ -53,7 +53,17 @@ design_param.humerus_ant_post           = {0};
 design_param.humerus_sup_inf_incl       = {12.5};
 design_param.humerus_ant_retro_version  = {0};
 
-scapula_morphologies                    = {'m1_0_m2_0_m3_0_'};
+scapula_morphologies                    = {'m1_0_m2_0_m3_0_',...
+                                           };
+
+%                                            'm1_0_m2_0_m3_2_',...
+%                                            'm1_0_m2_0_m3_-2_',...
+%                                            'm1_0_m2_2_m3_2_',...
+%                                            'm1_0_m2_2_m3_0_',...
+%                                            'm1_0_m2_2_m3_-2_',...
+%                                            'm1_0_m2_-2_m3_2_',...
+%                                            'm1_0_m2_-2_m3_0_',...
+%                                            'm1_0_m2_-2_m3_-2_'
 
 % Create permutation matrix
 param_matrix= allcomb( ...
@@ -106,7 +116,7 @@ flag_keepRC             = false;
 flag_ReplaceMuscles     = true;
 
 % Run Moco after model is defined?
-flag_runSim             = true;
+flag_runSim             = false;
 
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt        = true;
@@ -304,6 +314,8 @@ elseif flag_useParallel == false
         if flag_viaPointOpt  == true
             optimDeltViaPoint(model_file, flag_DELT1, flag_DELT2, flag_DELT3)
         end
+        
+        close all
 
         % Run OpenSim moco for predictive simulation
         if flag_runSim == true

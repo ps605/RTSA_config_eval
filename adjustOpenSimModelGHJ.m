@@ -31,7 +31,7 @@ conds_GHJ_geom.rot = [
 osim_model=Model(['..\..\OpenSim\In\Models\' model_name]);
 init_state=osim_model.initSystem();
 
-osim_model.setName(['RSA_' string(rhash)])
+osim_model.setName(['RSA_' rhash]);
 
 % Lock coordinates
 coord_to_lock={'thorax_tilt' 'thorax_list' 'thorax_rotation'...
@@ -466,7 +466,7 @@ txt_table = splitvars(table(string(date_time_now),...
     R,...
     'VariableNames',var_names_table));
 
-writetable(txt_table, '..\..\OpenSim\In\Models\RTSA_Adjusted\RTSA_model_log_table.txt');
+writetable(txt_table, '..\..\OpenSim\In\Models\RTSA_Adjusted\RTSA_model_log_table.txt', 'WriteMode', 'Append');
 
 % Write OpenSim model
 new_model_file = ['..\..\OpenSim\In\Models\RTSA_Adjusted\FSModel_GHJoint_' rhash '.osim'];
