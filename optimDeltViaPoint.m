@@ -455,8 +455,8 @@ if flag_DELT3 == true
 
 end
 %% Print out model
-
-osim_model.print([model_file(1:end-5) '_wtf.osim'])
+osim_model.print(model_file);
+% osim_model.print([model_file(1:end-5) '_wtf.osim']);
 
 disp(opt_via);
 end

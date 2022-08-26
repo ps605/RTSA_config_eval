@@ -31,6 +31,8 @@ conds_GHJ_geom.rot = [
 osim_model=Model(['..\..\OpenSim\In\Models\' model_name]);
 init_state=osim_model.initSystem();
 
+osim_model.setName(['RSA_' string(rhash)])
+
 % Lock coordinates
 coord_to_lock={'thorax_tilt' 'thorax_list' 'thorax_rotation'...
     'thorax_tx' 'thorax_ty' 'thorax_tz'};

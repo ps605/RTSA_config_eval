@@ -37,48 +37,83 @@ time_i = datetime;
 %% Set-up
 
 %%%%%%%%%%%%%%%%% Create parameter combinations for loops %%%%%%%%%%%%%%%%%
-design_param.diameter       = {0.036};
-design_param.hemi_base_off  = {0};
+design_param.diameter                   = {0.036};
 
-scapula_morphologies = {'m1_0_m2_0_m3_0_'};
+design_param.glenoid_base_off           = {0}; % Equivelant to baseplate offset
+design_param.glenoid_prox_dist          = {-0.006};
+design_param.glenoid_ant_post           = {0};
+
+design_param.glenoid_sup_inf_incl       = {-10};
+design_param.gelnoid_ant_retro_version  = {0};
+
+design_param.humerus_base_off           = {0.012};
+design_param.humerus_prox_dist          = {0};
+design_param.humerus_ant_post           = {0};
+
+design_param.humerus_sup_inf_incl       = {12.5};
+design_param.humerus_ant_retro_version  = {0};
+
+scapula_morphologies                    = {'m1_0_m2_0_m3_0_'};
 
 % Create permutation matrix
 param_matrix= allcomb( ...
     design_param.diameter,...
-    design_param.hemi_base_off, ...
+    design_param.glenoid_base_off, ...
+    design_param.glenoid_prox_dist, ...
+    design_param.glenoid_ant_post, ...
+    design_param.glenoid_sup_inf_incl, ...
+    design_param.gelnoid_ant_retro_version,...
+    design_param.humerus_base_off,...
+    design_param.humerus_prox_dist,...
+    design_param.humerus_ant_post,...
+    design_param.humerus_sup_inf_incl,...
+    design_param.humerus_ant_retro_version,...
     scapula_morphologies...
     );
 
 % Split matrix
-p1 = param_matrix(:,1);
-p2 = param_matrix(:,2);
-p3 = param_matrix(:,3);
+param_diameter              = param_matrix(:,1);
+param_glenoid_base_off      = param_matrix(:,2);
+param_glenoid_prox_dist     = param_matrix(:,3);
+param_glenoid_ant_post      = param_matrix(:,4);
+
+param_glenoid_inclination   = param_matrix(:,5);
+param_glenoid_version       = param_matrix(:,6);
+
+param_humerus_base_off      = param_matrix(:,7);
+param_humerus_prox_dist     = param_matrix(:,8);
+param_humerus_ant_post      = param_matrix(:,9);
+
+param_humerus_inclination   = param_matrix(:,10);
+param_humerus_version       = param_matrix(:,11);
+
+param_morphologies          = param_matrix(:,end);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % If use parallel with 2 workers (18 threads/worker) to batch job
-flag_useParallel = false;
+flag_useParallel        = false;
 
 % If should plot intermediate plots for checking
-flag_checkPlots = false;
+flag_checkPlots         = false;
 
 % If replacing Muscles with Actuators
-flag_useTorque = false;
+flag_useTorque          = false;
 
 % If removing Rotator Cuff muscles
-flag_keepRC =  false;
+flag_keepRC             = false;
 
 % Replace muscle models Millard2012Equilibrium with DeGrootFregly
-flag_ReplaceMuscles = true;
+flag_ReplaceMuscles     = true;
 
 % Run Moco after model is defined?
-flag_runSim = false;
+flag_runSim             = true;
 
 % Optimise DELT1, DELT2 and DELT3 via points
-flag_viaPointOpt = true;
+flag_viaPointOpt        = true;
 
-flag_DELT1 = true;
-flag_DELT2 = true;
-flag_DELT3 = true;
+flag_DELT1              = true;
+flag_DELT2              = true;
+flag_DELT3              = true;
 
 %% Pass setup parameters and prepare models/simulations
 if flag_useParallel == true
@@ -87,7 +122,7 @@ if flag_useParallel == true
 
     % Number of Workers
     n_workers     = 2;
-    n_threads      = 36/n_workers;
+    n_threads     = 36/n_workers;
 
     % Specify maximum number of computational threads (?)
     % maxNumCompThreads(n_threads);
@@ -99,7 +134,7 @@ if flag_useParallel == true
         %% Define Parameters for hemisphere/cup gemetry and offsets
        
         %%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%%
-        diameter = p1{i_param};
+        diameter = param_diameter{i_param};
 
         R = diameter/2;
 
@@ -110,14 +145,14 @@ if flag_useParallel == true
         % Rotation offsets in degrees
 
         % Anteroversion: +ive; Retroversion: -ive
-        hemi_gle_offsets.y_ant_retro_version    = 0;
+        hemi_gle_offsets.y_ant_retro_version    = param_glenoid_version{i_param};
         % Inferior inclination: - ive; Superior inclination: +ive
-        hemi_gle_offsets.x_sup_inf_incl         = -10;
+        hemi_gle_offsets.x_sup_inf_incl         = param_glenoid_inclination{i_param};
 
         % Translation offsets in meters (m)
-        hemi_gle_offsets.x_ant_post   = 0;          % X-normal
-        hemi_gle_offsets.y_prox_dist  = -0.006;     % Y-normal
-        hemi_gle_offsets.z_base_off   = p2{i_param};      % Z-normal
+        hemi_gle_offsets.x_ant_post   = param_glenoid_ant_post{i_param};          % X-normal
+        hemi_gle_offsets.y_prox_dist  = param_glenoid_prox_dist{i_param};     % Y-normal
+        hemi_gle_offsets.z_base_off   = param_glenoid_base_off{i_param};      % Z-normal
 
         %%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%
 
@@ -126,17 +161,17 @@ if flag_useParallel == true
         % Rotation offsets in degrees
 
         % Anteroversion: +ive; Retroversion: -ive
-        hemi_cup_offsets.z_ant_retro_version   = 0;
+        hemi_cup_offsets.z_ant_retro_version   = param_humerus_version{i_param};
         % Inferior inclination: - ive; Superior inclination: +ive
-        hemi_cup_offsets.x_sup_inf_incl        = 12.5;
+        hemi_cup_offsets.x_sup_inf_incl        = param_humerus_inclination{i_param};
 
         % Translation offsets in meters (m)
-        hemi_cup_offsets.x_ant_post   = 0;      % X-normal
-        hemi_cup_offsets.y_base_off   = 0.012;  % Y-normal
-        hemi_cup_offsets.z_prox_dist  = 0;      % Z-normal
+        hemi_cup_offsets.x_ant_post   = param_humerus_ant_post{i_param};      % X-normal
+        hemi_cup_offsets.y_base_off   = param_humerus_base_off{i_param};  % Y-normal
+        hemi_cup_offsets.z_prox_dist  = param_humerus_prox_dist{i_param};      % Z-normal
 
         %%%%%%%%%%%%%%%%%%%%%%%% Model morphology %%%%%%%%%%%%%%%%%%%%%%%%%
-        model_SSM = p3{i_param};
+        model_SSM = param_morphologies{i_param};
 
         % Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
         % Add random pause between 0.25-0.50 seconds to print files in parfor
@@ -187,8 +222,8 @@ elseif flag_useParallel == false
     for i_param = 1:size(param_matrix,1)
         %% Define Parameters for hemisphere/cup gemetry and offsets
    
-        %%%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%
-        diameter = p1{i_param};
+        %%%%%%%%%%%%%%%%%%%%%%% Hemisphere radius %%%%%%%%%%%%%%%%%%%%%%%%%
+        diameter = param_diameter{i_param};
 
         R = diameter/2;
 
@@ -199,14 +234,14 @@ elseif flag_useParallel == false
         % Rotation offsets in degrees
 
         % Anteroversion: +ive; Retroversion: -ive
-        hemi_gle_offsets.y_ant_retro_version    = 0;
+        hemi_gle_offsets.y_ant_retro_version    = param_glenoid_version{i_param};
         % Inferior inclination: - ive; Superior inclination: +ive
-        hemi_gle_offsets.x_sup_inf_incl         = -10;
+        hemi_gle_offsets.x_sup_inf_incl         = param_glenoid_inclination{i_param};
 
         % Translation offsets in meters (m)
-        hemi_gle_offsets.x_ant_post   = 0;          % X-normal
-        hemi_gle_offsets.y_prox_dist  = -0.006;     % Y-normal
-        hemi_gle_offsets.z_base_off   = p2{i_param};      % Z-normal
+        hemi_gle_offsets.x_ant_post   = param_glenoid_ant_post{i_param};          % X-normal
+        hemi_gle_offsets.y_prox_dist  = param_glenoid_prox_dist{i_param};     % Y-normal
+        hemi_gle_offsets.z_base_off   = param_glenoid_base_off{i_param};      % Z-normal
 
         %%%%%%%%%%%%%%%%%%%%%%% Humeral cup offsets %%%%%%%%%%%%%%%%%%%%%%%
 
@@ -215,17 +250,17 @@ elseif flag_useParallel == false
         % Rotation offsets in degrees
 
         % Anteroversion: +ive; Retroversion: -ive
-        hemi_cup_offsets.z_ant_retro_version   = 0;
+        hemi_cup_offsets.z_ant_retro_version   = param_humerus_version{i_param};
         % Inferior inclination: - ive; Superior inclination: +ive
-        hemi_cup_offsets.x_sup_inf_incl        = 12.5;
+        hemi_cup_offsets.x_sup_inf_incl        = param_humerus_inclination{i_param};
 
         % Translation offsets in meters (m)
-        hemi_cup_offsets.x_ant_post   = 0;      % X-normal
-        hemi_cup_offsets.y_base_off   = 0.012;  % Y-normal
-        hemi_cup_offsets.z_prox_dist  = 0;      % Z-normal
-        
+        hemi_cup_offsets.x_ant_post   = param_humerus_ant_post{i_param};      % X-normal
+        hemi_cup_offsets.y_base_off   = param_humerus_base_off{i_param};  % Y-normal
+        hemi_cup_offsets.z_prox_dist  = param_humerus_prox_dist{i_param};      % Z-normal
+
         %%%%%%%%%%%%%%%%%%%%%%%% Model morphology %%%%%%%%%%%%%%%%%%%%%%%%%
-        model_SSM = p3{i_param};
+        model_SSM = param_morphologies{i_param};
 
         % Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
         % Add random pause between 0.25-0.50 seconds to print files in parfor

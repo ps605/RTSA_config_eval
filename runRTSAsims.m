@@ -148,7 +148,7 @@ solver.set_verbosity(2);
 solver.set_optim_solver('ipopt');
 solver.set_optim_convergence_tolerance(1e-1);
 solver.set_optim_constraint_tolerance(1e-3);
-solver.set_optim_max_iterations(1);
+solver.set_optim_max_iterations(1000);
 
 % % %             % Create an initial guess
 % % %             in_guess=solver.createGuess();
