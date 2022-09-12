@@ -207,7 +207,7 @@ time_array = ArrayDouble;
 states_storage.getTimeColumn(time_array);
 
 % Set up AnalyzeTool
-analyzeTool=AnalyzeTool('..\..\OpenSim\In\Setup_files\JRA\templateJRA.xml',0);
+analyzeTool=AnalyzeTool('..\..\OpenSim\In\Setup_files\Analysis\template_JRA_FR.xml',0);
 analyzeTool.setName('Moco');
 analyzeTool.setInitialTime(0);
 analyzeTool.setFinalTime(time_array.getLast);
@@ -218,11 +218,10 @@ analyzeTool.setModelFilename(model_file)
 analyzeTool.setResultsDir(['..\..\OpenSim\Out\Moco\' print_folder_name '\']);
 
 JRA = analyzeTool.updAnalysisSet.get(0);
-%             JRA.setName('ShoulderJointReaction')
-%             JRA.setJointNames(joints);
-%             JRA.setOnBody(on_bodies)
-%             JRA.setInFrame(in_frames);
 JRA.setEndTime(time_array.getLast)
+
+FR = analyzeTool.updAnalysisSet.get(1);
+FR.setEndTime(time_array.getLast);
 
 % Print and read back in as bug workaround
 analyzeTool.print('runAnalyzeTool.xml');

@@ -6,6 +6,10 @@ clc
 
 %% Set-up
 
+% Shooulder joint (deg) angle to compute MA for
+joint_angle = 90;
+
+
 % Import OpenSim 4.3 libraries
 import org.opensim.modeling.*
 
@@ -15,8 +19,10 @@ model_name = 'FSModel_GHJoint_Z87jms113pz.osim';
 osim_model=Model(['..\..\OpenSim\In\Models\RTSA_Adjusted\' model_name]);
 init_state=osim_model.initSystem();
 
+
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
+elv_angle    = osim_model.getCoordinateSet().get('elv_angle');
 
 %% Update muscle locationtions and (initial) via-point locations
 % SSM scapula muscle locations
@@ -125,8 +131,13 @@ for i_muscle = 0:muscle_set.getSize()-1
 
                     osim_model.finalizeConnections();
                     osim_model.initSystem();
+                    
+                    % Set shoulder_elv joint angle
+                    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, 30);
+                    osim_model.updCoordinateSet().get('elv_angle').setValue(init_state, deg2rad(joint_angle));
+                    osim_model.realizePosition(init_state);
 
-                    muscle_MA_perts.(char(muscle.getName()))(i_pert, 1) = muscle_GP.computeMomentArm(init_state, shoulder_elv);
+                    muscle_MA_perts.(char(muscle.getName()))(i_pert, 1) = muscle_GP.computeMomentArm(init_state, elv_angle);
                 end
 
             end
@@ -149,7 +160,12 @@ for i_muscle = 1:numel(muscle_names)
     scatter(ones(size(muscle_MA_perts.(muscle_names{i_muscle}),1)) + i_muscle -1, muscle_MA_perts.(muscle_names{i_muscle})*1000)
     hold on
 end
+
+title(['shoulder_elv MA sensitivity to scapula muscle insertion pertubation @ ' num2str(joint_angle) ' deg'], 'Interpreter', 'none')
 xticks(1:numel(muscle_names))
 xticklabels(muscle_names)
 xlabel("Muscles originating/inserting to the scapula")
 ylabel("Muscle moment arm (mm)")
+
+saveas(gcf,['..\..\OpenSim\Out\Verification_Validation\Moment_arms\MA_elv_angle_sensitivity_scap_muscle_position_deg_' num2str(joint_angle) '.fig'], 'fig');
+saveas(gcf,['..\..\OpenSim\Out\Verification_Validation\Moment_arms\MA_elv_angle_sensitivity_scap_muscle_position_deg_' num2str(joint_angle) '.tif'], 'tiff');
