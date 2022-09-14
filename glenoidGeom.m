@@ -45,8 +45,6 @@ glenoid_inferior = glenoid_points(min_gl_p,:);
 % Calculate vector between barrycentre and most inferior point
 bc_to_inferior_p =  glenoid_inferior - glenoid_barycentre;
 
-
-%% continue
 % Invert so it point superiorly and normalise
 axial_normal = -(bc_to_inferior_p/norm(bc_to_inferior_p));
 
@@ -95,6 +93,39 @@ surf(plane_mesh_data.x_plane, plane_mesh_data.y_plane, plane_mesh_data.z_plane,.
     'FaceAlpha', 0.5,...
     'EdgeAlpha', 0.25)
 
+%% Calculate scapular plane
+scap_pointCloud = pointCloud([x(:), y(:), z(:)]);
+
+% Linear Regression method to fit plane
+x_sp = x(:);
+y_sp = y(:);
+z_sp = z(:);
+
+DM = [x_sp, y_sp, ones(size(z_sp))];
+B = DM\z_sp;
+
+% Create meshgrid of plane from Linear Regresion
+[X,Y] = meshgrid(linspace(min(x_sp),max(x_sp),50), linspace(min(y_sp),max(y_sp),50));
+Z = B(1)*X + B(2)*Y + B(3)*ones(size(X));
+
+% Create point cloud Linear Regression plane (consistensy with following code)
+scap_plane_pointCloud = pointCloud([X(:), Y(:), Z(:)]);
+% Fit plane to the Linear Regresion plane points
+[scap_plane,~,~, ~] = pcfitplane(scap_plane_pointCloud, 0.0001, 'MaxNumTrials', 1e6);
+
+% Generate plane mesh and plot using Ax + By + Gz + D = 0
+[plane_mesh_data.x_plane, plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
+plane_mesh_data.z_plane = -1*(scap_plane.Parameters(1)*plane_mesh_data.x_plane ...
+    + scap_plane.Parameters(2)*plane_mesh_data.y_plane ...
+    + scap_plane.Parameters(4))/scap_plane.Parameters(3);
+
+figure;
+pcshow(scap_pointCloud,"MarkerSize",10);
+hold on;
+surf(plane_mesh_data.x_plane, plane_mesh_data.y_plane, plane_mesh_data.z_plane,...
+    'FaceColor','y',...
+    'FaceAlpha', 0.5,...
+    'EdgeAlpha', 0.25)
 %% Project Points onto glenoid plane (minimisation problem)
 % "Most inferior" glenoid point onto glenoid plane
 plane_parameters = glenoid_plane.Parameters;

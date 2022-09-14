@@ -116,7 +116,7 @@ flag_keepRC             = false;
 flag_ReplaceMuscles     = true;
 
 % Run Moco after model is defined?2
-flag_runSim             = true;
+flag_runSim             = false;
 
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt        = false;
