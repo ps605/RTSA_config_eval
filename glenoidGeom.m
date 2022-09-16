@@ -120,7 +120,7 @@ plane_mesh_data.z_plane = -1*(scap_plane.Parameters(1)*plane_mesh_data.x_plane .
     + scap_plane.Parameters(4))/scap_plane.Parameters(3);
 
 figure;
-pcshow(scap_pointCloud,"MarkerSize",10);
+pcshow(scap_pointCloud, 'MarkerSize',20);
 hold on;
 surf(plane_mesh_data.x_plane, plane_mesh_data.y_plane, plane_mesh_data.z_plane,...
     'FaceColor','y',...
