@@ -380,6 +380,11 @@ rotate(hemisphere_gle,...
     hemi_gle_offsets.x_sup_inf_incl,...
     glenoid_barycentre)
 
+R_x = axang2rotm([glenoid_plane_normals.x_n_r1 deg2rad(hemi_gle_offsets.x_sup_inf_incl)]);
+
+% Rotate glenoid_plane_normals.y_n axis after second rotation
+glenoid_plane_normals.y_n_r1 = R_x*glenoid_plane_normals.y_n';
+glenoid_plane_normals.y_n_r1 = glenoid_plane_normals.y_n_r1';
 
 %% Position on glenoid surface (anterior/posterior, base offset, superior/inferior)
 
