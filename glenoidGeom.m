@@ -386,6 +386,11 @@ R_x = axang2rotm([glenoid_plane_normals.x_n_r1 deg2rad(hemi_gle_offsets.x_sup_in
 glenoid_plane_normals.y_n_r1 = R_x*glenoid_plane_normals.y_n';
 glenoid_plane_normals.y_n_r1 = glenoid_plane_normals.y_n_r1';
 
+
+% Get transformed axes offsets from origin 
+glenoid_plane_normals.x_n_r1_theta = atan2(norm(cross(glenoid_plane_normals.x_n_r1,[1 0 0])),dot(glenoid_plane_normals.x_n_r1,[1 0 0]));
+glenoid_plane_normals.y_n_r1_theta = atan2(norm(cross(glenoid_plane_normals.y_n_r1,[0 1 0])),dot(glenoid_plane_normals.y_n_r1,[0 1 0]));
+
 %% Position on glenoid surface (anterior/posterior, base offset, superior/inferior)
 
 % X - Anterior / Posterior offsets
