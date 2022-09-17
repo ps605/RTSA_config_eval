@@ -388,9 +388,9 @@ glenoid_plane_normals.y_n_r1 = glenoid_plane_normals.y_n_r1';
 
 
 % Get transformed axes offsets from origin 
-glenoid_plane_normals.x_n_r1_theta = atan2(norm(cross(glenoid_plane_normals.x_n_r1,[1 0 0])),dot(glenoid_plane_normals.x_n_r1,[1 0 0]));
-glenoid_plane_normals.y_n_r1_theta = atan2(norm(cross(glenoid_plane_normals.y_n_r1,[0 1 0])),dot(glenoid_plane_normals.y_n_r1,[0 1 0]));
-
+glenoid_plane_normals.theta(1) = atan2(norm(cross(glenoid_plane_normals.x_n_r1,[1 0 0])),dot(glenoid_plane_normals.x_n_r1,[1 0 0]));
+glenoid_plane_normals.theta(2) = atan2(norm(cross(glenoid_plane_normals.y_n_r1,[0 1 0])),dot(glenoid_plane_normals.y_n_r1,[0 1 0]));
+glenoid_plane_normals.theta(3) = 0;
 %% Position on glenoid surface (anterior/posterior, base offset, superior/inferior)
 
 % X - Anterior / Posterior offsets
