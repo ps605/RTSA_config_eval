@@ -115,8 +115,8 @@ flag_keepRC             = false;
 % Replace muscle models Millard2012Equilibrium with DeGrootFregly
 flag_ReplaceMuscles     = true;
 
-% Run Moco after model is defined?2
-flag_runSim             = false;
+% Run Moco after model is defined?
+flag_runSim             = true;
 
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt        = false;
