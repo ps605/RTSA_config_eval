@@ -112,10 +112,54 @@ clear i_coord
 % % %             %Add the end point cost along with an effort cost.
 % % %             problem.addGoal(endPointCost1);
 
-% Three Marker end point costs (all in Ground)
-point_RS = Vec3(0.0796176, -0.0852458, 0.675867);
-point_US = Vec3(0.015706, -0.0795034, 0.687447);
-point_wri_out = Vec3(0.0508631, -0.056026, 0.685693);
+init_state = osim_model.initSystem();
+SJC_ground = modelObject.getJointSet().get('shoulder0').get_frames(1).getPositionInGround(init_state);
+
+%Calculate the distance of the forearm (i.e. between the elbow and wrist
+%joint centre).
+
+%Get the position of the joint centres. Joint 1 corresponds to ulna offset
+%frame for elbow and joint 0 the radius offset for the radius hand joint
+EJC_ground = modelObject.getJointSet().get('elbow').get_frames(1).getPositionInGround(init_state);
+WJC_ground = modelObject.getJointSet().get('radius_hand_r').get_frames(0).getPositionInGround(init_state);
+
+%Calculate the distance between the joint centres
+elbow = [EJC_ground.get(0),EJC_ground.get(1),EJC_ground.get(2)];
+wrist = [WJC_ground.get(0),WJC_ground.get(1),WJC_ground.get(2)];
+FA_length = dist_markers(elbow,wrist);
+
+%Calculate the position 200% forearm length in front of the shoulder. In
+%front is represented by positive X
+point_lateral_SJC = [SJC_ground.get(0),SJC_ground.get(1)+(FA_length*2),SJC_ground.get(2)];
+
+RS_marker = modelObject.getMarkerSet().get('RS').getLocationInGround(modelObject_state);
+US_marker = modelObject.getMarkerSet().get('US').getLocationInGround(modelObject_state);
+RS = [RS_marker.get(0),RS_marker.get(1),RS_marker.get(2)];
+US = [US_marker.get(0),US_marker.get(1),US_marker.get(2)];
+wristWidth = dist_markers(RS,US);
+
+%Add and subtract half of the wrist distance from the original marker end
+%point along the X-axis to get the proposed end points for the markers. It
+%is positive X in the ground frame for the radius marker and negative X for
+%the ulna marker
+point_US = Vec3(point_lateral_SJC(1)-(wristWidth/2), point_lateral_SJC(2), point_lateral_SJC(3));
+point_RS = Vec3(point_lateral_SJC(1)+(wristWidth/2), point_lateral_SJC(2), point_lateral_SJC(3));
+
+%Measure the distance from the wrist joint centre to the wri_out marker for
+%prescribing where the hand needs to go.
+wri_out = modelObject.getMarkerSet().get('wri_out').getLocationInGround(modelObject_state);
+wri_out = [wri_out.get(0),wri_out.get(1),wri_out.get(2)];
+wrist = [WJC_ground.get(0),WJC_ground.get(1),WJC_ground.get(2)];
+wristHeight = dist_markers(wri_out,wrist);
+
+%Add the wirst height amount along the y-axis from the proposed reach point
+%to get the point where the wri_out marker needs to go
+point_wri_out = Vec3(point_lateral_SJC(1),point_lateral_SJC(2)+wristHeight,point_lateral_SJC(3));
+
+% % Three Marker end point costs (all in Ground)
+% point_RS = Vec3(0.0796176, -0.0852458, 0.675867);
+% point_US = Vec3(0.015706, -0.0795034, 0.687447);
+% point_wri_out = Vec3(0.0508631, -0.056026, 0.685693);
 
 end_point_cost_1 = MocoMarkerFinalGoal('marker_RS', 60);
 end_point_cost_1.setPointName('/markerset/RS');
