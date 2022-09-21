@@ -24,35 +24,8 @@ problem.setModel(osim_model);
 %% Bounds and constraints
 
 % Set time bounds
-problem.setTimeBounds(0,0.550);
+problem.setTimeBounds(0,1);
 
-% Set coordinate q bounds
-% coords_to_bound={'elv_angle',...
-%     'shoulder_elv',...
-%     'shoulder_rot',...
-%     'elbow_flexion',...
-%     'pro_sup'};
-%
-% coord_bound={[-0.0242407, 1.36556]
-%     [0, 1.85581]
-%     [-0.138833, 0.713998]
-%     [0, 1.5708]
-%     [-1.5708, 1.5708]};
-%
-% for i_coord=1:numel(coords_to_bound)
-%
-%     % Coord name
-%     coord_char_val=['/jointset/',...
-%     char(osim_model.getCoordinateSet.get(coords_to_bound{i_coord}).getJoint.getName()),...
-%     '/',...
-%     char(osim_model.getCoordinateSet.get(coords_to_bound{i_coord}).getName()),...
-%     '/value'];
-%
-%     % Coord bound
-%    % coord_bound=[osim_model.getCoordinateSet.get(coords_to_bound{i_coord}).getRangeMin(), osim_model.getCoordinateSet.get(coords_to_bound{i_coord}).getRangeMax()];
-%
-%     problem.setStateInfoPattern(coord_char_val, coord_bound{i_coord}, 0, []);
-% end
 
 % This should be changed back to task_bounds - the ones used in Fox for first
 % proper run
@@ -91,11 +64,11 @@ if strcmp(task_name, 'HairTouch')
     % Get the position of the C7 marker
     init_state = osim_model.initSystem();
     C7 = osim_model.getMarkerSet().get('C7').getLocationInGround(init_state);
-    
+
     %Prescribe the marker end point using the X and Z coordinates of
     %the C7 marker and add the arbitrary distance to the Y position
     point_occiput = Vec3(C7.get(0),C7.get(1) + 0.25,C7.get(2));
-    
+
     end_point_cost_1 = MocoMarkerFinalGoal('marker_MiddleFinger', 60);
     end_point_cost_1.setPointName('/markerset/MiddleFinger');
     end_point_cost_1.setReferenceLocation(point_occiput);
@@ -174,6 +147,77 @@ elseif strcmp(task_name, 'LateralReach')
     problem.addGoal(end_point_cost_2);
     problem.addGoal(end_point_cost_3);
 
+elseif strcmp(task_name, 'UpwardReach')
+
+    init_state = osim_model.initSystem();
+
+    SJC_ground = osim_model.getJointSet().get('shoulder0').get_frames(1).getPositionInGround(init_state);
+
+    %Calculate the distance of the forearm (i.e. between the elbow and wrist
+    %joint centre).
+
+    %Get the position of the joint centres. Joint 1 corresponds to ulna offset
+    %frame for elbow and joint 0 the radius offset for the radius hand joint
+    EJC_ground = osim_model.getJointSet().get('elbow').get_frames(1).getPositionInGround(init_state);
+    WJC_ground = osim_model.getJointSet().get('radius_hand_r').get_frames(0).getPositionInGround(init_state);
+
+    %Calculate the distance between the joint centres
+    elbow = [EJC_ground.get(0),EJC_ground.get(1),EJC_ground.get(2)];
+    wrist = [WJC_ground.get(0),WJC_ground.get(1),WJC_ground.get(2)];
+    FA_length = dist_markers(elbow,wrist);
+
+    %Calculate the position 200% forearm length in front of the shoulder. In
+    %front is represented by positive X
+    point_anterior_SJC = [SJC_ground.get(0)+(FA_length*2.0), SJC_ground.get(1), SJC_ground.get(2)];
+
+    RS_marker = osim_model.getMarkerSet().get('RS').getLocationInGround(init_state);
+    US_marker = osim_model.getMarkerSet().get('US').getLocationInGround(init_state);
+    RS = [RS_marker.get(0),RS_marker.get(1),RS_marker.get(2)];
+    US = [US_marker.get(0),US_marker.get(1),US_marker.get(2)];
+    wristWidth = dist_markers(RS,US);
+
+    %Add and subtract half of the wrist distance from the original marker end
+    %point along the Z-axis to get the proposed end points for the markers. It
+    %is positive Z in the ground frame for the ulnar marker and negative Z for
+    %the radius marker
+    point_US = Vec3(point_anterior_SJC(1), point_anterior_SJC(2), point_anterior_SJC(3)+(wristWidth/2));
+    point_RS = Vec3(point_anterior_SJC(1), point_anterior_SJC(2), point_anterior_SJC(3)-(wristWidth/2));
+
+    %Measure the distance from the wrist joint centre to the wri_out marker for
+    %prescribing where the hand needs to go.
+    wri_out = osim_model.getMarkerSet().get('wri_out').getLocationInGround(init_state);
+    wri_out = [wri_out.get(0),wri_out.get(1),wri_out.get(2)];
+    wrist = [WJC_ground.get(0),WJC_ground.get(1),WJC_ground.get(2)];
+    wristHeight = dist_markers(wri_out,wrist);
+
+    %Add the wirst height amount along the y-axis from the proposed reach point
+    %to get the point where the wri_out marker needs to go
+    point_wri_out = Vec3(point_anterior_SJC(1),point_anterior_SJC(2)+wristHeight,point_anterior_SJC(3));
+
+    % % Three Marker end point costs (all in Ground)
+    % point_RS = Vec3(0.0796176, -0.0852458, 0.675867);
+    % point_US = Vec3(0.015706, -0.0795034, 0.687447);
+    % point_wri_out = Vec3(0.0508631, -0.056026, 0.685693);
+
+    end_point_cost_1 = MocoMarkerFinalGoal('marker_RS', 60);
+    end_point_cost_1.setPointName('/markerset/RS');
+    end_point_cost_1.setReferenceLocation(point_RS);
+
+
+    end_point_cost_2 = MocoMarkerFinalGoal('marker_US', 60);
+    end_point_cost_2.setPointName('/markerset/US');
+    end_point_cost_2.setReferenceLocation(point_US);
+
+
+    end_point_cost_3 = MocoMarkerFinalGoal('marker_wrist_out', 60);
+    end_point_cost_3.setPointName('/markerset/wri_out');
+    end_point_cost_3.setReferenceLocation(point_wri_out);
+
+    % Add the MarkerGoals to the problem
+    problem.addGoal(end_point_cost_1);
+    problem.addGoal(end_point_cost_2);
+    problem.addGoal(end_point_cost_3);
+
 end
 
 %% 3 - Minimise effort
@@ -190,18 +234,18 @@ solver.set_optim_convergence_tolerance(1e-1);
 solver.set_optim_constraint_tolerance(1e-3);
 solver.set_optim_max_iterations(1000);
 
-% % %             % Create an initial guess
-% % %             in_guess=solver.createGuess();
-% % %             in_guess.randomizeAdd();
-% % %             solver.setGuess(in_guess);
+% Create an initial guess
+in_guess=solver.createGuess();
+in_guess.randomizeAdd();
+solver.setGuess(in_guess);
 
 % Set guess from previous (~ good) solution. This will need
 % alterations when other conditions are testeed/
-if flag_keepRC == true
-    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_1.sto');
-else
-    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto')
-end
+% if flag_keepRC == true
+%     solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_1.sto');
+% else
+%     solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto')
+% end
 
 %% Solve
 
