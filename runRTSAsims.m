@@ -30,7 +30,7 @@ problem.setTimeBounds(0,1);
 % This should be changed back to task_bounds - the ones used in Fox for first
 % proper run
 load('new_task_bounds.mat');
-addTaskBounds('LateralReach',new_task_bounds,problem,osim_model);
+addTaskBounds(task_name,new_task_bounds,problem,osim_model);
 
 clear i_coord
 
@@ -268,9 +268,9 @@ if ~exist(['..\..\OpenSim\Out\Moco\' print_folder_name '\'],"dir")
     mkdir(['..\..\OpenSim\Out\Moco\' print_folder_name '\'])
 end
 
-solution_file = ['..\..\OpenSim\Out\Moco\' print_folder_name '\MocoSol_LatReach.sto'];
+solution_file = ['..\..\OpenSim\Out\Moco\' print_folder_name '\MocoSol_' task_name '.sto'];
 
-predicted_solution.write(['..\..\OpenSim\Out\Moco\' print_folder_name '\MocoSol_LatReach.sto']);
+predicted_solution.write(['..\..\OpenSim\Out\Moco\' print_folder_name '\MocoSol_' task_name '.sto']);
 
 %% ANALYSIS
 
