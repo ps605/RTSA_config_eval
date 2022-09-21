@@ -1,4 +1,4 @@
-function runRTSAsims(model_file, rhash, flag_keepRC)
+function runRTSAsims(model_file, rhash, flag_keepRC, task_name)
 %runRTSAsims Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -87,98 +87,94 @@ clear i_coord
 
 %% 2 - Minimise distance from defined point at final time (From Aaron Fox, Deakin)
 
-% % % %Get the position of the C7 marker
-% % % model_state = osim_model.initSystem();
-% % % C7 = osim_model.getMarkerSet().get('C7').getLocationInGround(model_state);
-% % %
-% % % %Prescribe the marker end point using the X and Z coordinates of
-% % % %the C7 marker and add the arbitrary distance to the Y position
-% % % hairReachPoint = Vec3(C7.get(0),C7.get(1) + 0.25,C7.get(2));
-% % %
-% % % % Lateral reach point
-% % %
+if strcmp(task_name, 'HairTouch')
+    % Get the position of the C7 marker
+    init_state = osim_model.initSystem();
+    C7 = osim_model.getMarkerSet().get('C7').getLocationInGround(init_state);
+    
+    %Prescribe the marker end point using the X and Z coordinates of
+    %the C7 marker and add the arbitrary distance to the Y position
+    point_occiput = Vec3(C7.get(0),C7.get(1) + 0.25,C7.get(2));
+    
+    end_point_cost_1 = MocoMarkerFinalGoal('marker_MiddleFinger', 60);
+    end_point_cost_1.setPointName('/markerset/MiddleFinger');
+    end_point_cost_1.setReferenceLocation(point_occiput);
 
-% % % %Cleanup
-% % % clear C7
+    % Add the MarkerGoals to the problem
+    problem.addGoal(end_point_cost_1);
 
-% % %             % Add the end point costs with appropriate weights
-% % %             endPointCost1 = MocoMarkerFinalGoal('MF_endPoint',5);
-% % %             endPointCost1.setPointName('/markerset/MiddleFinger');
-% % %
-% % %             % Point at at approximatly shoulder hieght.
-% % %             lat_reach_point=Vec3(0.05, -0.021, 0.85);
-% % %             endPointCost1.setReferenceLocation(lat_reach_point);
-% % %
-% % %             %Add the end point cost along with an effort cost.
-% % %             problem.addGoal(endPointCost1);
+elseif strcmp(task_name, 'LateralReach')
 
-init_state = osim_model.initSystem();
-SJC_ground = osim_model.getJointSet().get('shoulder0').get_frames(1).getPositionInGround(init_state);
+    init_state = osim_model.initSystem();
 
-%Calculate the distance of the forearm (i.e. between the elbow and wrist
-%joint centre).
+    SJC_ground = osim_model.getJointSet().get('shoulder0').get_frames(1).getPositionInGround(init_state);
 
-%Get the position of the joint centres. Joint 1 corresponds to ulna offset
-%frame for elbow and joint 0 the radius offset for the radius hand joint
-EJC_ground = osim_model.getJointSet().get('elbow').get_frames(1).getPositionInGround(init_state);
-WJC_ground = osim_model.getJointSet().get('radius_hand_r').get_frames(0).getPositionInGround(init_state);
+    %Calculate the distance of the forearm (i.e. between the elbow and wrist
+    %joint centre).
 
-%Calculate the distance between the joint centres
-elbow = [EJC_ground.get(0),EJC_ground.get(1),EJC_ground.get(2)];
-wrist = [WJC_ground.get(0),WJC_ground.get(1),WJC_ground.get(2)];
-FA_length = dist_markers(elbow,wrist);
+    %Get the position of the joint centres. Joint 1 corresponds to ulna offset
+    %frame for elbow and joint 0 the radius offset for the radius hand joint
+    EJC_ground = osim_model.getJointSet().get('elbow').get_frames(1).getPositionInGround(init_state);
+    WJC_ground = osim_model.getJointSet().get('radius_hand_r').get_frames(0).getPositionInGround(init_state);
 
-%Calculate the position 200% forearm length in front of the shoulder. In
-%front is represented by positive X
-point_lateral_SJC = [SJC_ground.get(0), SJC_ground.get(1), SJC_ground.get(2)+(FA_length*2.25)];
+    %Calculate the distance between the joint centres
+    elbow = [EJC_ground.get(0),EJC_ground.get(1),EJC_ground.get(2)];
+    wrist = [WJC_ground.get(0),WJC_ground.get(1),WJC_ground.get(2)];
+    FA_length = dist_markers(elbow,wrist);
 
-RS_marker = osim_model.getMarkerSet().get('RS').getLocationInGround(init_state);
-US_marker = osim_model.getMarkerSet().get('US').getLocationInGround(init_state);
-RS = [RS_marker.get(0),RS_marker.get(1),RS_marker.get(2)];
-US = [US_marker.get(0),US_marker.get(1),US_marker.get(2)];
-wristWidth = dist_markers(RS,US);
+    %Calculate the position 200% forearm length in front of the shoulder. In
+    %front is represented by positive X
+    point_lateral_SJC = [SJC_ground.get(0), SJC_ground.get(1), SJC_ground.get(2)+(FA_length*2.25)];
 
-%Add and subtract half of the wrist distance from the original marker end
-%point along the X-axis to get the proposed end points for the markers. It
-%is positive X in the ground frame for the radius marker and negative X for
-%the ulna marker
-point_US = Vec3(point_lateral_SJC(1)-(wristWidth/2), point_lateral_SJC(2), point_lateral_SJC(3));
-point_RS = Vec3(point_lateral_SJC(1)+(wristWidth/2), point_lateral_SJC(2), point_lateral_SJC(3));
+    RS_marker = osim_model.getMarkerSet().get('RS').getLocationInGround(init_state);
+    US_marker = osim_model.getMarkerSet().get('US').getLocationInGround(init_state);
+    RS = [RS_marker.get(0),RS_marker.get(1),RS_marker.get(2)];
+    US = [US_marker.get(0),US_marker.get(1),US_marker.get(2)];
+    wristWidth = dist_markers(RS,US);
 
-%Measure the distance from the wrist joint centre to the wri_out marker for
-%prescribing where the hand needs to go.
-wri_out = osim_model.getMarkerSet().get('wri_out').getLocationInGround(init_state);
-wri_out = [wri_out.get(0),wri_out.get(1),wri_out.get(2)];
-wrist = [WJC_ground.get(0),WJC_ground.get(1),WJC_ground.get(2)];
-wristHeight = dist_markers(wri_out,wrist);
+    %Add and subtract half of the wrist distance from the original marker end
+    %point along the X-axis to get the proposed end points for the markers. It
+    %is positive X in the ground frame for the radius marker and negative X for
+    %the ulna marker
+    point_US = Vec3(point_lateral_SJC(1)-(wristWidth/2), point_lateral_SJC(2), point_lateral_SJC(3));
+    point_RS = Vec3(point_lateral_SJC(1)+(wristWidth/2), point_lateral_SJC(2), point_lateral_SJC(3));
 
-%Add the wirst height amount along the y-axis from the proposed reach point
-%to get the point where the wri_out marker needs to go
-point_wri_out = Vec3(point_lateral_SJC(1),point_lateral_SJC(2)+wristHeight,point_lateral_SJC(3));
+    %Measure the distance from the wrist joint centre to the wri_out marker for
+    %prescribing where the hand needs to go.
+    wri_out = osim_model.getMarkerSet().get('wri_out').getLocationInGround(init_state);
+    wri_out = [wri_out.get(0),wri_out.get(1),wri_out.get(2)];
+    wrist = [WJC_ground.get(0),WJC_ground.get(1),WJC_ground.get(2)];
+    wristHeight = dist_markers(wri_out,wrist);
 
-% % Three Marker end point costs (all in Ground)
-% point_RS = Vec3(0.0796176, -0.0852458, 0.675867);
-% point_US = Vec3(0.015706, -0.0795034, 0.687447);
-% point_wri_out = Vec3(0.0508631, -0.056026, 0.685693);
+    %Add the wirst height amount along the y-axis from the proposed reach point
+    %to get the point where the wri_out marker needs to go
+    point_wri_out = Vec3(point_lateral_SJC(1),point_lateral_SJC(2)+wristHeight,point_lateral_SJC(3));
 
-end_point_cost_1 = MocoMarkerFinalGoal('marker_RS', 60);
-end_point_cost_1.setPointName('/markerset/RS');
-end_point_cost_1.setReferenceLocation(point_RS);
+    % % Three Marker end point costs (all in Ground)
+    % point_RS = Vec3(0.0796176, -0.0852458, 0.675867);
+    % point_US = Vec3(0.015706, -0.0795034, 0.687447);
+    % point_wri_out = Vec3(0.0508631, -0.056026, 0.685693);
+
+    end_point_cost_1 = MocoMarkerFinalGoal('marker_RS', 60);
+    end_point_cost_1.setPointName('/markerset/RS');
+    end_point_cost_1.setReferenceLocation(point_RS);
 
 
-end_point_cost_2 = MocoMarkerFinalGoal('marker_US', 60);
-end_point_cost_2.setPointName('/markerset/US');
-end_point_cost_2.setReferenceLocation(point_US);
+    end_point_cost_2 = MocoMarkerFinalGoal('marker_US', 60);
+    end_point_cost_2.setPointName('/markerset/US');
+    end_point_cost_2.setReferenceLocation(point_US);
 
 
-end_point_cost_3 = MocoMarkerFinalGoal('marker_wrist_out', 60);
-end_point_cost_3.setPointName('/markerset/wri_out');
-end_point_cost_3.setReferenceLocation(point_wri_out);
+    end_point_cost_3 = MocoMarkerFinalGoal('marker_wrist_out', 60);
+    end_point_cost_3.setPointName('/markerset/wri_out');
+    end_point_cost_3.setReferenceLocation(point_wri_out);
 
-% Add the MarkerGoals to the problem
-problem.addGoal(end_point_cost_1);
-problem.addGoal(end_point_cost_2);
-problem.addGoal(end_point_cost_3);
+    % Add the MarkerGoals to the problem
+    problem.addGoal(end_point_cost_1);
+    problem.addGoal(end_point_cost_2);
+    problem.addGoal(end_point_cost_3);
+
+end
 
 %% 3 - Minimise effort
 
@@ -276,7 +272,7 @@ runTool.run();
 %% POST PROCESSING
 
 jra_filename = ['..\..\OpenSim\Out\Moco\' print_folder_name '\Moco_JointReaction_ReactionLoads.sto'];
-postPocessingShoulderModelOC(solution_file,print_folder_name, jra_filename);
+postPocessingShoulderModelOC(solution_file, print_folder_name, jra_filename);
 
 
 end

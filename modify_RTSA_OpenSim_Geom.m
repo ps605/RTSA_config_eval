@@ -64,7 +64,8 @@ scapula_morphologies                    = {'m1_0_m2_0_m3_0_'%,...
 %                                            'm1_0_m2_-2_m3_-2_'
 };
 
-            
+motion_tasks                            = {'LateralReach'};
+
 % Create permutation matrix
 param_matrix= allcomb( ...
     design_param.diameter,...
@@ -78,7 +79,8 @@ param_matrix= allcomb( ...
     design_param.humerus_ant_post,...
     design_param.humerus_sup_inf_incl,...
     design_param.humerus_ant_retro_version,...
-    scapula_morphologies...
+    scapula_morphologies,...
+    motion_tasks...
     );
 
 % Split matrix
@@ -97,7 +99,8 @@ param_humerus_ant_post      = param_matrix(:,9);
 param_humerus_inclination   = param_matrix(:,10);
 param_humerus_version       = param_matrix(:,11);
 
-param_morphologies          = param_matrix(:,end);
+param_morphologies          = param_matrix(:,12);
+param_tasks          = param_matrix(:,end);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Flags %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % If use parallel with 2 workers (18 threads/worker) to batch job
@@ -182,6 +185,9 @@ if flag_useParallel == true
 
         %%%%%%%%%%%%%%%%%%%%%%%% Model morphology %%%%%%%%%%%%%%%%%%%%%%%%%
         model_SSM = param_morphologies{i_param};
+        
+        %%%%%%%%%%%%%%%%%%%%%%%% Simulation task %%%%%%%%%%%%%%%%%%%%%%%%%%
+        task_name = param_tasks{i_param}
 
         % Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
         % Add random pause between 0.25-0.50 seconds to print files in parfor
@@ -224,7 +230,7 @@ if flag_useParallel == true
 
         % Run OpenSim moco for predictive simulation
         if flag_runSim == true
-            runRTSAsims(model_file, rhash, flag_keepRC)
+            runRTSAsims(model_file, rhash, flag_keepRC, task_name)
         end
 
     end
@@ -273,6 +279,9 @@ elseif flag_useParallel == false
         %%%%%%%%%%%%%%%%%%%%%%%% Model morphology %%%%%%%%%%%%%%%%%%%%%%%%%
         model_SSM = param_morphologies{i_param};
 
+        %%%%%%%%%%%%%%%%%%%%%%%% Simulation task %%%%%%%%%%%%%%%%%%%%%%%%%%
+        task_name = param_tasks{i_param};
+
         % Create a random 11-char hash to reference model file X00yyy111zz (~30e12)
         % Add random pause between 0.25-0.50 seconds to print files in parfor
         pause(0.250 + rand*0.250)
@@ -309,6 +318,7 @@ elseif flag_useParallel == false
             R,...
             rhash,...
             model_SSM,...
+            task_name,...
             flag_useTorque,...
             flag_keepRC,...
             flag_ReplaceMuscles);
@@ -321,7 +331,7 @@ elseif flag_useParallel == false
 
         % Run OpenSim moco for predictive simulation
         if flag_runSim == true
-            runRTSAsims(model_file, rhash, flag_keepRC)
+            runRTSAsims(model_file, rhash, flag_keepRC, task_name)
         end
 
     end
