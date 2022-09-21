@@ -29,8 +29,8 @@ problem.setTimeBounds(0,1);
 
 % This should be changed back to task_bounds - the ones used in Fox for first
 % proper run
-load('new_task_bounds.mat');
-addTaskBounds(task_name,new_task_bounds,problem,osim_model);
+load('new2_task_bounds.mat');
+addTaskBounds(task_name,new2_task_bounds,problem,osim_model);
 
 clear i_coord
 
