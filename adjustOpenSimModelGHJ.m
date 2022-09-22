@@ -1,9 +1,9 @@
 function new_model_file = adjustOpenSimModelGHJ(GHJ_in_parent, GHJ_in_parent_rot, GHJ_in_child, hemi_gle_offsets, hemi_cup_offsets, R, rhash, model_SSM, task_name, flag_useTorque, flag_keepRC, flag_ReplaceMuscles)
 % adjustOpenSimModelGHJ Create new OpenSim model with the newly defined GHJ
-% location and with the  generated parametric "implant geometries" 
-% (glenosphere and humeral cup). Also export log of RTSA models indexed by 
+% location and with the  generated parametric "implant geometries"
+% (glenosphere and humeral cup). Also export log of RTSA models indexed by
 % 11-charecter alphanumeric hash
-% 
+%
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%% TO ADD  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % -
 %
@@ -105,7 +105,7 @@ if flag_keepRC == false
     osim_model.updForceSet.remove(osim_model.getMuscles.get('INFSP'));
     osim_model.updForceSet.remove(osim_model.updMuscles.get('SUBSC'));
     osim_model.updForceSet.remove(osim_model.updMuscles.get('TMIN'));
-    
+
     % Update so that model has -4 muscles and not empty
     osim_model.finalizeConnections()
 end
@@ -133,7 +133,7 @@ for i_joint = 1:numel(joints_to_alter)
     %     baseline_tran_p = osim_model.getJointSet.get(joints_to_alter{i_joint}).get_frames(0).get_translation();
     baseline_tran_p = Vec3(0); % [0 0 0];
 
-    % Update JCS translation in Parent
+    %% Update JCS translation in Parent
     % Check if it is first joint <unrothum> because that
     % joint has to define initial position of JCS (for the
     % following discritised joints [shoulder0/1/2]) and
@@ -141,12 +141,12 @@ for i_joint = 1:numel(joints_to_alter)
     % the joints' JCS can be defined based on the offset
     % from the body to Child POF.
     if strcmp(joints_to_alter{i_joint},'unrothum')
-        
+
         osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(0).set_translation(Vec3(...
             baseline_tran_p.get(0) + conds_GHJ_geom.tran(1, 1),...
             baseline_tran_p.get(1) + conds_GHJ_geom.tran(1, 2),...
             baseline_tran_p.get(2) + conds_GHJ_geom.tran(1, 3)));
-   
+
     elseif strcmp(joints_to_alter{i_joint},'shoulder0')|| strcmp(joints_to_alter{i_joint},'shoulder1') || strcmp(joints_to_alter{i_joint},'shoulder2')
         osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(0).set_translation(Vec3(...
             baseline_tran_p.get(0) + conds_GHJ_geom.tran(1, 4),...
@@ -167,7 +167,7 @@ for i_joint = 1:numel(joints_to_alter)
 
     end
 
-    % Get baseline translation in Child
+    %% Get baseline translation in Child
     %     baseline_tran_c = osim_model.getJointSet.get(joints_to_alter{i_joint}).get_frames(1).get_translation();
     baseline_tran_c = Vec3(0); %[0 0 0];
 
@@ -191,8 +191,8 @@ for i_joint = 1:numel(joints_to_alter)
             baseline_rot_p.get(0) + conds_GHJ_geom.rot(1, 1),...
             baseline_rot_p.get(1) + conds_GHJ_geom.rot(1, 2),...
             baseline_rot_p.get(2) + conds_GHJ_geom.rot(1, 3)));
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Remove this if statement after checks - i.e. all angles the same
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Remove this if statement after checks - i.e. all angles the same
     elseif strcmp(joints_to_alter{i_joint},'shoulder0')|| strcmp(joints_to_alter{i_joint},'shoulder1') || strcmp(joints_to_alter{i_joint},'shoulder2')
         osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(0).set_orientation(Vec3(...
             baseline_rot_p.get(0) + conds_GHJ_geom.rot(1, 1),...
@@ -202,12 +202,19 @@ for i_joint = 1:numel(joints_to_alter)
     % Get baseline rotation in Child
     baseline_rot_c = osim_model.getJointSet.get(joints_to_alter{i_joint}).get_frames(1).get_orientation();
 
-    % Update JCS rotation in Child
-    osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(1).set_orientation(Vec3(...
-        baseline_rot_c.get(0) + conds_GHJ_geom.rot(1, 1),...
-        baseline_rot_c.get(1) + conds_GHJ_geom.rot(1, 2),...
-        baseline_rot_c.get(2) + conds_GHJ_geom.rot(1, 3)));
-
+    if strcmp(joints_to_alter{i_joint},'unrotscap')
+        % Update JCS rotation in Child
+        osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(1).set_orientation(Vec3(...
+            baseline_rot_c.get(0),...
+            baseline_rot_c.get(1),...
+            baseline_rot_c.get(2)));
+    else
+        % Update JCS rotation in Child
+        osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(1).set_orientation(Vec3(...
+            baseline_rot_c.get(0) + conds_GHJ_geom.rot(1, 1),...
+            baseline_rot_c.get(1) + conds_GHJ_geom.rot(1, 2),...
+            baseline_rot_c.get(2) + conds_GHJ_geom.rot(1, 3)));
+    end
 
 end
 
@@ -234,41 +241,41 @@ muscle_names = {'DELT2',...
 % Get OpenSim muscle set
 muscle_set = osim_model.getMuscles();
 
-% Loop through muscles 
+% Loop through muscles
 for i_muscle = 0:muscle_set.getSize()-1
     % Get muscle
     muscle = muscle_set.get(i_muscle);
     % Index muscle path point data
     idx_muscle_data = find(strcmp(muscle_names(:), char(muscle.getName)));
 
-    % Skip if muscle isn't of <scapula> 
+    % Skip if muscle isn't of <scapula>
     if isempty(idx_muscle_data)
         continue
     end
-    
+
     % Get muscle path points
     muscle_PathPointSet = muscle.getGeometryPath().getPathPointSet();
-    
+
     for i_point = 0:muscle_PathPointSet.getSize()-1
-        
+
         point = muscle_PathPointSet.get(i_point);
 
         body_of_point = point.getBody().getName();
-        
+
         % Skip if point isn' attached to <scapula>
         if ~strcmp(char(body_of_point), 'scapula')
             continue
         end
 
         point_name = char(point.getName());
-        
+
         point_concrete_class = char(point.getConcreteClassName());
-        
+
         if strcmp(point_concrete_class, 'PathPoint') || strcmp(point_concrete_class, 'ConditionalPathPoint')
             % Downcast AbstractPathPoint to PathPoint to set new xyz
             % location
             point_downCast = PathPoint.safeDownCast(point);
-            
+
             if strcmp(point_name(end-2:end), 'via') && strcmp('DELT2', char(muscle.getName))
 
                 % Via point offset from the scap muscle attachement -
@@ -297,7 +304,7 @@ for i_muscle = 0:muscle_set.getSize()-1
                 location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1) + tmaj_via_off(1),...
                     muscle_locs(idx_muscle_data,2) + tmaj_via_off(2),...
                     muscle_locs(idx_muscle_data,3) + tmaj_via_off(3));
-                point_downCast.set_location(location_Vec3);  
+                point_downCast.set_location(location_Vec3);
 
             else
                 location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1), muscle_locs(idx_muscle_data,2), muscle_locs(idx_muscle_data,3));
