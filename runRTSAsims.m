@@ -24,13 +24,13 @@ problem.setModel(osim_model);
 %% Bounds and constraints
 
 % Set time bounds
-problem.setTimeBounds(0,1);
+problem.setTimeBounds(0,[0.75 1.5]);
 
 
 % This should be changed back to task_bounds - the ones used in Fox for first
 % proper run
-load('new2_task_bounds.mat');
-addTaskBounds(task_name,taskBounds,problem,osim_model);
+load('new_task_bounds.mat');
+addTaskBounds(task_name,new_task_bounds,problem,osim_model);
 
 clear i_coord
 
@@ -56,7 +56,7 @@ clear i_coord
 %% Goals
 %% 1 - Minimise time taken
 
-%problem.addGoal(MocoFinalTimeGoal('time',1));
+problem.addGoal(MocoFinalTimeGoal('time',1));
 
 %% 2 - Minimise distance from defined point at final time (From Aaron Fox, Deakin)
 
@@ -234,18 +234,18 @@ solver.set_optim_convergence_tolerance(1e-1);
 solver.set_optim_constraint_tolerance(1e-3);
 solver.set_optim_max_iterations(1000);
 
-% Create an initial guess
-in_guess=solver.createGuess();
-in_guess.randomizeAdd();
-solver.setGuess(in_guess);
+% % % % Create an initial guess
+% % % in_guess=solver.createGuess();
+% % % in_guess.randomizeAdd();
+% % % solver.setGuess(in_guess);
 
 % Set guess from previous (~ good) solution. This will need
 % alterations when other conditions are testeed/
-% if flag_keepRC == true
-%     solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_1.sto');
-% else
-%     solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto')
-% end
+if flag_keepRC == true
+    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_1.sto');
+else
+    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto')
+end
 
 %% Solve
 

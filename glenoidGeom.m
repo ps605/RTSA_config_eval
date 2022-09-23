@@ -358,7 +358,7 @@ rotate(hemisphere_gle,...
     hemi_gle_offsets.y_ant_retro_version,...
     glenoid_barycentre)
 
-% Rotate CoR_glen about glenoid_plane_normals.y_n
+% Rotation matrix
 R_y = axang2rotm([glenoid_plane_normals.y_n deg2rad(hemi_gle_offsets.y_ant_retro_version)]);
 
 % Need to rotate glenoid_plane_normals.x_n axis after first rotation
@@ -380,6 +380,7 @@ rotate(hemisphere_gle,...
     hemi_gle_offsets.x_sup_inf_incl,...
     glenoid_barycentre)
 
+% Rotation matrix
 R_x = axang2rotm([glenoid_plane_normals.x_n_r1 deg2rad(hemi_gle_offsets.x_sup_inf_incl)]);
 
 % Rotate glenoid_plane_normals.y_n axis after second rotation
@@ -387,7 +388,7 @@ glenoid_plane_normals.y_n_r1 = R_x*glenoid_plane_normals.y_n';
 glenoid_plane_normals.y_n_r1 = glenoid_plane_normals.y_n_r1';
 
 
-% Get transformed axes offsets from origin 
+% Get transformed axes orientation offsets from origin 
 glenoid_plane_normals.theta(1) = atan2(norm(cross(glenoid_plane_normals.x_n_r1,[1 0 0])),dot(glenoid_plane_normals.x_n_r1,[1 0 0]));
 glenoid_plane_normals.theta(2) = atan2(norm(cross(glenoid_plane_normals.y_n_r1,[0 1 0])),dot(glenoid_plane_normals.y_n_r1,[0 1 0]));
 glenoid_plane_normals.theta(3) = 0;
