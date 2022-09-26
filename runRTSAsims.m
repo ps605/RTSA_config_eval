@@ -139,13 +139,13 @@ elseif strcmp(task_name, 'LateralReach')
     end_point_cost_2.setPointName('/markerset/US');
     end_point_cost_2.setReferenceLocation(point_US);
     % Define end_point marker postion for visualisation
-    osim_model.getMarkerSet().get('LateralReach_US').set_location(point_US)
+    osim_model.getMarkerSet().get('LateralReach_US').set_location(point_US);
 
     end_point_cost_3 = MocoMarkerFinalGoal('marker_wrist_out', 60);
     end_point_cost_3.setPointName('/markerset/wri_out');
     end_point_cost_3.setReferenceLocation(point_wri_out);
     % Define end_point marker postion for visualisation
-    osim_model.getMarkerSet().get('LateralReach_wri_out').set_location(point_wri_out)
+    osim_model.getMarkerSet().get('LateralReach_wri_out').set_location(point_wri_out);
 
     % Add the MarkerGoals to the problem
     problem.addGoal(end_point_cost_1);
@@ -207,16 +207,20 @@ elseif strcmp(task_name, 'UpwardReach')
     end_point_cost_1 = MocoMarkerFinalGoal('marker_RS', 60);
     end_point_cost_1.setPointName('/markerset/RS');
     end_point_cost_1.setReferenceLocation(point_RS);
-
+    % Define end_point marker postion for visualisation
+    osim_model.getMarkerSet().get('LateralREach_RS').set_location(point_RS)
 
     end_point_cost_2 = MocoMarkerFinalGoal('marker_US', 60);
     end_point_cost_2.setPointName('/markerset/US');
     end_point_cost_2.setReferenceLocation(point_US);
-
+    % Define end_point marker postion for visualisation
+    osim_model.getMarkerSet().get('LateralReach_US').set_location(point_US);
 
     end_point_cost_3 = MocoMarkerFinalGoal('marker_wrist_out', 60);
     end_point_cost_3.setPointName('/markerset/wri_out');
     end_point_cost_3.setReferenceLocation(point_wri_out);
+    % Define end_point marker postion for visualisation
+    osim_model.getMarkerSet().get('LateralReach_wri_out').set_location(point_wri_out);
 
     % Add the MarkerGoals to the problem
     problem.addGoal(end_point_cost_1);
