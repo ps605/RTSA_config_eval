@@ -39,17 +39,23 @@ glenoid_points = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM 'rim_co
 glenoid_barycentre = mean(glenoid_points);
 
 % Get points to define coordinate system - Y-axis
-[~, min_gl_p] = min(glenoid_points(:,2));
-glenoid_inferior = glenoid_points(min_gl_p,:);
+D = pdist(glenoid_points);
+D = squareform(D);
+[~,I] = max(D(:));
+[max_point_idx_1, max_point_idx_2] = ind2sub(size(D),I);
+max_point_idx = [max_point_idx_1, max_point_idx_2];
 
-% Calculate vector between barrycentre and most inferior point
-bc_to_inferior_p =  glenoid_inferior - glenoid_barycentre;
-
-% Invert so it point superiorly and normalise
-axial_normal = -(bc_to_inferior_p/norm(bc_to_inferior_p));
+% % % [~, min_gl_p] = min(glenoid_points(:,2));
+% % % glenoid_inferior = glenoid_points(min_gl_p,:);
+% % % 
+% % % % Calculate vector between barrycentre and most inferior point
+% % % bc_to_inferior_p =  glenoid_inferior - glenoid_barycentre;
+% % % 
+% % % % Invert so it point superiorly and normalise
+% % % axial_normal = -(bc_to_inferior_p/norm(bc_to_inferior_p));
 
 scatter3(glenoid_points(:,1), glenoid_points(:,2), glenoid_points(:,3), 'filled', 'o', 'cyan');
-scatter3(glenoid_points(min_gl_p,1), glenoid_points(min_gl_p,2), glenoid_points(min_gl_p,3), 'filled', 'o', 'magenta');
+% scatter3(glenoid_points(min_gl_p,1), glenoid_points(min_gl_p,2), glenoid_points(min_gl_p,3), 'filled', 'o', 'magenta');
 scatter3(glenoid_barycentre(:,1), glenoid_barycentre(:,2), glenoid_barycentre(:,3), 'filled', 'o', 'magenta');
 
 % Generate PointCloud of slected points and barycentre
@@ -131,26 +137,29 @@ surf(plane_mesh_data.x_plane, plane_mesh_data.y_plane, plane_mesh_data.z_plane,.
 plane_parameters = glenoid_plane.Parameters;
 % Constraint function (plane)
 f_con = @(y_m)plane_func_d(y_m, plane_parameters);
-% Cost function (distance)
-J_inferior = @(y_m)sqrt((glenoid_inferior(1) - y_m(1))^2 + (glenoid_inferior(2) - y_m(2))^2 + (glenoid_inferior(3) - y_m(3))^2);
-% Initial Condition (point on plane)
-y_m_0 = [plane_mesh_data.x_plane(1) plane_mesh_data.y_plane(1) plane_mesh_data.z_plane(1)];
 
-options = optimset('MaxIter', 100, 'TolFun', 1e-4);
-% Run fmincon
-[glenoid_inferior_on_plane, ~] = fmincon(J_inferior,...
-    y_m_0,...
-    [],...
-    [],...
-    [],...
-    [],...
-    [],...
-    [],...
-    f_con,...
-    options);
+for i_max_point = 1:2
+    % Cost function (distance)
+    J_inferior = @(y_m)sqrt((glenoid_points(max_point_idx(i_max_point),1) - y_m(1))^2 + (glenoid_points(max_point_idx(i_max_point),2) - y_m(2))^2 + (glenoid_points(max_point_idx(i_max_point),3) - y_m(3))^2);
+    % Initial Condition (point on plane)
+    y_m_0 = [plane_mesh_data.x_plane(1) plane_mesh_data.y_plane(1) plane_mesh_data.z_plane(1)];
 
-scatter3(glenoid_inferior_on_plane(1), glenoid_inferior_on_plane(2), glenoid_inferior_on_plane(3), 'filled','o','magenta');
-
+    options = optimset('MaxIter', 100, 'TolFun', 1e-4);
+    % Run fmincon
+    [max_point_plane, ~] = fmincon(J_inferior,...
+        y_m_0,...
+        [],...
+        [],...
+        [],...
+        [],...
+        [],...
+        [],...
+        f_con,...
+        options);
+    
+    glenoid_max_points(i_max_point,:) = max_point_plane;
+    scatter3(max_point_plane(1), max_point_plane(2), max_point_plane(3), 'filled','o','magenta');
+end
 % Glenoid barycentre onto glenoid plane
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This updates the value of glenoid_barycentre to the projection (x, y, z)
@@ -182,7 +191,7 @@ if bary_plane >= 1e-4
 end
 
 
-%% Check which way the Palne norm (Z axis) is pointing
+%% Check which way the Plane norm (Z axis) is pointing
 
 % Get the barycentre of glenoid verteces
 x_sca_mean = mean(x,'all');
@@ -245,12 +254,12 @@ scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'b
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Check if plane norm and glenoid_inferior_on_plane are perpendicular
-bc_to_inf_glen = (glenoid_inferior_on_plane - glenoid_barycentre)/norm(glenoid_inferior_on_plane - glenoid_barycentre);
+vec_max_glen_points = (glenoid_max_points(1,:) - glenoid_max_points(2,:))/norm(glenoid_max_points(1,:) - glenoid_max_points(2,:));
 
-if dot(bc_to_inf_glen, glenoid_normal) < 1e-10
-    % Negate so that axis normal is pointing superiorly
-    glenoid_plane_y_n = -bc_to_inf_glen;
-elseif dot(bc_to_inf_glen, glenoid_normal) >= 1e-10
+if dot(vec_max_glen_points, glenoid_normal) < 1e-10
+    % NEED to make sure axis is pointingg superiorly
+    glenoid_plane_y_n = vec_max_glen_points;
+elseif dot(vec_max_glen_points, glenoid_normal) >= 1e-10
     disp(' Error: Glenoid plane Y and Z axes not perpendicular (dot(bc_to_inf_glen, glenoid_normal) >= 1e-10)');
     keyboard
 end
