@@ -131,16 +131,21 @@ elseif strcmp(task_name, 'LateralReach')
     end_point_cost_1 = MocoMarkerFinalGoal('marker_RS', 60);
     end_point_cost_1.setPointName('/markerset/RS');
     end_point_cost_1.setReferenceLocation(point_RS);
+    % Define end_point marker postion for visualisation
+    osim_model.getMarkerSet().get('LateralREach_RS').set_location(point_RS)
 
 
     end_point_cost_2 = MocoMarkerFinalGoal('marker_US', 60);
     end_point_cost_2.setPointName('/markerset/US');
     end_point_cost_2.setReferenceLocation(point_US);
-
+    % Define end_point marker postion for visualisation
+    osim_model.getMarkerSet().get('LateralReach_US').set_location(point_US)
 
     end_point_cost_3 = MocoMarkerFinalGoal('marker_wrist_out', 60);
     end_point_cost_3.setPointName('/markerset/wri_out');
     end_point_cost_3.setReferenceLocation(point_wri_out);
+    % Define end_point marker postion for visualisation
+    osim_model.getMarkerSet().get('LateralReach_wri_out').set_location(point_wri_out)
 
     % Add the MarkerGoals to the problem
     problem.addGoal(end_point_cost_1);
@@ -256,6 +261,9 @@ toc;
 % Add random pause between 0.25-1 seconds to print files in parfor
 pause(0.250 + rand*0.075)
 %% Post-processing
+% Finilise connections for redefined marker targets and print model 
+osim_model.finalizeConnections();
+osim_model.print(model_file);
 
 % If failed, unseal
 if ~predicted_solution.success()
