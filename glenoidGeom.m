@@ -88,13 +88,13 @@ glenoid_normal = glenoid_plane.Normal;
 figure(10)
 
 % Generate plane mesh and plot using Ax + By + Gz + D = 0
-[plane_mesh_data.x_plane, plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
-plane_mesh_data.z_plane = -1*(glenoid_plane.Parameters(1)*plane_mesh_data.x_plane ...
-    + glenoid_plane.Parameters(2)*plane_mesh_data.y_plane ...
+[gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
+gle_plane_mesh_data.z_plane = -1*(glenoid_plane.Parameters(1)*gle_plane_mesh_data.x_plane ...
+    + glenoid_plane.Parameters(2)*gle_plane_mesh_data.y_plane ...
     + glenoid_plane.Parameters(4))/glenoid_plane.Parameters(3);
 
 % Plot Plane
-surf(plane_mesh_data.x_plane, plane_mesh_data.y_plane, plane_mesh_data.z_plane,...
+surf(gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane, gle_plane_mesh_data.z_plane,...
     'FaceColor','g',...
     'FaceAlpha', 0.25,...
     'EdgeAlpha', 0)
@@ -120,18 +120,31 @@ scap_plane_pointCloud = pointCloud([X(:), Y(:), Z(:)]);
 [scap_plane,~,~, ~] = pcfitplane(scap_plane_pointCloud, 0.0001, 'MaxNumTrials', 1e6);
 
 % Generate plane mesh and plot using Ax + By + Gz + D = 0
-[plane_mesh_data.x_plane, plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
-plane_mesh_data.z_plane = -1*(scap_plane.Parameters(1)*plane_mesh_data.x_plane ...
-    + scap_plane.Parameters(2)*plane_mesh_data.y_plane ...
+[sca_plane_mesh_data.x_plane, sca_plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
+sca_plane_mesh_data.z_plane = -1*(scap_plane.Parameters(1)*sca_plane_mesh_data.x_plane ...
+    + scap_plane.Parameters(2)*sca_plane_mesh_data.y_plane ...
     + scap_plane.Parameters(4))/scap_plane.Parameters(3);
 
-% figure;
-% pcshow(scap_pointCloud, 'MarkerSize',20);
-% hold on;
-% surf(plane_mesh_data.x_plane, plane_mesh_data.y_plane, plane_mesh_data.z_plane,...
-%     'FaceColor','y',...
-%     'FaceAlpha', 0.5,...
-%     'EdgeAlpha', 0.25)
+figure;
+pcshow(scap_pointCloud, 'MarkerSize',20);
+hold on;
+surf(sca_plane_mesh_data.x_plane, sca_plane_mesh_data.y_plane, sca_plane_mesh_data.z_plane,...
+    'FaceColor','y',...
+    'FaceAlpha', 0.25,...
+    'EdgeAlpha', 0)
+
+%% Calculate vector of glenoid and scapula plane intersection
+
+[~, intersect_v] = plane_intersect(glenoid_plane.Parameters(1:3),...
+                             [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)],...
+                             scap_plane.Parameters(1:3),...
+                             [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
+
+% Connect with line to visualise normal and projection
+    line([glenoid_barycentre(1) pl_p(1)],...
+        [glenoid_barycentre(2) pl_p(2)],...
+        [glenoid_barycentre(3) pl_p(3)], ...
+        'LineWidth',4,'Color','green');
 %% Project Points onto glenoid plane (minimisation problem)
 % "Most inferior" glenoid point onto glenoid plane
 plane_parameters = glenoid_plane.Parameters;
@@ -142,7 +155,7 @@ for i_max_point = 1:2
     % Cost function (distance)
     J_inferior = @(y_m)sqrt((glenoid_points(max_point_idx(i_max_point),1) - y_m(1))^2 + (glenoid_points(max_point_idx(i_max_point),2) - y_m(2))^2 + (glenoid_points(max_point_idx(i_max_point),3) - y_m(3))^2);
     % Initial Condition (point on plane)
-    y_m_0 = [plane_mesh_data.x_plane(1) plane_mesh_data.y_plane(1) plane_mesh_data.z_plane(1)];
+    y_m_0 = [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)];
 
     options = optimset('MaxIter', 100, 'TolFun', 1e-4);
     % Run fmincon
@@ -184,6 +197,8 @@ bary_plane = glenoid_plane.Parameters(1)*glenoid_barycentre(1) +...
     glenoid_plane.Parameters(2)*glenoid_barycentre(2) +...
     glenoid_plane.Parameters(3)*glenoid_barycentre(3) + ...
     glenoid_plane.Parameters(4);
+
+
 
 if bary_plane >= 1e-4
     disp('Error: You fucked up')
@@ -254,11 +269,11 @@ scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'b
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Check if plane norm and glenoid_inferior_on_plane are perpendicular
-vec_max_glen_points = (glenoid_max_points(1,:) - glenoid_max_points(2,:))/norm(glenoid_max_points(1,:) - glenoid_max_points(2,:));
+%vec_max_glen_points = (glenoid_max_points(1,:) - glenoid_max_points(2,:))/norm(glenoid_max_points(1,:) - glenoid_max_points(2,:));
 
-if dot(vec_max_glen_points, glenoid_normal) < 1e-10
+if dot(intersect_v, glenoid_normal) < 1e-10
     % NEED to make sure axis is pointingg superiorly
-    glenoid_plane_y_n = vec_max_glen_points;
+    glenoid_plane_y_n = intersect_v;
 elseif dot(vec_max_glen_points, glenoid_normal) >= 1e-10
     disp(' Error: Glenoid plane Y and Z axes not perpendicular (dot(bc_to_inf_glen, glenoid_normal) >= 1e-10)');
     keyboard
