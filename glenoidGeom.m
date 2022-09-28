@@ -125,26 +125,15 @@ sca_plane_mesh_data.z_plane = -1*(scap_plane.Parameters(1)*sca_plane_mesh_data.x
     + scap_plane.Parameters(2)*sca_plane_mesh_data.y_plane ...
     + scap_plane.Parameters(4))/scap_plane.Parameters(3);
 
-figure;
-pcshow(scap_pointCloud, 'MarkerSize',20);
-hold on;
+% figure;
+% pcshow(scap_pointCloud, 'MarkerSize',20);
+% hold on;
 surf(sca_plane_mesh_data.x_plane, sca_plane_mesh_data.y_plane, sca_plane_mesh_data.z_plane,...
     'FaceColor','y',...
     'FaceAlpha', 0.25,...
     'EdgeAlpha', 0)
 
-%% Calculate vector of glenoid and scapula plane intersection
 
-[~, intersect_v] = plane_intersect(glenoid_plane.Parameters(1:3),...
-                             [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)],...
-                             scap_plane.Parameters(1:3),...
-                             [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
-
-% Connect with line to visualise normal and projection
-    line([glenoid_barycentre(1) pl_p(1)],...
-        [glenoid_barycentre(2) pl_p(2)],...
-        [glenoid_barycentre(3) pl_p(3)], ...
-        'LineWidth',4,'Color','green');
 %% Project Points onto glenoid plane (minimisation problem)
 % "Most inferior" glenoid point onto glenoid plane
 plane_parameters = glenoid_plane.Parameters;
@@ -169,8 +158,10 @@ for i_max_point = 1:2
         [],...
         f_con,...
         options);
-    
-    glenoid_max_points(i_max_point,:) = max_point_plane;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is currently note used as now using plane interscection but keep for
+% ease if wanted to re-introduce
+%    glenoid_max_points(i_max_point,:) = max_point_plane;
     scatter3(max_point_plane(1), max_point_plane(2), max_point_plane(3), 'filled','o','magenta');
 end
 % Glenoid barycentre onto glenoid plane
@@ -205,6 +196,21 @@ if bary_plane >= 1e-4
     keyboard
 end
 
+%% Calculate vector of glenoid and scapula plane intersection
+
+[~, intersect_v] = plane_intersect(glenoid_plane.Parameters(1:3),...
+                             [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)],...
+                             scap_plane.Parameters(1:3),...
+                             [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
+
+% Project point from barycentre along intersect axis for visualisation
+pl_p = glenoid_barycentre + R*intersect_v
+
+% Connect with line to visualise normal and projection
+    line([glenoid_barycentre(1) pl_p(1)],...
+        [glenoid_barycentre(2) pl_p(2)],...
+        [glenoid_barycentre(3) pl_p(3)], ...
+        'LineWidth',4,'Color','green');
 
 %% Check which way the Plane norm (Z axis) is pointing
 
