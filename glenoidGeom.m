@@ -204,13 +204,17 @@ end
                              [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
 
 % Project point from barycentre along intersect axis for visualisation
-pl_p = glenoid_barycentre + R*intersect_v
+pl_p = glenoid_barycentre + R*intersect_v;
 
-% Connect with line to visualise normal and projection
-    line([glenoid_barycentre(1) pl_p(1)],...
-        [glenoid_barycentre(2) pl_p(2)],...
-        [glenoid_barycentre(3) pl_p(3)], ...
-        'LineWidth',4,'Color','green');
+% % % Connect with line to visualise normal and projection
+% %     line([glenoid_barycentre(1) pl_p(1)],...
+% %         [glenoid_barycentre(2) pl_p(2)],...
+% %         [glenoid_barycentre(3) pl_p(3)], ...
+% %         'LineWidth',4,'Color','green');
+
+% Check for orientation of vector with respect to Y axis
+intersect_v_angle = vrrotvec([0 1 0], intersect_v);
+intersect_v_angle_deg = rad2deg(intersect_v_angle(4));
 
 %% Check which way the Plane norm (Z axis) is pointing
 
@@ -279,7 +283,11 @@ scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'b
 
 if dot(intersect_v, glenoid_normal) < 1e-10
     % NEED to make sure axis is pointingg superiorly
-    glenoid_plane_y_n = intersect_v;
+    if intersect_v_angle_deg < 90 && intersect_v_angle_deg > - 90
+        glenoid_plane_y_n = intersect_v;
+    else
+        glenoid_plane_y_n = -intersect_v;
+    end
 elseif dot(vec_max_glen_points, glenoid_normal) >= 1e-10
     disp(' Error: Glenoid plane Y and Z axes not perpendicular (dot(bc_to_inf_glen, glenoid_normal) >= 1e-10)');
     keyboard
