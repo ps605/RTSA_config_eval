@@ -203,6 +203,9 @@ end
                              scap_plane.Parameters(1:3),...
                              [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
 
+% Normalise intersection vector
+intersect_v = intersect_v/norm(intersect_v);
+
 % Project point from barycentre along intersect axis for visualisation
 pl_p = glenoid_barycentre + R*intersect_v;
 
@@ -327,7 +330,7 @@ glen_rot = vrrotvec([0 0 1], glenoid_normal);
 rotate(hemisphere_gle,glen_rot(1:3),rad2deg(glen_rot(4)), glenoid_barycentre)
 
 % This is the Glenoid plane Y-axis
-glenoid_plane_normals.y_p = glenoid_barycentre + glenoid_plane_y_n(1:3)*R;
+glenoid_plane_normals.y_p = glenoid_barycentre + R.*glenoid_plane_y_n(1:3);
 scatter3(glenoid_plane_normals.y_p(1),glenoid_plane_normals.y_p(2), glenoid_plane_normals.y_p(3),'yellow','filled','o','MarkerEdgeColor','black')
 
 line([glenoid_barycentre(1) glenoid_plane_normals.y_p(1)],...
@@ -398,10 +401,20 @@ rotate(hemisphere_gle,...
 
 % Rotation matrix
 R_y = axang2rotm([glenoid_plane_normals.y_n deg2rad(hemi_gle_offsets.y_ant_retro_version)]);
+R_z = axang2rotm([glenoid_plane_normals.z_n deg2rad(hemi_gle_offsets.y_ant_retro_version)]);
 
 % Need to rotate glenoid_plane_normals.x_n axis after first rotation
 glenoid_plane_normals.x_n_r1 = R_y*glenoid_plane_normals.x_n';
 glenoid_plane_normals.x_n_r1 = glenoid_plane_normals.x_n_r1';
+
+glenoid_plane_normals.z_n_r1 = R_y*glenoid_plane_normals.z_n';
+glenoid_plane_normals.z_n_r1 = glenoid_plane_normals.z_n_r1';
+
+ppx = glenoid_barycentre + R*glenoid_plane_normals.x_n_r1;
+scatter3(ppx(1), ppx(2), ppx(3), 'red', 'filled');
+
+ppz = glenoid_barycentre + R*glenoid_plane_normals.z_n_r1;
+scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
 
 % Supero-/Infero- inclination (about Anterior/Posterior axis)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -425,11 +438,19 @@ R_x = axang2rotm([glenoid_plane_normals.x_n_r1 deg2rad(hemi_gle_offsets.x_sup_in
 glenoid_plane_normals.y_n_r1 = R_x*glenoid_plane_normals.y_n';
 glenoid_plane_normals.y_n_r1 = glenoid_plane_normals.y_n_r1';
 
+glenoid_plane_normals.z_n_r2 = R_x*glenoid_plane_normals.z_n_r1';
+glenoid_plane_normals.z_n_r2 = glenoid_plane_normals.z_n_r2';
+
+ppy = glenoid_barycentre + R*glenoid_plane_normals.y_n_r1;
+scatter3(ppy(1), ppy(2), ppy(3), 'yellow', 'filled');
+
+ppz = glenoid_barycentre + R*glenoid_plane_normals.z_n_r2;
+scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
 
 % Get transformed axes orientation offsets from origin 
 glenoid_plane_normals.theta(1) = atan2(norm(cross(glenoid_plane_normals.x_n_r1,[1 0 0])),dot(glenoid_plane_normals.x_n_r1,[1 0 0]));
 glenoid_plane_normals.theta(2) = atan2(norm(cross(glenoid_plane_normals.y_n_r1,[0 1 0])),dot(glenoid_plane_normals.y_n_r1,[0 1 0]));
-glenoid_plane_normals.theta(3) = 0;
+glenoid_plane_normals.theta(3) = atan2(norm(cross(glenoid_plane_normals.z_n_r2,[0 0 1])),dot(glenoid_plane_normals.z_n_r2,[0 0 1]));
 %% Position on glenoid surface (anterior/posterior, base offset, superior/inferior)
 
 % X - Anterior / Posterior offsets
@@ -469,7 +490,7 @@ scapula = struct('glenoid_plane_normals', glenoid_plane_normals,... % x-y-z norm
     'glenoid_barycentre', glenoid_barycentre,...                    % centre of DEFAULT hemisphere (CoR of joint effectivly - needs the hemi_gle_offsets translation only to be applied along normals)
     'hemisphere_gle', hemisphere_gle,...                            % rototranslated glenoid hemisphere
     'glenoid_plane', glenoid_plane,...                              % glenoid plane parameters
-    'plane_mesh_data', plane_mesh_data,...
+    'plane_mesh_data', sca_plane_mesh_data,...
     'R', R,...                                                      % hemisphere radius (m)
     'CoR_glen', CoR_glen,...                                        % adjusted barycentre now as CoR
     'stl_scap', stl_scap);
