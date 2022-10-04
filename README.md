@@ -7,7 +7,7 @@ This is a project that aims to improve surgical pre-operative planning technolog
 They are many variables that influence a surgeon's decisions when performing a RTSA which include:
 
 1) anatomy and morphology of the patient 
-2) construct (i.e. implant )size
+2) construct (i.e. implant) size
 3) construct placement
 4) construct orientation on the scapula and humerus. 
 
