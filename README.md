@@ -1,4 +1,4 @@
-# # Welcome to my Reverse Total Shoulder Arthroplasty (RTSA) surgical simulation repo!
+# Welcome to my Reverse Total Shoulder Arthroplasty (RTSA) surgical simulation repo!
 
 ***
 
