@@ -479,7 +479,11 @@ CoR_glen = CoR_glen + glenoid_plane_normals.z_n*hemi_gle_offsets.z_base_off;
 
 scatter3(CoR_glen(1),CoR_glen(2), CoR_glen(3),'magenta','filled','o','MarkerEdgeColor','black')
 
+ppy = CoR_glen + R*glenoid_plane_normals.y_n_r1;
+scatter3(ppy(1), ppy(2), ppy(3), 'yellow', 'filled');
 
+ppz = CoR_glen + R*glenoid_plane_normals.z_n_r2;
+scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
 % % % keyboard
 
 %% Create scapula/glenoid structure to output for manipulation

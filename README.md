@@ -4,7 +4,14 @@
 
 This is a project that aims to improve surgical pre-operative planning technology by progressing for pure geometrical surgery planning to functional and biomechanical outcome based planning.
 
-They are many variables that influence a surgeon's decisions when performing a RTSA which include: 1) anatomy and morphology of the patient, 2) construct size, 3) construct (i.e. implant) placement and 4) construct orientation on the scapula and humerus. All these decisions alter the mechanical system of the shoulder joint (center of rotation, muscle function and joint loading) all of which have complicated interactions that influence the capability of the shoulder to perform functional tasks.
+They are many variables that influence a surgeon's decisions when performing a RTSA which include:
+
+1) anatomy and morphology of the patient 
+2) construct (i.e. implant )size
+3) construct placement
+4) construct orientation on the scapula and humerus. 
+
+All these decisions alter the mechanical system of the shoulder joint (center of rotation, muscle function and joint loading) all of which have complicated interactions that influence the capability of the shoulder to perform functional tasks.
 
 ![image](https://user-images.githubusercontent.com/30126218/193914879-4636d3c5-a066-4e5a-9eb8-dce0800b4ca9.png)
 [Roche, C.P, 2022]
