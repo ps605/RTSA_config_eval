@@ -393,28 +393,7 @@ CoR_glen = glenoid_barycentre;
 
 %% Version/Inclination of cup about hemisphere normal axes
 
-% Antero-/Postero- version (about Proximal/Distal axis)
-rotate(hemisphere_gle,...
-    glenoid_plane_normals.y_n,...
-    hemi_gle_offsets.y_ant_retro_version,...
-    glenoid_barycentre)
-
-% Rotation matrix
-R_y = axang2rotm([glenoid_plane_normals.y_n deg2rad(hemi_gle_offsets.y_ant_retro_version)]);
-R_z = axang2rotm([glenoid_plane_normals.z_n deg2rad(hemi_gle_offsets.y_ant_retro_version)]);
-
-% Need to rotate glenoid_plane_normals.x_n axis after first rotation
-glenoid_plane_normals.x_n_r1 = R_y*glenoid_plane_normals.x_n';
-glenoid_plane_normals.x_n_r1 = glenoid_plane_normals.x_n_r1';
-
-glenoid_plane_normals.z_n_r1 = R_y*glenoid_plane_normals.z_n';
-glenoid_plane_normals.z_n_r1 = glenoid_plane_normals.z_n_r1';
-
-ppx = glenoid_barycentre + R*glenoid_plane_normals.x_n_r1;
-scatter3(ppx(1), ppx(2), ppx(3), 'red', 'filled');
-
-ppz = glenoid_barycentre + R*glenoid_plane_normals.z_n_r1;
-scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 1st Rotation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Supero-/Infero- inclination (about Anterior/Posterior axis)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -432,20 +411,46 @@ rotate(hemisphere_gle,...
     glenoid_barycentre)
 
 % Rotation matrix
-R_x = axang2rotm([glenoid_plane_normals.x_n_r1 deg2rad(hemi_gle_offsets.x_sup_inf_incl)]);
+R_x = axang2rotm([glenoid_plane_normals.x_n deg2rad(hemi_gle_offsets.x_sup_inf_incl)]);
 
 % Rotate glenoid_plane_normals.y_n axis after second rotation
 glenoid_plane_normals.y_n_r1 = R_x*glenoid_plane_normals.y_n';
 glenoid_plane_normals.y_n_r1 = glenoid_plane_normals.y_n_r1';
 
-glenoid_plane_normals.z_n_r2 = R_x*glenoid_plane_normals.z_n_r1';
-glenoid_plane_normals.z_n_r2 = glenoid_plane_normals.z_n_r2';
+glenoid_plane_normals.z_n_r1 = R_x*glenoid_plane_normals.z_n';
+glenoid_plane_normals.z_n_r1 = glenoid_plane_normals.z_n_r1';
 
 ppy = glenoid_barycentre + R*glenoid_plane_normals.y_n_r1;
 scatter3(ppy(1), ppy(2), ppy(3), 'yellow', 'filled');
 
+ppz = glenoid_barycentre + R*glenoid_plane_normals.z_n_r1;
+scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 2nd Rotation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Antero-/Postero- version (about Proximal/Distal axis)
+rotate(hemisphere_gle,...
+    glenoid_plane_normals.y_n_r1,...
+    hemi_gle_offsets.y_ant_retro_version,...
+    glenoid_barycentre)
+
+% Rotation matrix
+R_y = axang2rotm([glenoid_plane_normals.y_n_r1 deg2rad(hemi_gle_offsets.y_ant_retro_version)]);
+R_z = axang2rotm([glenoid_plane_normals.z_n_r1 deg2rad(hemi_gle_offsets.y_ant_retro_version)]);
+
+% Need to rotate glenoid_plane_normals.x_n axis after first rotation
+glenoid_plane_normals.x_n_r1 = R_y*glenoid_plane_normals.x_n';
+glenoid_plane_normals.x_n_r1 = glenoid_plane_normals.x_n_r1';
+
+glenoid_plane_normals.z_n_r2 = R_y*glenoid_plane_normals.z_n_r1';
+glenoid_plane_normals.z_n_r2 = glenoid_plane_normals.z_n_r2';
+
+ppx = glenoid_barycentre + R*glenoid_plane_normals.x_n_r1;
+scatter3(ppx(1), ppx(2), ppx(3), 'red', 'filled');
+
 ppz = glenoid_barycentre + R*glenoid_plane_normals.z_n_r2;
 scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
+
 
 % Get transformed axes orientation offsets from origin 
 glenoid_plane_normals.theta(1) = atan2(norm(cross(glenoid_plane_normals.x_n_r1,[1 0 0])),dot(glenoid_plane_normals.x_n_r1,[1 0 0]));
