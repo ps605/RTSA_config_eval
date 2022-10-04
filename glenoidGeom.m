@@ -406,7 +406,7 @@ CoR_glen = glenoid_barycentre;
 hemi_gle_offsets.x_sup_inf_incl = - hemi_gle_offsets.x_sup_inf_incl;
 
 rotate(hemisphere_gle,...
-    glenoid_plane_normals.x_n_r1,...
+    glenoid_plane_normals.x_n,...
     hemi_gle_offsets.x_sup_inf_incl,...
     glenoid_barycentre)
 
@@ -453,9 +453,19 @@ scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
 
 
 % Get transformed axes orientation offsets from origin 
-glenoid_plane_normals.theta(1) = atan2(norm(cross(glenoid_plane_normals.x_n_r1,[1 0 0])),dot(glenoid_plane_normals.x_n_r1,[1 0 0]));
-glenoid_plane_normals.theta(2) = atan2(norm(cross(glenoid_plane_normals.y_n_r1,[0 1 0])),dot(glenoid_plane_normals.y_n_r1,[0 1 0]));
-glenoid_plane_normals.theta(3) = atan2(norm(cross(glenoid_plane_normals.z_n_r2,[0 0 1])),dot(glenoid_plane_normals.z_n_r2,[0 0 1]));
+
+% Final rotation matrix of glenosphere axes
+RM = [glenoid_plane_normals.x_n_r1;...
+    glenoid_plane_normals.y_n_r1;...
+    glenoid_plane_normals.z_n_r2];
+
+% Calculate eular angles of fianl RM in global
+ZYX_Euler_ang = rotm2eul(RM, 'ZYX');
+
+% Invert calcutated angles
+glenoid_plane_normals.theta(1) = - ZYX_Euler_ang(3);
+glenoid_plane_normals.theta(2) = - ZYX_Euler_ang(2);
+glenoid_plane_normals.theta(3) = - ZYX_Euler_ang(1);
 %% Position on glenoid surface (anterior/posterior, base offset, superior/inferior)
 
 % X - Anterior / Posterior offsets
