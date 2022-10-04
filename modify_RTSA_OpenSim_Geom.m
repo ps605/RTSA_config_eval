@@ -40,10 +40,10 @@ time_i = datetime;
 design_param.diameter                   = {0.036};
 
 design_param.glenoid_base_off           = {0}; % Equivelant to baseplate offset
-design_param.glenoid_prox_dist          = {0};
+design_param.glenoid_prox_dist          = {-0.006};
 design_param.glenoid_ant_post           = {0};
 
-design_param.glenoid_sup_inf_incl       = {-30};
+design_param.glenoid_sup_inf_incl       = {-10};
 design_param.gelnoid_ant_retro_version  = {0};
 
 design_param.humerus_base_off           = {0};
