@@ -290,13 +290,13 @@ states_storage=Storage(solution_file);
 
 % Set ArrayStr
 joints = ArrayStr();
-joints.set(0, 'shoulder0');
+joints.set(0, 'unrothum');
 
 on_bodies = ArrayStr();
 on_bodies.set(0, 'parent');
 
 in_frames = ArrayStr();
-in_frames.set(0, '/bodyset/scapula/glenoid_centre/');
+in_frames.set(0, '/jointset/unrothum/scapula_offset/');
 
 % Get time
 time_array = ArrayDouble;
