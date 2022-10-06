@@ -303,7 +303,7 @@ time_array = ArrayDouble;
 states_storage.getTimeColumn(time_array);
 
 % Set up AnalyzeTool
-analyzeTool=AnalyzeTool('..\..\OpenSim\In\Setup_files\Analysis\template_JRA_FR.xml',0);
+analyzeTool=AnalyzeTool('..\..\OpenSim\In\Setup_files\Analysis\template_JRA_FR_MA.xml',0);
 analyzeTool.setName('Moco');
 analyzeTool.setInitialTime(0);
 analyzeTool.setFinalTime(time_array.getLast);
@@ -318,6 +318,9 @@ JRA.setEndTime(time_array.getLast)
 
 FR = analyzeTool.updAnalysisSet.get(1);
 FR.setEndTime(time_array.getLast);
+
+MA = analyzeTool.updAnalysisSet.get(2);
+MA.setEndTime(time_array.getLast);
 
 % Print and read back in as bug workaround
 analyzeTool.print('runAnalyzeTool.xml');
