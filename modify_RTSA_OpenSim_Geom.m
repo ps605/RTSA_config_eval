@@ -40,10 +40,10 @@ time_i = datetime;
 design_param.diameter                   = {0.036};
 
 design_param.glenoid_base_off           = {0}; % Equivelant to baseplate offset
-design_param.glenoid_prox_dist          = {0};
+design_param.glenoid_prox_dist          = {-0.006};
 design_param.glenoid_ant_post           = {0};
 
-design_param.glenoid_sup_inf_incl       = {0};
+design_param.glenoid_sup_inf_incl       = {-10};
 design_param.gelnoid_ant_retro_version  = {0};
 
 design_param.humerus_base_off           = {0};
@@ -118,10 +118,10 @@ flag_keepRC             = false;
 flag_ReplaceMuscles     = true;
 
 % Run Moco after model is defined?
-flag_runSim             = true;
+flag_runSim             = false;
 
 % Optimise DELT1, DELT2 and DELT3 via points
-flag_viaPointOpt        = false;
+flag_viaPointOpt        = true;
 
 flag_DELT1              = true; % Optimises position of via-point
 flag_DELT2              = true; % Deletes via-point

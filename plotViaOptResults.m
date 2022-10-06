@@ -1,4 +1,4 @@
-function plotViaOptResults(muscle_name, p_sim_0, p_sim_opt, delt_via_downCast, delt_GP, shoulder_elv, osim_model, data_RTSA, model_MA_init, J_opt, radius, flag_via_delete)
+function plotViaOptResults(muscle_name, p_sim_0, p_sim_opt, delt_via_downCast, delt_GP, coord_for_MA, osim_model, data_RTSA, model_MA_init, J_opt, radius, flag_via_delete)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -67,7 +67,7 @@ for i_angle = 1:length(data_RTSA.angles)
     %%%%%%%%%%%%%%%%%%% POS 1-5 - 2.5/30/60/90/120 DEG %%%%%%%%%%%%%%%%%%%%
     osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)), true);
     osim_model.realizePosition(init_state);
-    model_MA_optim.DELTx(i_angle) = delt_GP.computeMomentArm(init_state,shoulder_elv);
+    model_MA_optim.DELTx(i_angle) = delt_GP.computeMomentArm(init_state,coord_for_MA);
     
     % Initial MA
     scatter(data_RTSA.angles(i_angle) , model_MA_init(i_angle),'filled','o','red');

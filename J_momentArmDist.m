@@ -11,11 +11,6 @@ w3  = 10;
 w4  = 10;
 w5  = 10;
 
-% % w1  = 2;
-% % w2  = 4;
-% % w3  = 10;
-% % w4  = 10;
-% % w5  = 4;
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
 

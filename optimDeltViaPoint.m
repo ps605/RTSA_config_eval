@@ -27,13 +27,21 @@ init_state = osim_model.initSystem();
 
 % Ackland et al (2010) RTSA MA data
 
-data_RTSA.angles        = [2.5, 30, 60, 90, 120];
-data_RTSA.DELT1_mean    = [15.6, 25.2,32.5, 35.8, 33.3]*0.001;
-data_RTSA.DELT1_sd      = [2.3, 2.5, 1.8, 3.4, 2.7]*0.001;
-data_RTSA.DELT2_mean    = [30.2, 33.9, 42.2, 46.2, 39.8]*0.001;
-data_RTSA.DELT2_sd      = [6.6, 5.5, 5.5, 4.2, 5.8]*0.001;
-data_RTSA.DELT3_mean    = [1.3, 3.5, 7.3, 11.4, 14.1]*0.001;
-data_RTSA.DELT3_sd      = [1.4, 1.0, 1.7, 2.5, 3.6]*0.001;
+data_adb_RTSA.angles        = [2.5, 30, 60, 90, 120];
+data_adb_RTSA.DELT1_mean    = [15.6, 25.2,32.5, 35.8, 33.3]*0.001;
+data_adb_RTSA.DELT1_sd      = [2.3, 2.5, 1.8, 3.4, 2.7]*0.001;
+data_adb_RTSA.DELT2_mean    = [30.2, 33.9, 42.2, 46.2, 39.8]*0.001;
+data_adb_RTSA.DELT2_sd      = [6.6, 5.5, 5.5, 4.2, 5.8]*0.001;
+data_adb_RTSA.DELT3_mean    = [1.3, 3.5, 7.3, 11.4, 14.1]*0.001;
+data_adb_RTSA.DELT3_sd      = [1.4, 1.0, 1.7, 2.5, 3.6]*0.001;
+
+data_flx_RTSA.angles        = [2.5, 30, 60, 90, 120];
+data_flx_RTSA.DELT1_mean    = [25.9, 34.2, 35.8, 35.7, 32.7]*0.001;
+data_flx_RTSA.DELT1_sd      = [5.1, 2.9, 4.4, 5.3, 5.6]*0.001;
+data_flx_RTSA.DELT2_mean    = [14.2, 18.6, 20.1, 22.8, 27.0]*0.001;
+data_flx_RTSA.DELT2_sd      = [6.4, 7.1, 4.9, 6.6, 6.1]*0.001;
+data_flx_RTSA.DELT3_mean    = [-14.6, -17.6, -16.3, -13.8, -13.1]*0.001;
+data_flx_RTSA.DELT3_sd      = [5.5, 7.0, 5.1, 2.8, 2.4]*0.001;
 
 %% Handle model
 
@@ -44,6 +52,7 @@ delt3 = osim_model.getMuscles.get('DELT3');
 
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
+elv_angle    = osim_model.getCoordinateSet().get('elv_angle');
 
 % Get PathPointSet(s)
 
@@ -76,11 +85,12 @@ for i_point = 0:delt1_PPS_size-1
 end
 
 % DELT1 moment arm before any optimisation
-for i_angle = 1:length(data_RTSA.angles)
-    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)));
+for i_angle = 1:length(data_adb_RTSA.angles)
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_adb_RTSA.angles(i_angle)));
     osim_model.realizePosition(init_state);
 
-    model_MA_init.DELT1(i_angle) = delt1_GP.computeMomentArm(init_state,shoulder_elv);
+    model_abd_MA_init.DELT1(i_angle) = delt1_GP.computeMomentArm(init_state,shoulder_elv);
+    model_flx_MA_init.DELT1(i_angle) = delt1_GP.computeMomentArm(init_state,elv_angle);
 
 end
 
@@ -117,11 +127,13 @@ for i_point = 0:delt2_PPS_size-1
 end
 
 % DELT2 moment arm before any optimisation
-for i_angle = 1:length(data_RTSA.angles)
-    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)));
+for i_angle = 1:length(data_adb_RTSA.angles)
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_adb_RTSA.angles(i_angle)));
     osim_model.realizePosition(init_state);
 
-    model_MA_init.DELT2(i_angle) = delt2_GP.computeMomentArm(init_state,shoulder_elv);
+    model_abd_MA_init.DELT2(i_angle) = delt2_GP.computeMomentArm(init_state,shoulder_elv);
+    model_flx_MA_init.DELT2(i_angle) = delt2_GP.computeMomentArm(init_state,elv_angle);
+
 end
 
 % Delete via point
@@ -161,11 +173,13 @@ for i_point = 0:delt3_PPS_size-1
 end
 
 % DELT3 moment arm before any optimisation
-for i_angle = 1:length(data_RTSA.angles)
-    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)));
+for i_angle = 1:length(data_adb_RTSA.angles)
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_adb_RTSA.angles(i_angle)));
     osim_model.realizePosition(init_state);
 
-    model_MA_init.DELT3(i_angle) = delt3_GP.computeMomentArm(init_state,shoulder_elv);
+    model_abd_MA_init.DELT3(i_angle) = delt3_GP.computeMomentArm(init_state,shoulder_elv);
+    model_flx_MA_init.DELT3(i_angle) = delt3_GP.computeMomentArm(init_state,elv_angle);
+
 end
 
 % Delete via point
@@ -200,7 +214,7 @@ if flag_DELT1 == true
     %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
     % Cost function to minimise moment arm differances between simulated and
     % calculated conditions
-    fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT1', delt1_via_downCast, flag_delt1ViaDelete);
+    fObj = @(p_sim)J_momentArmDist(p_sim, data_adb_RTSA, osim_model, 'DELT1', delt1_via_downCast, flag_delt1ViaDelete);
 
     % Set-up options
     options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
@@ -245,8 +259,21 @@ if flag_DELT1 == true
         delt1_GP,...
         shoulder_elv,...
         osim_model,...
-        data_RTSA,...
-        model_MA_init.DELT1,...
+        data_adb_RTSA,...
+        model_abd_MA_init.DELT1,...
+        J_opt,...
+        radius,...
+        flag_delt1ViaDelete);
+
+    plotViaOptResults('DELT1',...
+        p_sim_0,...
+        opt_via(1,1:3),...
+        delt1_via_downCast,...
+        delt1_GP,...
+        elv_angle,...
+        osim_model,...
+        data_flx_RTSA,...
+        model_flx_MA_init.DELT1,...
         J_opt,...
         radius,...
         flag_delt1ViaDelete);
@@ -278,7 +305,7 @@ if flag_DELT2 == true
         % but best workaround for best [physiological] result)
         opt_via(2,1:3) = [0, 0, 0];
 
-        error_MA_DELT2 = J_momentArmDist(opt_via(2,1:3), data_RTSA, osim_model, 'DELT2', delt2_via_downCast, flag_delt2ViaDelete);
+        error_MA_DELT2 = J_momentArmDist(opt_via(2,1:3), data_adb_RTSA, osim_model, 'DELT2', delt2_via_downCast, flag_delt2ViaDelete);
 
         plotViaOptResults('DELT2',...
             p_sim_0,...
@@ -287,8 +314,8 @@ if flag_DELT2 == true
             delt2_GP,...
             shoulder_elv,...
             osim_model,...
-            data_RTSA,...
-            model_MA_init.DELT2,...
+            data_adb_RTSA,...
+            model_abd_MA_init.DELT2,...
             error_MA_DELT2,...
             radius,...
             flag_delt2ViaDelete);
@@ -298,7 +325,7 @@ if flag_DELT2 == true
         %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
         % Cost function to minimise moment arm differances between simulated and
         % calculated conditions
-        fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT2', delt2_via_downCast);
+        fObj = @(p_sim)J_momentArmDist(p_sim, data_adb_RTSA, osim_model, 'DELT2', delt2_via_downCast);
 
         % Set-up options
         options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
@@ -344,8 +371,8 @@ if flag_DELT2 == true
             delt2_GP,...
             shoulder_elv,...
             osim_model,...
-            data_RTSA,...
-            model_MA_init.DELT2,...
+            data_adb_RTSA,...
+            model_abd_MA_init.DELT2,...
             J_opt,...
             radius);
     end
@@ -381,7 +408,7 @@ if flag_DELT3 == true
         % but best workaround for best [physiological] result)
         opt_via(3,1:3) = [0, 0, 0];
 
-        error_MA_DELT3 = J_momentArmDist(opt_via(3,1:3), data_RTSA, osim_model, 'DELT3', delt3_via_downCast, flag_delt3ViaDelete);
+        error_MA_DELT3 = J_momentArmDist(opt_via(3,1:3), data_adb_RTSA, osim_model, 'DELT3', delt3_via_downCast, flag_delt3ViaDelete);
 
         plotViaOptResults('DELT3',...
             p_sim_0,...
@@ -390,8 +417,8 @@ if flag_DELT3 == true
             delt3_GP,...
             shoulder_elv,...
             osim_model,...
-            data_RTSA,...
-            model_MA_init.DELT3,...
+            data_adb_RTSA,...
+            model_abd_MA_init.DELT3,...
             error_MA_DELT3,...
             radius,...
             flag_delt3ViaDelete);
@@ -402,7 +429,7 @@ if flag_DELT3 == true
         %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
         % Cost function to minimise moment arm differances between simulated and
         % calculated conditions
-        fObj = @(p_sim)J_momentArmDist(p_sim, data_RTSA, osim_model, 'DELT3', delt3_via_downCast);
+        fObj = @(p_sim)J_momentArmDist(p_sim, data_adb_RTSA, osim_model, 'DELT3', delt3_via_downCast);
 
         % Set-up options
         options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
@@ -447,8 +474,8 @@ if flag_DELT3 == true
             delt3_GP,...
             shoulder_elv,...
             osim_model,...
-            data_RTSA,...
-            model_MA_init.DELT3,...
+            data_adb_RTSA,...
+            model_abd_MA_init.DELT3,...
             J_opt,...
             radius);
     end
