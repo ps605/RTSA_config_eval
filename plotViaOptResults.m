@@ -53,7 +53,7 @@ end
 
 figure;
 hold on
-title([muscle_name ' MA across shoulder elevation after via point opt'])
+title([muscle_name ' ' char(coord_for_MA.getName()) ' MA after via point opt'], 'Interpreter','none')
 xlabel('Shoulder elevation angle (deg)');
 ylabel('Moment arm (m)');
 xlim([-5 125]);
