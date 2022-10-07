@@ -14,7 +14,7 @@ function new_model_file = adjustOpenSimModelGHJ(GHJ_in_parent, GHJ_in_parent_rot
 import org.opensim.modeling.*
 
 % Baseline model file
-model_name = 'FullShoulderModel_glC.osim'; %'FullShoulderModelglC_understand_jointDefs_implant.osim';
+model_name = 'FullShoulderModel_glC_viaRTSA.osim'; %'FullShoulderModelglC_understand_jointDefs_implant.osim';
 
 % To change JCS position and relative geometry
 conds_GHJ_geom.tran = [
@@ -356,7 +356,7 @@ end
 % Get the first geometry Scapula
 sca_OS_geom = osim_model.getBodySet.get('scapula').get_attached_geometry(0);
 sca_OS_mesh = Mesh.safeDownCast(sca_OS_geom);
-sca_OS_mesh.set_mesh_file([model_SSM 'downsample.stl'])
+sca_OS_mesh.set_mesh_file([model_SSM '_downsample.stl'])
 % Clone
 sca_OS_geom_clone= sca_OS_geom.clone();
 % DownCast to <Mesh>
