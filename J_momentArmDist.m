@@ -5,16 +5,16 @@ import org.opensim.modeling.*
 init_state = osim_model.initSystem();
 
 % Weights for joint positions
-w1      = 10;
-w2      = 10;
-w3      = 10;
-w4      = 10;
-w5      = 10;
-w6      = 0;
-w7      = 0;
-w8      = 0;
-w9      = 0;
-w10     = 0;
+w1      = 5;
+w2      = 5;
+w3      = 5;
+w4      = 5;
+w5      = 5;
+w6      = 10;
+w7      = 10;
+w8      = 10;
+w9      = 10;
+w10     = 10;
 
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');

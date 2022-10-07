@@ -6,13 +6,13 @@ function optimDeltViaPoint(model_file, flag_DELT1, flag_DELT2, flag_DELT3)
 % GA setup
 function_tolerance       = 1e-6;
 constraint_colerance     = 1e-6;
-max_generations          = 50;
+max_generations          = 75;
 population_size          = 120;
 elite_count              = ceil(0.05*population_size);
 fitness_limit            = 1e-5;
 initial_populationMatrix = []; % DELT3 insertion [0.0016, -0.0163, 0.0148]; %[0.0176, -0.0090, 0.0210];%[0.0271, 0.0048, 0.0189]; %[0.0272, 0.0048, 0.0189]; %[-0.0258, 0.0189, 0.0198];
 creation_fcn             = [];
-max_stallGenerations     = 15;
+max_stallGenerations     = 20;
 
 % Flags
 flag_delt1ViaDelete = false;
@@ -193,7 +193,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT1 == true
     % Search radius around init location
-    radius = 0.025;
+    radius = 0.05; %0.025
     p_sim_0 = delt1_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
@@ -214,7 +214,7 @@ if flag_DELT1 == true
     %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
     % Cost function to minimise moment arm differances between simulated and
     % calculated conditions
-    fObj = @(p_sim)J_momentArmDist(p_sim, data_adb_RTSA, osim_model, 'DELT1', delt1_via_downCast, flag_delt1ViaDelete);
+    fObj = @(p_sim)J_momentArmDist(p_sim, data_adb_RTSA, data_flx_RTSA, osim_model, 'DELT1', delt1_via_downCast, flag_delt1ViaDelete);
 
     % Set-up options
     options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
