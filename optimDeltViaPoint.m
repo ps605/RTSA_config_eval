@@ -193,7 +193,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT1 == true
     % Search radius around init location
-    radius = 0.05; %0.025
+    radius = 0.025; %0.025
     p_sim_0 = delt1_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
@@ -282,7 +282,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT2 == true
     % Search radius around init location
-    radius = 0.015;
+    radius = 0.025;
     p_sim_0 = delt2_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
@@ -305,7 +305,7 @@ if flag_DELT2 == true
         % but best workaround for best [physiological] result)
         opt_via(2,1:3) = [0, 0, 0];
 
-        error_MA_DELT2 = J_momentArmDist(opt_via(2,1:3), data_adb_RTSA, osim_model, 'DELT2', delt2_via_downCast, flag_delt2ViaDelete);
+        error_MA_DELT2 = J_momentArmDist(opt_via(2,1:3), data_adb_RTSA, data_flx_RTSA, osim_model, 'DELT2', delt2_via_downCast, flag_delt2ViaDelete);
 
         plotViaOptResults('DELT2',...
             p_sim_0,...
@@ -338,7 +338,7 @@ if flag_DELT2 == true
         %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
         % Cost function to minimise moment arm differances between simulated and
         % calculated conditions
-        fObj = @(p_sim)J_momentArmDist(p_sim, data_adb_RTSA, osim_model, 'DELT2', delt2_via_downCast);
+        fObj = @(p_sim)J_momentArmDist(p_sim, data_adb_RTSA, data_flx_RTSA, osim_model, 'DELT2', delt2_via_downCast, flag_delt2ViaDelete);
 
         % Set-up options
         options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
@@ -409,7 +409,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT3 == true
     % Search radius around init location
-    radius = 0.055;
+    radius = 0.025;
     p_sim_0 = delt3_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
@@ -435,7 +435,7 @@ if flag_DELT3 == true
         % but best workaround for best [physiological] result)
         opt_via(3,1:3) = [0, 0, 0];
 
-        error_MA_DELT3 = J_momentArmDist(opt_via(3,1:3), data_adb_RTSA, osim_model, 'DELT3', delt3_via_downCast, flag_delt3ViaDelete);
+        error_MA_DELT3 = J_momentArmDist(opt_via(3,1:3), data_adb_RTSA, data_flx_RTSA, osim_model, 'DELT3', delt3_via_downCast, flag_delt3ViaDelete);
 
         plotViaOptResults('DELT3',...
             p_sim_0,...
@@ -469,7 +469,7 @@ if flag_DELT3 == true
         %%% fCon = @(p_sim)sphere_func_con(p_sim, p_sim_0, radius);
         % Cost function to minimise moment arm differances between simulated and
         % calculated conditions
-        fObj = @(p_sim)J_momentArmDist(p_sim, data_adb_RTSA, osim_model, 'DELT3', delt3_via_downCast);
+        fObj = @(p_sim)J_momentArmDist(p_sim, data_adb_RTSA, data_flx_RTSA, osim_model, 'DELT3', delt3_via_downCast, flag_delt2ViaDelete);
 
         % Set-up options
         options = optimoptions('ga', 'Display', 'iter', 'PlotFcn',{@gaplotbestf, @gaplotmaxconstr});
