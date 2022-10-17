@@ -23,8 +23,7 @@
 % 2) Interactivly chose surgical configuration parameters and updating
 %       visualiser and data to pass onto next step?
 %       (https://www.mathworks.com/help/control/ug/build-app-with-interactive-plot-updates.html)
-% 3) Dynamic reading of .stl files (ALMOST - 20220630)
-% 4) Where the hemisphere and cup .stl are saved to
+%
 %
 % Pavlos Silvestros, PhD - University of Victoria, CAN, June 2022
 

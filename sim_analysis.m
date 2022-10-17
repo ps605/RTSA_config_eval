@@ -7,6 +7,10 @@ clear
 close all
 clc
 %% Setup
+
+% Import OpenSim 4.3 libraries
+import org.opensim.modeling.*
+
 muscles_to_plot = {'SUPSP',...
     'INFSP',...
     'SUBSC',...
@@ -89,6 +93,69 @@ sims = dir([analysis_folder '/sim_*']);
 num_sims = numel(sims);
 
 log_table = readtable('..\..\OpenSim\In\Models\RTSA_Adjusted\RTSA_model_log_table.txt');
+
+task_name = 'LateralReach';
+
+% Flags
+flag_AnalysisTool = true;
+
+%% Re-run AnalysisTool if needed
+if flag_AnalysisTool    
+
+    for i_sim = 1:num_sims
+        model_file = ['..\..\OpenSim\In\Models\RTSA_Adjusted\FSModel_GHJoint_' sims(i_sim).name(5:end) '.osim'];
+        osim_model = Model();
+
+        solution_file = [analysis_folder sims(i_sim).name '/MocoSol_' task_name '.sto'];
+
+        states_storage=Storage(solution_file);
+
+        % Set ArrayStr
+        joints = ArrayStr();
+        joints.set(0, 'unrothum');
+
+        on_bodies = ArrayStr();
+        on_bodies.set(0, 'parent');
+
+        in_frames = ArrayStr();
+        in_frames.set(0, '/jointset/unrothum/scapula_offset/');
+
+        % Get time
+        time_array = ArrayDouble;
+        states_storage.getTimeColumn(time_array);
+
+        % Set up AnalyzeTool
+        analyzeTool=AnalyzeTool('..\..\OpenSim\In\Setup_files\Analysis\template_JRA_FR_MA.xml',0);
+        analyzeTool.setName('Moco');
+        analyzeTool.setInitialTime(0);
+        analyzeTool.setFinalTime(time_array.getLast);
+        %             analyzeTool.setStatesStorage(states_storage);
+        analyzeTool.setStatesFileName(solution_file);
+        %             analyzeTool.setModel(osim_model);
+        analyzeTool.setModelFilename(model_file)
+        analyzeTool.setResultsDir(['..\..\OpenSim\Out\Moco\Analysis\' sims(i_sim).name '\']);
+
+        JR_Analysis = analyzeTool.updAnalysisSet.get(0);
+        JR_downCast = JointReaction.safeDownCast(JR_Analysis);
+        JR_downCast.setEndTime(time_array.getLast);
+        JR_downCast.setInFrame(in_frames);
+        JR_downCast.setOnBody(on_bodies);
+        JR_downCast.setJointNames(joints);
+
+        FR = analyzeTool.updAnalysisSet.get(1);
+        FR.setEndTime(time_array.getLast);
+
+        MA = analyzeTool.updAnalysisSet.get(2);
+        MA.setEndTime(time_array.getLast);
+
+        % Print and read back in as bug workaround
+        analyzeTool.print('runAnalyzeTool.xml');
+
+        runTool = AnalyzeTool('runAnalyzeTool.xml');
+        runTool.run();
+
+    end
+end
 
 %% Analysis Joint Reaction Analysis
 for i_sim = 1 : num_sims
@@ -542,27 +609,4 @@ saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT2_modes.
 figure(3)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT3_modes.tiff','tiff')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
