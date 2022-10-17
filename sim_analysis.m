@@ -42,9 +42,44 @@ jrf_colours = [240 59 32;
     44 127 184;
     221 28 119]./255;
 
+sd_colours = [254,153,41;
+    236,112,20;
+    204,76,2;
+    140,45,4]./255;
+
 jointF_to_plot = {'shoulder0_on_scapphant_in_glenoid_centre_fx'...
     'shoulder0_on_scapphant_in_glenoid_centre_fy',...
     'shoulder0_on_scapphant_in_glenoid_centre_fz'};
+
+muscleF_to_plot = {'DELT1',...
+    'DELT2',...
+    'DELT3'};
+
+modes = {'m2',...
+    'm4',...
+    'm5',...
+    'm6',...
+    'm7',...
+    'm9',...
+    'm11'};
+
+SDs = {'-3',...
+    '-1',...
+    '1',...
+    '3'};
+
+y_lims_force = {[0, 300],...
+    [0, 400],...
+    [0, 400],...
+    [0, 500]};
+
+y_lims_muscle_force = {[0, 100],...
+    [0, 300],...
+    [0, 200]};
+
+y_lims_muscle_lengths = {[0.15, 0.22],...
+    [0.11, 0.18],...
+    [0.15, 0.18]};
 
 analysis_folder = '../../OpenSim/Out/Moco/Analysis/';
 
@@ -53,46 +88,481 @@ sims = dir([analysis_folder '/sim_*']);
 
 num_sims = numel(sims);
 
-%% Analysis
+log_table = readtable('..\..\OpenSim\In\Models\RTSA_Adjusted\RTSA_model_log_table.txt');
+
+%% Analysis Joint Reaction Analysis
 for i_sim = 1 : num_sims
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% Import data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%% Import data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Import JRF data
     joint_reaction = importdata([analysis_folder sims(i_sim).name '/Moco_JointReaction_ReactionLoads.sto']);
-
-    % Import ForceReporter data
-    force_reporter = importdata([analysis_folder sims(i_sim).name '/Moco_ForceReporter_forces.sto']);
 
     % Import Kinematics data
     %%% sim_JRF = importdata([analysis_folder sims(i_sim).name '/MocoSol_LateralReach.sto']);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% JRF %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Get time
-    JRA.time = joint_reaction.data(:,1);
-    
+    JRA.(sims(i_sim).name).time = joint_reaction.data(:,1);
+
     for i_joint = 1:numel(jointF_to_plot)
         % Get handle of coordinates to plot
-        JRA.pos(:, i_joint) = find(contains(joint_reaction.colheaders, jointF_to_plot{i_joint}));
-        JRA.label{1,i_joint} = joint_reaction.colheaders{JRA.pos(i_joint)};
+        JRA.(sims(i_sim).name).pos(:, i_joint) = find(contains(joint_reaction.colheaders, jointF_to_plot{i_joint}));
+        JRA.(sims(i_sim).name).label{1,i_joint} = joint_reaction.colheaders{JRA.(sims(i_sim).name).pos(i_joint)};
 
-        if contains(JRA.label{1,i_joint}, 'fz')
-            JRA.data(:, i_joint) = abs(joint_reaction.data(:,JRA.pos(i_joint)));
+        if contains(JRA.(sims(i_sim).name).label{1,i_joint}, 'fz')
+            JRA.(sims(i_sim).name).data(:, i_joint) = abs(joint_reaction.data(:,JRA.(sims(i_sim).name).pos(i_joint)));
         else
-            JRA.data(:, i_joint) = joint_reaction.data(:,JRA.pos(i_joint));
+            JRA.(sims(i_sim).name).data(:, i_joint) = joint_reaction.data(:,JRA.(sims(i_sim).name).pos(i_joint));
         end
-        
+
         % Get max force values
-        [max_F_final(i_sim, i_joint), max_point] = max(JRA.data(round(numel(JRA.data(:, i_joint))*0.6):end,i_joint));
+        [max_F_final(i_sim, i_joint), max_point] = max(JRA.(sims(i_sim).name).data(round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6):end,i_joint));
 
         % Create q plots
         figure (i_joint)
-        plot(JRA.time, JRA.data(:, i_joint), 'LineWidth', 1.5, 'Color', jrf_colours(i_joint,:))
+
+
+        plot(JRA.(sims(i_sim).name).time, JRA.(sims(i_sim).name).data(:, i_joint), 'LineWidth', 1.5, 'Color', jrf_colours(i_joint,:))
+
         hold on;
-        scatter(JRA.time(max_point + round(numel(JRA.data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+        scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
         xlabel('Time (s)');
         ylabel(['JRF [' jointF_to_plot{i_joint}(end) '] (N)']);
+        ylim(y_lims_force{i_joint});
         hold on;
 
     end
 
+    JRA.(sims(i_sim).name).F_res = sqrt(JRA.(sims(i_sim).name).data(:, 1).^2 + JRA.(sims(i_sim).name).data(:, 2).^2 + JRA.(sims(i_sim).name).data(:, 3).^2);
+    figure(4)
+
+    plot(JRA.(sims(i_sim).name).time, JRA.(sims(i_sim).name).F_res, 'LineWidth', 1.5, 'Color', 'magenta')
+
+    hold on;
+    %scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+    xlabel('Time (s)');
+    ylabel('JRF [Resultant] (N)');
+    ylim(y_lims_force{4});
+    hold on;
+
 
 end
+
+% Plot mean scapula data on top of other trials
+figure(1)
+plot(JRA.sim_G56ndt383qv.time, JRA.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fx.tiff','tiff')
+figure(2)
+plot(JRA.sim_G56ndt383qv.time, JRA.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fy.tiff','tiff')
+figure(3)
+plot(JRA.sim_G56ndt383qv.time, JRA.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fz.tiff','tiff')
+figure(4)
+plot(JRA.sim_G56ndt383qv.time, JRA.sim_G56ndt383qv.F_res(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(4), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fres.tiff','tiff')
+
+close all
+
+%% By mode
+for i_mode = 1:numel(modes)
+
+    for i_sd = 1:numel(SDs)
+
+        morphology = [modes{i_mode} '_' SDs{i_sd}];
+
+        idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
+
+        for i_joint = 1:3
+
+            figure (i_joint)
+            subplot(3,3, i_mode)
+            plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+                JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_joint), ...
+                'LineWidth', 1.5,...
+                'Color', sd_colours(i_sd,:))
+
+            hold on;
+            %             scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+            xlabel('Time (s)');
+            ylabel(['JRF [' jointF_to_plot{i_joint}(end) '] (%)']);
+            ylim(y_lims_force{i_joint});
+            title(modes{i_mode})
+            hold on;
+
+        end
+
+        figure(4)
+        subplot(3,3, i_mode)
+        plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time, ...
+            JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).F_res ,...
+            'LineWidth', 1.5, ...
+            'Color', sd_colours(i_sd,:))
+
+        hold on;
+        %scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+        xlabel('Time (s)');
+        ylabel('JRF [Resultant] (N)');
+        ylim(y_lims_force{4});
+        title(modes{i_mode})
+        hold on;
+
+    end
+
+    figure(1)
+    plot(JRA.sim_G56ndt383qv.time, JRA.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    figure(2)
+    plot(JRA.sim_G56ndt383qv.time, JRA.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    figure(3)
+    plot(JRA.sim_G56ndt383qv.time, JRA.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    figure(4)
+    plot(JRA.sim_G56ndt383qv.time, JRA.sim_G56ndt383qv.F_res(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+
+end
+
+figure(1)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fx_modes.tiff','tiff')
+figure(2)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fy_modes.tiff','tiff')
+figure(3)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fz_modes.tiff','tiff')
+figure(4)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(4), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fres_modes.tiff','tiff')
+
+close all
+%% Analysis muscle forces
+for i_sim = 1: num_sims
+
+    % Import ForceReporter data
+    tendon_force = importdata([analysis_folder sims(i_sim).name '/Moco_MuscleAnalysis_TendonForce.sto']);
+
+    % Get time
+    TF.(sims(i_sim).name).time = tendon_force.data(:,1);
+
+    for i_mus = 1:numel(muscleF_to_plot)
+        % Get handle of coordinates to plot
+        TF.(sims(i_sim).name).pos(:, i_mus) = find(contains(tendon_force.colheaders, muscleF_to_plot{i_mus}));
+        TF.(sims(i_sim).name).label{1,i_mus} = tendon_force.colheaders{TF.(sims(i_sim).name).pos(i_mus)};
+
+        TF.(sims(i_sim).name).data(:, i_mus) = tendon_force.data(:,TF.(sims(i_sim).name).pos(i_mus));
+
+
+        % Create q plots
+        figure (i_mus)
+
+
+        plot(TF.(sims(i_sim).name).time, TF.(sims(i_sim).name).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+
+        hold on;
+        %         scatter(TF.(sims(i_sim).name).time(max_point + round(numel(TF.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+        xlabel('Time (s)');
+        ylabel(['Total Muscle (Tendon) Force [' muscleF_to_plot{i_mus} '] (N)']);
+        hold on;
+    end
+
+end
+
+
+% Plot mean scapula data on top of other trials
+figure(1)
+plot(TF.sim_G56ndt383qv.time, TF.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_DELT1.tiff','tiff')
+figure(2)
+plot(TF.sim_G56ndt383qv.time, TF.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_DELT2.tiff','tiff')
+figure(3)
+plot(TF.sim_G56ndt383qv.time, TF.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_DELT3.tiff','tiff')
+
+close all
+
+%% By mode
+for i_mode = 1:numel(modes)
+
+    for i_sd = 1:numel(SDs)
+
+        morphology = [modes{i_mode} '_' SDs{i_sd}];
+
+        idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
+
+        for i_mus = 1:3
+
+            figure (i_mus)
+            subplot(3,3, i_mode)
+            plot(TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+                TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
+                'LineWidth', 1.5,...
+                'Color', sd_colours(i_sd,:))
+
+            hold on;
+            %             scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+            xlabel('Time (s)');
+            ylabel(['Total Muscle (Tendon) Force [' muscleF_to_plot{i_mus} '] (N)']);
+            ylim(y_lims_muscle_force{i_mus});
+            title(modes{i_mode})
+            hold on;
+
+        end
+
+
+    end
+
+    figure(1)
+    plot(TF.sim_G56ndt383qv.time, TF.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    figure(2)
+    plot(TF.sim_G56ndt383qv.time, TF.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    figure(3)
+    plot(TF.sim_G56ndt383qv.time, TF.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+
+end
+
+
+figure(1)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_DELT1_modes.tiff','tiff')
+figure(2)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_DELT2_modes.tiff','tiff')
+figure(3)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_DELT3_modes.tiff','tiff')
+
+close all
+
+%% Muscle Lengths
+for i_sim = 1: num_sims
+
+    % Import ForceReporter data
+    muscle_length = importdata([analysis_folder sims(i_sim).name '/Moco_MuscleAnalysis_Length.sto']);
+
+    % Get time
+    ML.(sims(i_sim).name).time = muscle_length.data(:,1);
+
+    for i_mus = 1:numel(muscleF_to_plot)
+        % Get handle of coordinates to plot
+        ML.(sims(i_sim).name).pos(:, i_mus) = find(contains(muscle_length.colheaders, muscleF_to_plot{i_mus}));
+        ML.(sims(i_sim).name).label{1,i_mus} = muscle_length.colheaders{ML.(sims(i_sim).name).pos(i_mus)};
+
+        ML.(sims(i_sim).name).data(:, i_mus) = muscle_length.data(:,ML.(sims(i_sim).name).pos(i_mus));
+
+
+        % Create q plots
+        figure (i_mus)
+
+
+        plot(ML.(sims(i_sim).name).time, ML.(sims(i_sim).name).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+
+        hold on;
+        %         scatter(TF.(sims(i_sim).name).time(max_point + round(numel(TF.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+        xlabel('Time (s)');
+        ylabel([' Muscle Length [' muscleF_to_plot{i_mus} '] (m)']);
+        hold on;
+    end
+
+end
+
+
+% Plot mean scapula data on top of other trials
+figure(1)
+plot(ML.sim_G56ndt383qv.time, ML.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_DELT1.tiff','tiff')
+figure(2)
+plot(ML.sim_G56ndt383qv.time, ML.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_DELT2.tiff','tiff')
+figure(3)
+plot(ML.sim_G56ndt383qv.time, ML.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_DELT3.tiff','tiff')
+
+close all
+
+%% By mode
+
+for i_mode = 1:numel(modes)
+
+    for i_sd = 1:numel(SDs)
+
+        morphology = [modes{i_mode} '_' SDs{i_sd}];
+
+        idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
+
+        for i_mus = 1:3
+
+            figure (i_mus)
+            subplot(3,3, i_mode)
+            plot(ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+                ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
+                'LineWidth', 1.5,...
+                'Color', sd_colours(i_sd,:))
+
+            hold on;
+            %             scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+            xlabel('Time (s)');
+            ylabel(['Muscle Length [' muscleF_to_plot{i_mus} '] (m)']);
+            ylim(y_lims_muscle_lengths{i_mus});
+            title(modes{i_mode})
+            hold on;
+
+        end
+
+
+    end
+
+    figure(1)
+    plot(ML.sim_G56ndt383qv.time, ML.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    figure(2)
+    plot(ML.sim_G56ndt383qv.time, ML.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    figure(3)
+    plot(ML.sim_G56ndt383qv.time, ML.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+
+end
+
+
+figure(1)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_DELT1_modes.tiff','tiff')
+figure(2)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_DELT2_modes.tiff','tiff')
+figure(3)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_DELT3_modes.tiff','tiff')
+close all
+
+%% Muscle Activations
+for i_sim = 1: num_sims
+
+    % Import ForceReporter data
+    muscle_activation = importdata([analysis_folder sims(i_sim).name '/MocoSol_LateralReach.sto']);
+
+    % Get time
+    MAct.(sims(i_sim).name).time = muscle_activation.data(:,1);
+
+    for i_mus = 1:numel(muscleF_to_plot)
+        % Get handle of coordinates to plot
+        MAct.(sims(i_sim).name).pos(:, i_mus) = find(contains(muscle_activation.colheaders, [muscleF_to_plot{i_mus} '/activation']));
+        MAct.(sims(i_sim).name).label{1,i_mus} = muscle_activation.colheaders{MAct.(sims(i_sim).name).pos(i_mus)};
+
+        MAct.(sims(i_sim).name).data(:, i_mus) = muscle_activation.data(:,MAct.(sims(i_sim).name).pos(i_mus));
+
+
+        % Create q plots
+        figure (i_mus)
+
+
+        plot(MAct.(sims(i_sim).name).time, MAct.(sims(i_sim).name).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+
+        hold on;
+        %         scatter(TF.(sims(i_sim).name).time(max_point + round(numel(TF.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+        xlabel('Time (s)');
+        ylabel([' Muscle Activation [' muscleF_to_plot{i_mus} ']']);
+        ylim([0, 1]);
+        hold on;
+    end
+
+end
+
+
+% Plot mean scapula data on top of other trials
+figure(1)
+plot(MAct.sim_G56ndt383qv.time, MAct.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT1.tiff','tiff')
+figure(2)
+plot(MAct.sim_G56ndt383qv.time, MAct.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT2.tiff','tiff')
+figure(3)
+plot(MAct.sim_G56ndt383qv.time, MAct.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT3.tiff','tiff')
+
+close all
+
+%% By mode
+
+for i_mode = 1:numel(modes)
+
+    for i_sd = 1:numel(SDs)
+
+        morphology = [modes{i_mode} '_' SDs{i_sd}];
+
+        idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
+
+        for i_mus = 1:3
+
+            figure (i_mus)
+            subplot(3,3, i_mode)
+            plot(MAct.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+                MAct.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
+                'LineWidth', 1.5,...
+                'Color', sd_colours(i_sd,:))
+
+            hold on;
+            %             scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+            xlabel('Time (s)');
+            ylabel(['Muscle Activation [' muscleF_to_plot{i_mus} ']']);
+            ylim([0, 1]);
+            title(modes{i_mode})
+            hold on;
+
+        end
+
+
+    end
+
+    figure(1)
+    plot(MAct.sim_G56ndt383qv.time, MAct.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    figure(2)
+    plot(MAct.sim_G56ndt383qv.time, MAct.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    figure(3)
+    plot(MAct.sim_G56ndt383qv.time, MAct.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+
+end
+
+
+figure(1)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT1_modes.tiff','tiff')
+figure(2)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT2_modes.tiff','tiff')
+figure(3)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT3_modes.tiff','tiff')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
