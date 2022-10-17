@@ -313,8 +313,12 @@ analyzeTool.setStatesFileName(solution_file);
 analyzeTool.setModelFilename(model_file)
 analyzeTool.setResultsDir(['..\..\OpenSim\Out\Moco\' print_folder_name '\']);
 
-JRA = analyzeTool.updAnalysisSet.get(0);
-JRA.setEndTime(time_array.getLast)
+JR_Analysis = analyzeTool.updAnalysisSet.get(0);
+JR_downCast = JointReaction.safeDownCast(JR_Analysis);
+JR_downCast.setEndTime(time_array.getLast);
+JR_downCast.setInFrame(in_frames);
+JR_downCast.setOnBody(on_bodies);
+JR_downCast.setJointNames(joints);
 
 FR = analyzeTool.updAnalysisSet.get(1);
 FR.setEndTime(time_array.getLast);
