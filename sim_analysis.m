@@ -93,6 +93,10 @@ y_lims_muscle_moment = {[0, 1], [-3, 0], [-2, 0];...
     [0, 5], [0, 10], [-1, 1];...
     [-1.5, 0.2], [-7, 0], [-1.2, 0]};
 
+y_lims_muscle_moment_arm = {[-5, 15], [-18, 0], [-30, 0];...
+    [10, 50], [20, 50], [-15, 10];...
+    [-20, 50], [-30, 0], [-15, 10]};
+
 analysis_folder = '../../OpenSim/Out/Moco/Analysis/';
 
 % List simulation folders
@@ -634,7 +638,7 @@ for i_coord = 1:numel(coords_to_plot)
         for i_mus = 1:numel(muscleF_to_plot)
             % Get handle of coordinates to plot
             MM.(sims(i_sim).name).pos(:, i_mus) = find(contains(muscle_moment.colheaders, muscleF_to_plot{i_mus}));
-            TMMF.(sims(i_sim).name).label{1,i_mus} = muscle_moment.colheaders{MM.(sims(i_sim).name).pos(i_mus)};
+            MM.(sims(i_sim).name).label{1,i_mus} = muscle_moment.colheaders{MM.(sims(i_sim).name).pos(i_mus)};
 
             MM.(sims(i_sim).name).data(:, i_mus) = muscle_moment.data(:,MM.(sims(i_sim).name).pos(i_mus));
 
@@ -721,6 +725,113 @@ for i_coord = 1:numel(coords_to_plot)
     figure(3)
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
     saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\Moment_DELT3_' coord '_modes.tiff'],'tiff')
+
+    close all
+end
+
+%% Analysis muscle moment arms
+for i_coord = 1:numel(coords_to_plot)
+
+    coord = coords_to_plot{i_coord};
+
+    for i_sim = 1: num_sims
+
+        % Import ForceReporter data
+        muscle_moment_arm = importdata([analysis_folder sims(i_sim).name '/Moco_MuscleAnalysis_MomentArm_' coord '.sto']);
+
+        % Get time
+        MA.(sims(i_sim).name).time = muscle_moment_arm.data(:,1);
+
+        for i_mus = 1:numel(muscleF_to_plot)
+            % Get handle of coordinates to plot
+            MA.(sims(i_sim).name).pos(:, i_mus) = find(contains(muscle_moment_arm.colheaders, muscleF_to_plot{i_mus}));
+            MA.(sims(i_sim).name).label{1,i_mus} = muscle_moment_arm.colheaders{MA.(sims(i_sim).name).pos(i_mus)};
+
+            MA.(sims(i_sim).name).data(:, i_mus) = muscle_moment_arm.data(:,MA.(sims(i_sim).name).pos(i_mus));
+
+
+            % Create q plots
+            figure (i_mus)
+
+
+            plot(MA.(sims(i_sim).name).time, MA.(sims(i_sim).name).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+
+            hold on;
+            %         scatter(TF.(sims(i_sim).name).time(max_point + round(numel(TF.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+            xlabel('Time (s)');
+            ylabel(['Muscle Moment Arm [' muscleF_to_plot{i_mus} '] (m)']);
+            hold on;
+        end
+
+    end
+
+
+    % Plot mean scapula data on top of other trials
+    figure(1)
+    plot(MA.sim_G56ndt383qv.time, MA.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT1_' coord '.tiff'],'tiff')
+    figure(2)
+    plot(MA.sim_G56ndt383qv.time, MA.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT2_' coord '.tiff'],'tiff')
+    figure(3)
+    plot(MA.sim_G56ndt383qv.time, MA.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT3_' coord '.tiff'],'tiff')
+
+    close all
+
+    %% By mode
+    for i_mode = 1:numel(modes)
+
+        for i_sd = 1:numel(SDs)
+
+            morphology = [modes{i_mode} '_' SDs{i_sd}];
+
+            idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
+
+            for i_mus = 1:3
+
+                figure (i_mus)
+                subplot(3,3, i_mode)
+                plot(MA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+                    MA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
+                    'LineWidth', 1.5,...
+                    'Color', sd_colours(i_sd,:))
+
+                hold on;
+                %             scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
+                xlabel('Time (s)');
+                ylabel(['Muscle Moment Arm [' muscleF_to_plot{i_mus} '] (m)']);
+                ylim(y_lims_muscle_moment_arm{i_coord, i_mus}/1000);
+                title(modes{i_mode})
+                hold on;
+
+            end
+
+
+        end
+
+        figure(1)
+        plot(MA.sim_G56ndt383qv.time, MA.sim_G56ndt383qv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+        figure(2)
+        plot(MA.sim_G56ndt383qv.time, MA.sim_G56ndt383qv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+        figure(3)
+        plot(MA.sim_G56ndt383qv.time, MA.sim_G56ndt383qv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+
+    end
+
+
+    figure(1)
+    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT1_' coord '_modes.tiff'],'tiff')
+    figure(2)
+    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT2_' coord '_modes.tiff'],'tiff')
+    figure(3)
+    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT3_' coord '_modes.tiff'],'tiff')
 
     close all
 end
