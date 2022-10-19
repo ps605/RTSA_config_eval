@@ -34,7 +34,7 @@ hold on;
 %% Fit plane to glenoid rim points
 
 % Glenoid rim points X-Y-Z
-glenoid_points = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM 'rim_coords.txt'], ' ');
+glenoid_points = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '_rim_coords.txt'], ' ');
 % Calculate the mean of the points
 glenoid_barycentre = mean(glenoid_points);
 

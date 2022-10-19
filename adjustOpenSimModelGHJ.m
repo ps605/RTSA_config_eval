@@ -156,7 +156,7 @@ for i_joint = 1:numel(joints_to_alter)
     elseif strcmp(joints_to_alter{i_joint},'unrotscap')
 
         % Acromion offset
-        acromion_offset = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM 'acromion_offset.txt'], ' ');
+        acromion_offset = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '_acromion_offset.txt'], ' ');
 
         unrotscap_inParent_tran = osim_model.updJointSet.get(joints_to_alter{i_joint}).get_frames(0).get_translation();
 
@@ -220,7 +220,7 @@ end
 
 %% Update muscle locationtions and (initial) via-point locations
 % SSM scapula muscle locations
-muscle_locs = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM 'muscle_coords.txt'], ' ');
+muscle_locs = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '_muscle_coords.txt'], ' ');
 muscle_names = {'DELT2',...
     'DELT3', ...
     'TRP2',...
