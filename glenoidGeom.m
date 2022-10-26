@@ -1,6 +1,7 @@
 function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash)
 %% Set up
 % Load in and configure points of Scapula .stl
+% NOTE: not the most efficient way of handling the .stl
 [x, y, z] = stlreadXYZ(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '.stl']);
 
 figure(10);
@@ -132,6 +133,22 @@ surf(sca_plane_mesh_data.x_plane, sca_plane_mesh_data.y_plane, sca_plane_mesh_da
     'FaceColor','y',...
     'FaceAlpha', 0.25,...
     'EdgeAlpha', 0)
+
+%% Calculate supraspinatus fossa base vector
+
+load(fossa_base.mat);
+principal_cmp = pca([x(fossa_base.vertices(:)), y(fossa_base.vertices(:)), z(fossa_base.vertices(:))]);
+fossa_vector = principal_cmp(:,1)';
+% Plot 1st principle component vector
+fossa_point_i = [x(fossa_base.vertices(9)), y(fossa_base.vertices(9)), z(fossa_base.vertices(9))];
+fossa_point_f = fossa_point_i + fossa_vector.*0.1;
+fossa_point_f = glenoid_barycentre + fossa_vector.*R;
+
+
+
+line([fossa_point_i(1) fossa_point_f(1)], [fossa_point_i(2) fossa_point_f(2)], [fossa_point_i(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan'); 
+line([glenoid_barycentre(1) fossa_point_f(1)], [glenoid_barycentre(2) fossa_point_f(2)], [glenoid_barycentre(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan'); 
+
 
 
 %% Project Points onto glenoid plane (minimisation problem)
