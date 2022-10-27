@@ -146,6 +146,10 @@ flag_ReplaceMuscles     = true;
 % Run Moco after model is defined?
 flag_runSim             = true;
 
+% Correct morphology's Version and Inclination angles
+flag_correctVersion     = true;
+flag_correctInclination = true;
+
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt        = false;
 

@@ -503,8 +503,13 @@ CoR_glen = glenoid_barycentre;
 % thought of as the orientation of the cup as it sat on the resection plane
 % and then rotated about first axes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Negate (-) hemi_gle_offsets.x_sup_inf_incl so that positive is superior
-hemi_gle_offsets.x_sup_inf_incl = - hemi_gle_offsets.x_sup_inf_incl;
+if flag_correctInclination == true
+    % Set sup_inf_inclination to correction value calculated
+    hemi_gle_offsets.x_sup_inf_incl = fossa_correction_ang.YZ;
+else
+    % Negate (-) hemi_gle_offsets.x_sup_inf_incl so that positive is superior
+    hemi_gle_offsets.x_sup_inf_incl = - hemi_gle_offsets.x_sup_inf_incl;
+end
 
 rotate(hemisphere_gle,...
     glenoid_plane_normals.x_n,...
@@ -528,6 +533,10 @@ ppz = glenoid_barycentre + R*glenoid_plane_normals.z_n_r1;
 scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 2nd Rotation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if flag_correctVersion == true
+    % Set ant_retro_version to correction value calculated
+    hemi_gle_offsets.y_ant_retro_version = fossa_correction_ang.XZ;
+end
 
 % Antero-/Postero- version (about Proximal/Distal axis)
 rotate(hemisphere_gle,...
