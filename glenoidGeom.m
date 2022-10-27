@@ -386,7 +386,7 @@ end
 % All displacements are defined on the glenoid plane now based on the
 % variable: glenoid_plane_normals
 
-%% Calculate version and inversion angles from fossa vector angle
+%% Calculate version and inclination angles from fossa vector angle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% YZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fossa_vector onto glenoid YZ plane (glenoid_plane_normals.x_n)
 % Constraint function (plane)
@@ -410,13 +410,25 @@ J_fossa_point_f = @(y_m)sqrt((fossa_point_f(1) - y_m(1))^2 + (fossa_point_f(2) -
     f_con,...
     options);
 
-scatter3(fossa_point_f_YZ(1), fossa_point_f_YZ(2), fossa_point_f_YZ(3), 'filled','o','magenta');
 
-% % % Check if Barycentre sits on plane. Should be -> 0
-% % bary_plane = glenoid_plane.Parameters(1)*glenoid_barycentre(1) +...
-% %     glenoid_plane.Parameters(2)*glenoid_barycentre(2) +...
-% %     glenoid_plane.Parameters(3)*glenoid_barycentre(3) + ...
-% %     glenoid_plane.Parameters(4);
+
+% Calculate Inclination correction angle
+ 
+% Calculate unit vector from barycentre to projected point
+fossa_correction_v.YZ = (fossa_point_f_YZ - glenoid_barycentre)/norm(fossa_point_f_YZ - glenoid_barycentre);
+% Calcuate angle between correction angle about x_n
+fossa_correction_ang.YZ = vrrotvec(glenoid_plane_normals.z_n, fossa_correction_v.YZ);
+% Push correction vector point to R from barycentre
+fossa_point_f_YZ = glenoid_barycentre + fossa_correction_v.YZ*R;
+
+% Visualise Inclination angle
+scatter3(fossa_point_f_YZ(1), fossa_point_f_YZ(2), fossa_point_f_YZ(3), 'filled','o','g', 'MarkerEdgeColor','black');
+version_poly = [glenoid_barycentre; fossa_point_f_YZ; glenoid_plane_normals.z_p];
+patch(version_poly(:,1), version_poly(:,2) , version_poly(:,3), 'r');
+line([glenoid_barycentre(1) fossa_point_f_YZ(1)],...
+    [glenoid_barycentre(2) fossa_point_f_YZ(2)],...
+    [glenoid_barycentre(3) fossa_point_f_YZ(3)], ...
+    'LineWidth',4,'Color','g');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% XZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fossa_vector onto glenoid XZ plane (glenoid_plane_normals.y_n)
@@ -441,7 +453,23 @@ J_fossa_point_f = @(y_m)sqrt((fossa_point_f(1) - y_m(1))^2 + (fossa_point_f(2) -
     f_con,...
     options);
 
-scatter3(fossa_point_f_XZ(1), fossa_point_f_XZ(2), fossa_point_f_XZ(3), 'filled','o','magenta');
+% Calculate Version correction angle
+ 
+% Calculate unit vector from barycentre to projected point
+fossa_correction_v.XZ = (fossa_point_f_XZ - glenoid_barycentre)/norm(fossa_point_f_XZ - glenoid_barycentre);
+% Calcuate angle between correction angle about x_n
+fossa_correction_ang.XZ = vrrotvec(glenoid_plane_normals.z_n, fossa_correction_v.XZ);
+% Push correction vector point to R from barycentre
+fossa_point_f_XZ = glenoid_barycentre + fossa_correction_v.XZ*R;
+
+% Visualise Version angle
+scatter3(fossa_point_f_XZ(1), fossa_point_f_XZ(2), fossa_point_f_XZ(3), 'filled','o','g', 'MarkerEdgeColor','black');
+version_poly = [glenoid_barycentre; fossa_point_f_XZ; glenoid_plane_normals.z_p];
+patch(version_poly(:,1), version_poly(:,2) , version_poly(:,3), 'y');
+line([glenoid_barycentre(1) fossa_point_f_XZ(1)],...
+    [glenoid_barycentre(2) fossa_point_f_XZ(2)],...
+    [glenoid_barycentre(3) fossa_point_f_XZ(3)], ...
+    'LineWidth',4,'Color','g');
 
 %% Change position of the cup
 
