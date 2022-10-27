@@ -136,19 +136,19 @@ surf(sca_plane_mesh_data.x_plane, sca_plane_mesh_data.y_plane, sca_plane_mesh_da
 
 %% Calculate supraspinatus fossa base vector
 
-load(fossa_base.mat);
+load('fossa_base.mat');
 principal_cmp = pca([x(fossa_base.vertices(:)), y(fossa_base.vertices(:)), z(fossa_base.vertices(:))]);
 fossa_vector = principal_cmp(:,1)';
 % Plot 1st principle component vector
 fossa_point_i = [x(fossa_base.vertices(9)), y(fossa_base.vertices(9)), z(fossa_base.vertices(9))];
-fossa_point_f = fossa_point_i + fossa_vector.*0.1;
+% fossa_point_f = fossa_point_i + fossa_vector.*0.1;
 fossa_point_f = glenoid_barycentre + fossa_vector.*R;
 
 
 
-line([fossa_point_i(1) fossa_point_f(1)], [fossa_point_i(2) fossa_point_f(2)], [fossa_point_i(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan'); 
+% line([fossa_point_i(1) fossa_point_f(1)], [fossa_point_i(2) fossa_point_f(2)], [fossa_point_i(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan'); 
 line([glenoid_barycentre(1) fossa_point_f(1)], [glenoid_barycentre(2) fossa_point_f(2)], [glenoid_barycentre(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan'); 
-
+scatter3(fossa_point_f(1), fossa_point_f(2), fossa_point_f(3), 'filled', 'cyan', 'o','MarkerEdgeColor','black')
 
 
 %% Project Points onto glenoid plane (minimisation problem)
@@ -386,6 +386,62 @@ end
 % All displacements are defined on the glenoid plane now based on the
 % variable: glenoid_plane_normals
 
+%% Calculate version and inversion angles from fossa vector angle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% YZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fossa_vector onto glenoid YZ plane (glenoid_plane_normals.x_n)
+% Constraint function (plane)
+delta = -(glenoid_plane_normals.x_n(1)*glenoid_plane_normals.z_p(1) + glenoid_plane_normals.x_n(2)*glenoid_plane_normals.z_p(2) + glenoid_plane_normals.x_n(3)*glenoid_plane_normals.z_p(3));
+plane_parameters = [glenoid_plane_normals.x_n delta];
+f_con = @(y_m)plane_func_d(y_m, plane_parameters);
+y_m_0 = glenoid_barycentre;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This updates the value of glenoid_barycentre to the projection (x, y, z)
+% Cost function (distance)
+J_fossa_point_f = @(y_m)sqrt((fossa_point_f(1) - y_m(1))^2 + (fossa_point_f(2) - y_m(2))^2 + (fossa_point_f(3) - y_m(3))^2);
+% Run fmincon
+[fossa_point_f_YZ, ~] = fmincon(J_fossa_point_f,...
+    y_m_0,...
+    [],...
+    [],...
+    [],...
+    [],...
+    [],...
+    [],...
+    f_con,...
+    options);
+
+scatter3(fossa_point_f_YZ(1), fossa_point_f_YZ(2), fossa_point_f_YZ(3), 'filled','o','magenta');
+
+% % % Check if Barycentre sits on plane. Should be -> 0
+% % bary_plane = glenoid_plane.Parameters(1)*glenoid_barycentre(1) +...
+% %     glenoid_plane.Parameters(2)*glenoid_barycentre(2) +...
+% %     glenoid_plane.Parameters(3)*glenoid_barycentre(3) + ...
+% %     glenoid_plane.Parameters(4);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% XZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fossa_vector onto glenoid XZ plane (glenoid_plane_normals.y_n)
+% Constraint function (plane)
+delta = -(glenoid_plane_normals.y_n(1)*glenoid_plane_normals.z_p(1) + glenoid_plane_normals.y_n(2)*glenoid_plane_normals.z_p(2) + glenoid_plane_normals.y_n(3)*glenoid_plane_normals.z_p(3));
+plane_parameters = [glenoid_plane_normals.y_n delta];
+f_con = @(y_m)plane_func_d(y_m, plane_parameters);
+y_m_0 = glenoid_barycentre;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This updates the value of glenoid_barycentre to the projection (x, y, z)
+% Cost function (distance)
+J_fossa_point_f = @(y_m)sqrt((fossa_point_f(1) - y_m(1))^2 + (fossa_point_f(2) - y_m(2))^2 + (fossa_point_f(3) - y_m(3))^2);
+% Run fmincon
+[fossa_point_f_XZ, ~] = fmincon(J_fossa_point_f,...
+    y_m_0,...
+    [],...
+    [],...
+    [],...
+    [],...
+    [],...
+    [],...
+    f_con,...
+    options);
+
+scatter3(fossa_point_f_XZ(1), fossa_point_f_XZ(2), fossa_point_f_XZ(3), 'filled','o','magenta');
 
 %% Change position of the cup
 
