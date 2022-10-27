@@ -420,7 +420,7 @@ fossa_correction_ang.YZ = vrrotvec(glenoid_plane_normals.z_n, fossa_correction_v
 fossa_point_f_YZ = glenoid_barycentre + fossa_correction_v.YZ*R;
 
 % Visualise Inclination angle
-scatter3(fossa_point_f_YZ(1), fossa_point_f_YZ(2), fossa_point_f_YZ(3), 'filled','o','g', 'MarkerEdgeColor','black');
+scatter3(fossa_point_f_YZ(1), fossa_point_f_YZ(2), fossa_point_f_YZ(3), 'filled','o','cyan', 'MarkerEdgeColor','black');
 version_poly = [glenoid_barycentre; fossa_point_f_YZ; glenoid_plane_normals.z_p];
 patch(version_poly(:,1), version_poly(:,2) , version_poly(:,3), 'r');
 line([glenoid_barycentre(1) fossa_point_f_YZ(1)],...
@@ -461,7 +461,7 @@ fossa_correction_ang.XZ = vrrotvec(glenoid_plane_normals.z_n, fossa_correction_v
 fossa_point_f_XZ = glenoid_barycentre + fossa_correction_v.XZ*R;
 
 % Visualise Version angle
-scatter3(fossa_point_f_XZ(1), fossa_point_f_XZ(2), fossa_point_f_XZ(3), 'filled','o','g', 'MarkerEdgeColor','black');
+scatter3(fossa_point_f_XZ(1), fossa_point_f_XZ(2), fossa_point_f_XZ(3), 'filled','o','cyan', 'MarkerEdgeColor','black');
 version_poly = [glenoid_barycentre; fossa_point_f_XZ; glenoid_plane_normals.z_p];
 patch(version_poly(:,1), version_poly(:,2) , version_poly(:,3), 'y');
 line([glenoid_barycentre(1) fossa_point_f_XZ(1)],...
@@ -604,7 +604,7 @@ CoR_glen = CoR_glen + glenoid_plane_normals.x_n*hemi_gle_offsets.x_ant_post;
 
 % Y - Proximal / Distal offsets
 if flag_correct12mm == true
-    hemi_gle_offsets.y_prox_dist = correction_displacement.y_prox_dist;
+    hemi_gle_offsets.y_prox_dist = - correction_displacement.y_prox_dist;
 end
 
 hemisphere_gle.XData = hemisphere_gle.XData + glenoid_plane_normals.y_n(1)*hemi_gle_offsets.y_prox_dist;

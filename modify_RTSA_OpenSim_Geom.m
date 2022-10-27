@@ -147,9 +147,9 @@ flag_ReplaceMuscles     = true;
 flag_runSim             = true;
 
 % Correct morphology's Version / Inclination angles and 12 mm rule
-flag_correctVersion     = true;
+flag_correctVersion     = false;
 flag_correctInclination = true;
-flag_correct12mm      = true;
+flag_correct12mm        = true;
 
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt        = false;
