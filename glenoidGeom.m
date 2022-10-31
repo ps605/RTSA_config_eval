@@ -140,7 +140,7 @@ load('fossa_base.mat');
 principal_cmp = pca([x(fossa_base.vertices(:)), y(fossa_base.vertices(:)), z(fossa_base.vertices(:))]);
 fossa_vector = principal_cmp(:,1)';
 % Plot 1st principle component vector
-%fossa_point_i = [x(fossa_base.vertices(9)), y(fossa_base.vertices(9)), z(fossa_base.vertices(9))];
+fossa_point_i = [x(fossa_base.vertices(9)), y(fossa_base.vertices(9)), z(fossa_base.vertices(9))];
 % fossa_point_f = fossa_point_i + fossa_vector.*0.1;
 fossa_point_f = glenoid_barycentre + fossa_vector.*R;
 
@@ -482,11 +482,29 @@ min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
 [~, inf_point_idx] = min(min_rim_points);
 
 % Calculate distances
-inf_point = glenoid_points(inf_point_idx, :);
-d_inferior = norm(inf_point - glenoid_barycentre);
+inf_point.rim = glenoid_points(inf_point_idx, :);
+d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
 
-correction_displacement.y_prox_dist = d_inferior - 0.012;
+correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%% 6.5 mm rule Athwal %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Get mesh data for the hemisphere from Visualisation Object. This will
+% then be continuesly updated through "hemisphere" Surface variable
+
+hemi_gle_mesh_data.X = hemisphere_gle.XData;
+hemi_gle_mesh_data.Y = hemisphere_gle.YData;
+hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
+
+hemi_gle_points = [hemi_gle_mesh_data.X(:), hemi_gle_mesh_data.Y(:), hemi_gle_mesh_data.Z(:)];
+
+min_hemi_points = vecnorm((hemi_gle_points - p_point), 2 , 2);
+[~, inf_point_idx] = min(min_hemi_points);
+
+% Calculate distances
+inf_point.cup = hemi_gle_points(inf_point_idx, :);
+d_inferior.cup = norm(inf_point.cup - inf_point.rim);
+
+correction_displacement.y_prox_dist = d_inferior.cup - 0.0065;
 %% Change position of the cup
 
 % 1) Position on resection surface (superior/inferior, anterior/posterior)
@@ -494,13 +512,6 @@ correction_displacement.y_prox_dist = d_inferior - 0.012;
 % 3) Radius (wrt to glenosphere for congruent fit)
 % 4) Depth
 % 5) Version/Inclination
-
-% Get mesh data for the hemisphere from Visualisation Object. This will
-% then be continuesly updated through "hemisphere" Surface variable
-
-hemi_gle_mesh_data.X = hemisphere_gle.XData;
-hemi_gle_mesh_data.Y = hemisphere_gle.YData;
-hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The vector that will be rotated needs to be a column vector so it is
@@ -604,7 +615,7 @@ CoR_glen = CoR_glen + glenoid_plane_normals.x_n*hemi_gle_offsets.x_ant_post;
 
 % Y - Proximal / Distal offsets
 if flag_correct12mm == true
-    hemi_gle_offsets.y_prox_dist = - correction_displacement.y_prox_dist;
+    hemi_gle_offsets.y_prox_dist = correction_displacement.y_prox_dist;
 end
 
 hemisphere_gle.XData = hemisphere_gle.XData + glenoid_plane_normals.y_n(1)*hemi_gle_offsets.y_prox_dist;

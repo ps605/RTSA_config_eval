@@ -36,7 +36,7 @@ time_i = datetime;
 %% Set-up
 
 %%%%%%%%%%%%%%%%% Create parameter combinations for loops %%%%%%%%%%%%%%%%%
-design_param.diameter                   = {0.036};
+design_param.diameter                   = {0.042};
 
 design_param.glenoid_base_off           = {0}; % Equivelant to baseplate offset
 design_param.glenoid_prox_dist          = {-0.006};
