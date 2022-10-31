@@ -1,5 +1,11 @@
-function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correct12mm)
+function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist)
 %% Set up
+% Flag for which Proxi dist correction to use. True = 6.5 mm overhang
+% assuming 29 mm baseplate on 42 mm glenosphere. Flase = 12 mm rule
+% inferior rim to central peg.
+overhang = 0.0065;
+flag_AthwalOr12mm = true; 
+
 % Load in and configure points of Scapula .stl
 % NOTE: not the most efficient way of handling the .stl
 [x, y, z] = stlreadXYZ(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '.stl']);
@@ -101,7 +107,7 @@ surf(gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane, gle_plane_mesh_da
     'EdgeAlpha', 0)
 
 %% Calculate scapular plane
-scap_pointCloud = pointCloud([x(:), y(:), z(:)]);
+% scap_pointCloud = pointCloud([x(:), y(:), z(:)]);
 
 % Linear Regression method to fit plane
 x_sp = x(:);
@@ -136,11 +142,11 @@ surf(sca_plane_mesh_data.x_plane, sca_plane_mesh_data.y_plane, sca_plane_mesh_da
 
 %% Calculate supraspinatus fossa base vector
 
-load('fossa_base.mat');
+load fossa_base.mat;
 principal_cmp = pca([x(fossa_base.vertices(:)), y(fossa_base.vertices(:)), z(fossa_base.vertices(:))]);
 fossa_vector = principal_cmp(:,1)';
 % Plot 1st principle component vector
-fossa_point_i = [x(fossa_base.vertices(9)), y(fossa_base.vertices(9)), z(fossa_base.vertices(9))];
+% fossa_point_i = [x(fossa_base.vertices(9)), y(fossa_base.vertices(9)), z(fossa_base.vertices(9))];
 % fossa_point_f = fossa_point_i + fossa_vector.*0.1;
 fossa_point_f = glenoid_barycentre + fossa_vector.*R;
 
@@ -224,7 +230,7 @@ end
 intersect_v = intersect_v/norm(intersect_v);
 
 % Project point from barycentre along intersect axis for visualisation
-pl_p = glenoid_barycentre + R*intersect_v;
+% pl_p = glenoid_barycentre + R*intersect_v;
 
 % % % Connect with line to visualise normal and projection
 % %     line([glenoid_barycentre(1) pl_p(1)],...
@@ -473,38 +479,53 @@ line([glenoid_barycentre(1) fossa_point_f_XZ(1)],...
 correction_angles.x_sup_inf_incl        = rad2deg(fossa_correction_ang.YZ(4));
 correction_angles.y_ant_retro_version   = rad2deg(fossa_correction_ang.XZ(4));
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 12 mm rule %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Project a point inferiorly along glenoid -ive Y-axis
-p_point = glenoid_barycentre-glenoid_plane_normals.y_n*R*2;
-% Get smallest Euclidian distance of glenoid rim points from projected
-% point on -ive Y-axis. Not exact bur close ennough
-min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
-[~, inf_point_idx] = min(min_rim_points);
+if flag_AthwalOr12mm == true
 
-% Calculate distances
-inf_point.rim = glenoid_points(inf_point_idx, :);
-d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%% 6.5 mm rule Athwal %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Project a point inferiorly along glenoid -ive Y-axis
+    p_point = glenoid_barycentre-glenoid_plane_normals.y_n*R*2;
 
-correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
+    % Get mesh data for the hemisphere from Visualisation Object. This will
+    % then be continuesly updated through "hemisphere" Surface variable
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%% 6.5 mm rule Athwal %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Get mesh data for the hemisphere from Visualisation Object. This will
-% then be continuesly updated through "hemisphere" Surface variable
+    hemi_gle_mesh_data.X = hemisphere_gle.XData;
+    hemi_gle_mesh_data.Y = hemisphere_gle.YData;
+    hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
 
-hemi_gle_mesh_data.X = hemisphere_gle.XData;
-hemi_gle_mesh_data.Y = hemisphere_gle.YData;
-hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
+    hemi_gle_points = [hemi_gle_mesh_data.X(:), hemi_gle_mesh_data.Y(:), hemi_gle_mesh_data.Z(:)];
 
-hemi_gle_points = [hemi_gle_mesh_data.X(:), hemi_gle_mesh_data.Y(:), hemi_gle_mesh_data.Z(:)];
+    min_hemi_points = vecnorm((hemi_gle_points - p_point), 2 , 2);
+    [~, inf_point_idx] = min(min_hemi_points);
 
-min_hemi_points = vecnorm((hemi_gle_points - p_point), 2 , 2);
-[~, inf_point_idx] = min(min_hemi_points);
+    % Calculate distances
+    inf_point.cup = hemi_gle_points(inf_point_idx, :);
+    d_inferior.cup =  norm(inf_point.rim) - norm(inf_point.cup);
 
-% Calculate distances
-inf_point.cup = hemi_gle_points(inf_point_idx, :);
-d_inferior.cup =  norm(inf_point.rim) - norm(inf_point.cup);
+    correction_displacement.y_prox_dist = - overhang - d_inferior.cup;
 
-correction_displacement.y_prox_dist = - 0.0065 - d_inferior.cup;
+elseif flag_AthwalOr12mm == false
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 12 mm rule %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Get mesh data for the hemisphere from Visualisation Object. This will
+    % then be continuesly updated through "hemisphere" Surface variable
+
+    hemi_gle_mesh_data.X = hemisphere_gle.XData;
+    hemi_gle_mesh_data.Y = hemisphere_gle.YData;
+    hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
+
+    % Get smallest Euclidian distance of glenoid rim points from projected
+    % point on -ive Y-axis. Not exact bur close ennough
+    min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
+    [~, inf_point_idx] = min(min_rim_points);
+
+    % Calculate distances
+    inf_point.rim = glenoid_points(inf_point_idx, :);
+    d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
+
+    correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
+
+end
+
 %% Change position of the cup
 
 % 1) Position on resection surface (superior/inferior, anterior/posterior)
@@ -614,7 +635,7 @@ hemisphere_gle.ZData = hemisphere_gle.ZData + glenoid_plane_normals.x_n(3)*hemi_
 CoR_glen = CoR_glen + glenoid_plane_normals.x_n*hemi_gle_offsets.x_ant_post;
 
 % Y - Proximal / Distal offsets
-if flag_correct12mm == true
+if flag_correctProxDist == true
     hemi_gle_offsets.y_prox_dist = correction_displacement.y_prox_dist;
 end
 
