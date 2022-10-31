@@ -502,9 +502,9 @@ min_hemi_points = vecnorm((hemi_gle_points - p_point), 2 , 2);
 
 % Calculate distances
 inf_point.cup = hemi_gle_points(inf_point_idx, :);
-d_inferior.cup = norm(inf_point.cup - inf_point.rim);
+d_inferior.cup =  norm(inf_point.rim) - norm(inf_point.cup);
 
-correction_displacement.y_prox_dist = d_inferior.cup - 0.0065;
+correction_displacement.y_prox_dist = - 0.0065 - d_inferior.cup;
 %% Change position of the cup
 
 % 1) Position on resection surface (superior/inferior, anterior/posterior)
