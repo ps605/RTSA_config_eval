@@ -495,10 +495,18 @@ if flag_AthwalOr12mm == true
     hemi_gle_points = [hemi_gle_mesh_data.X(:), hemi_gle_mesh_data.Y(:), hemi_gle_mesh_data.Z(:)];
 
     min_hemi_points = vecnorm((hemi_gle_points - p_point), 2 , 2);
-    [~, inf_point_idx] = min(min_hemi_points);
+    [~, inf_point_idx_hemi] = min(min_hemi_points);
+    
+    % Get smallest Euclidian distance of glenoid rim points from projected
+    % point on -ive Y-axis. Not exact bur close ennough
+    min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
+    [~, inf_point_idx_rim] = min(min_rim_points);
 
     % Calculate distances
-    inf_point.cup = hemi_gle_points(inf_point_idx, :);
+    inf_point.rim = glenoid_points(inf_point_idx_rim, :);
+    d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
+
+    inf_point.cup = hemi_gle_points(inf_point_idx_hemi, :);
     d_inferior.cup =  norm(inf_point.rim) - norm(inf_point.cup);
 
     correction_displacement.y_prox_dist = - overhang - d_inferior.cup;
@@ -516,10 +524,10 @@ elseif flag_AthwalOr12mm == false
     % Get smallest Euclidian distance of glenoid rim points from projected
     % point on -ive Y-axis. Not exact bur close ennough
     min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
-    [~, inf_point_idx] = min(min_rim_points);
+    [~, inf_point_idx_rim] = min(min_rim_points);
 
     % Calculate distances
-    inf_point.rim = glenoid_points(inf_point_idx, :);
+    inf_point.rim = glenoid_points(inf_point_idx_rim, :);
     d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
 
     correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
@@ -657,11 +665,13 @@ CoR_glen = CoR_glen + glenoid_plane_normals.z_n*hemi_gle_offsets.z_base_off;
 scatter3(CoR_glen(1),CoR_glen(2), CoR_glen(3),'magenta','filled','o','MarkerEdgeColor','black')
 
 ppy = CoR_glen + R*glenoid_plane_normals.y_n_r1;
-scatter3(ppy(1), ppy(2), ppy(3), 'yellow', 'filled');
+scatter3(ppy(1), ppy(2), ppy(3), 'yellow', 'filled','MarkerEdgeColor','black');
 
 ppz = CoR_glen + R*glenoid_plane_normals.z_n_r2;
-scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
+scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled','MarkerEdgeColor','black');
 % % % keyboard
+ppx = CoR_glen + R*glenoid_plane_normals.x_n_r1;
+scatter3(ppx(1), ppx(2), ppx(3), 'red', 'filled','MarkerEdgeColor','black');
 
 %% Create scapula/glenoid structure to output for manipulation
 
