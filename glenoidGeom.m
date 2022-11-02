@@ -3,8 +3,12 @@ function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_corre
 % Flag for which prox/dist correction to use. 
 % True = 6.5 mm overhang assuming 29 mm baseplate on 42 mm glenosphere OR 7 mm overhang assuming 25 mm baseplate and 39 mm glenosphere.
 % Flase = 12 mm rule  inferior rim to central peg.
-overhang = 0.007;
 flag_AthwalOr12mm = true; 
+
+% Inferior overhang
+overhang = 0.007;
+% Lateral offset from inferior rim
+offset = 0.002;
 
 % Load in and configure points of Scapula .stl
 % NOTE: not the most efficient way of handling the .stl
@@ -470,9 +474,7 @@ if flag_AthwalOr12mm == true
     % Project a point inferiorly along glenoid -ive Y-axis
     p_point = glenoid_barycentre-glenoid_plane_normals.y_n*R*2;
 
-    % Get mesh data for the hemisphere from Visualisation Object. This will
-    % then be continuesly updated through "hemisphere" Surface variable
-
+    % Get mesh data for the hemisphere from Visualisation Object. 
     hemi_gle_mesh_data.X = hemisphere_gle.XData;
     hemi_gle_mesh_data.Y = hemisphere_gle.YData;
     hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
@@ -492,7 +494,7 @@ if flag_AthwalOr12mm == true
     d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
 
     inf_point.cup = hemi_gle_points(inf_point_idx_hemi, :);
-    d_inferior.cup =  norm(inf_point.rim) - norm(inf_point.cup);
+    d_inferior.cup =  norm(inf_point.rim - inf_point.cup);
 
     correction_displacement.y_prox_dist = - overhang - d_inferior.cup;
 
@@ -519,40 +521,10 @@ elseif flag_AthwalOr12mm == false
 
 end
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Lateral Offset %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% "Most inferior" glenoid point onto glenoid plane
-delta = -(glenoid_plane_normals.z_n(1)*glenoid_plane_normals.z_p(1) + glenoid_plane_normals.z_n(2)*glenoid_plane_normals.z_p(2) + glenoid_plane_normals.z_n(3)*glenoid_plane_normals.z_p(3));
-plane_parameters = [glenoid_plane_normals.y_n delta];
-plane_parameters = glenoid_plane.Parameters;
-% Constraint function (plane)
-f_con = @(y_m)plane_func_d(y_m, plane_parameters);
-options = optimset('MaxIter', 100, 'TolFun', 1e-4);
-
-% Cost function (distance)
-J_inferior = @(y_m)sqrt((glenoid_points(inf_point_idx_rim, 1) - y_m(1))^2 + (glenoid_points(inf_point_idx_rim, 2) - y_m(2))^2 + (glenoid_points(inf_point_idx_rim, 3) - y_m(3))^2);
-% Initial Condition (point on plane)
-y_m_0 = [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)];
-
-
-% Run fmincon
-[rim_on_glenoid_plane, ~] = fmincon(J_inferior,...
-    y_m_0,...
-    [],...
-    [],...
-    [],...
-    [],...
-    [],...
-    [],...
-    f_con,...
-    options);
-
-inf_point.rim_on_plane = rim_on_glenoid_plane;
-% scatter3(rim_on_glenoid_plane(1), rim_on_glenoid_plane(2), rim_on_glenoid_plane(3), 'filled','o','red');
-
-lat_offset_i = norm( inf_point.rim - inf_point.rim_on_plane);
-lat_offset_f = lat_offset_i + 0.004;
-hemi_gle_offsets.z_base_off = lat_offset_f;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Lateral Offset %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculated after X and Y rotations are applied to the glenosphere because
+% the glenoid plane (i.e. normal to glenosphere) is rotated
 
 %% Change position of the cup
 
@@ -656,9 +628,9 @@ glenoid_plane_normals.theta(3) = - ZYX_Euler_ang(1);
 %% Calcuate offset of the rotated glenoid plane from inferior glenoid rim
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Lateral Offset %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% "Most inferior" glenoid point onto glenoid plane
-delta = -(glenoid_plane_normals.z_n(1)*CoR_glen(1) + glenoid_plane_normals.z_n(2)*CoR_glen(2) + glenoid_plane_normals.z_n(3)*CoR_glen(3));
-plane_parameters = [glenoid_plane_normals.z_n delta];
+% Calculate Plane parameters after rotations are applied (Ax+By+Cz+D=0)
+delta = -(glenoid_plane_normals.z_n_r2(1)*CoR_glen(1) + glenoid_plane_normals.z_n_r2(2)*CoR_glen(2) + glenoid_plane_normals.z_n_r2(3)*CoR_glen(3));
+plane_parameters = [glenoid_plane_normals.z_n_r2 delta];
 
 % Constraint function (plane)
 f_con = @(y_m)plane_func_d(y_m, plane_parameters);
@@ -686,7 +658,7 @@ inf_point.rim_on_plane = rim_on_glenoid_plane;
 % scatter3(rim_on_glenoid_plane(1), rim_on_glenoid_plane(2), rim_on_glenoid_plane(3), 'filled','o','red');
 
 lat_offset_i = norm( inf_point.rim - inf_point.rim_on_plane);
-lat_offset_f = lat_offset_i + 0.004;
+lat_offset_f = lat_offset_i + offset;
 hemi_gle_offsets.z_base_off = lat_offset_f;
 %% Position on glenoid surface (anterior/posterior, base offset, superior/inferior)
 
