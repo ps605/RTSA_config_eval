@@ -1,9 +1,9 @@
 function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist)
 %% Set up
-% Flag for which Proxi dist correction to use. True = 6.5 mm overhang
-% assuming 29 mm baseplate on 42 mm glenosphere. Flase = 12 mm rule
-% inferior rim to central peg.
-overhang = 0.0065;
+% Flag for which prox/dist correction to use. 
+% True = 6.5 mm overhang assuming 29 mm baseplate on 42 mm glenosphere OR 7 mm overhang assuming 25 mm baseplate and 39 mm glenosphere.
+% Flase = 12 mm rule  inferior rim to central peg.
+overhang = 0.007;
 flag_AthwalOr12mm = true; 
 
 % Load in and configure points of Scapula .stl
@@ -152,44 +152,23 @@ fossa_point_f = glenoid_barycentre + fossa_vector.*R;
 
 
 
+% scatter3(x(fossa_base.vertices(:)), y(fossa_base.vertices(:)), z(fossa_base.vertices(:)), 'cyan', 'filled', 'MarkerEdgeColor', 'black');
 % line([fossa_point_i(1) fossa_point_f(1)], [fossa_point_i(2) fossa_point_f(2)], [fossa_point_i(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan'); 
 line([glenoid_barycentre(1) fossa_point_f(1)], [glenoid_barycentre(2) fossa_point_f(2)], [glenoid_barycentre(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan'); 
 scatter3(fossa_point_f(1), fossa_point_f(2), fossa_point_f(3), 'filled', 'cyan', 'o','MarkerEdgeColor','black')
 
 
 %% Project Points onto glenoid plane (minimisation problem)
-% "Most inferior" glenoid point onto glenoid plane
-plane_parameters = glenoid_plane.Parameters;
-% Constraint function (plane)
-f_con = @(y_m)plane_func_d(y_m, plane_parameters);
 
-for i_max_point = 1:2
-    % Cost function (distance)
-    J_inferior = @(y_m)sqrt((glenoid_points(max_point_idx(i_max_point),1) - y_m(1))^2 + (glenoid_points(max_point_idx(i_max_point),2) - y_m(2))^2 + (glenoid_points(max_point_idx(i_max_point),3) - y_m(3))^2);
-    % Initial Condition (point on plane)
-    y_m_0 = [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)];
-
-    options = optimset('MaxIter', 100, 'TolFun', 1e-4);
-    % Run fmincon
-    [max_point_plane, ~] = fmincon(J_inferior,...
-        y_m_0,...
-        [],...
-        [],...
-        [],...
-        [],...
-        [],...
-        [],...
-        f_con,...
-        options);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This is currently note used as now using plane interscection but keep for
-% ease if wanted to re-introduce
-%    glenoid_max_points(i_max_point,:) = max_point_plane;
-    scatter3(max_point_plane(1), max_point_plane(2), max_point_plane(3), 'filled','o','magenta');
-end
 % Glenoid barycentre onto glenoid plane
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This updates the value of glenoid_barycentre to the projection (x, y, z)
+plane_parameters = glenoid_plane.Parameters;
+% Constraint function (plane)
+f_con = @(y_m)plane_func_d(y_m, plane_parameters);
+options = optimset('MaxIter', 100, 'TolFun', 1e-4);
+% Initial Condition (point on plane)
+y_m_0 = [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)];
 % Cost function (distance)
 J_barycentre = @(y_m)sqrt((glenoid_barycentre(1) - y_m(1))^2 + (glenoid_barycentre(2) - y_m(2))^2 + (glenoid_barycentre(3) - y_m(3))^2);
 % Run fmincon
@@ -393,6 +372,8 @@ end
 % variable: glenoid_plane_normals
 
 %% Calculate version and inclination correction angles from fossa vector angle; And 12 mm rule from most inferior point on glenoid Y-axis
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Version %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% YZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fossa_vector onto glenoid YZ plane (glenoid_plane_normals.x_n)
 % Constraint function (plane)
@@ -434,6 +415,7 @@ line([glenoid_barycentre(1) fossa_point_f_YZ(1)],...
     [glenoid_barycentre(3) fossa_point_f_YZ(3)], ...
     'LineWidth',4,'Color','g');
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Inclination %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% XZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fossa_vector onto glenoid XZ plane (glenoid_plane_normals.y_n)
 % Constraint function (plane)
@@ -478,6 +460,9 @@ line([glenoid_barycentre(1) fossa_point_f_XZ(1)],...
 %%%%%%%%%%%%%%%%%%%%%%% Clean up correction angles %%%%%%%%%%%%%%%%%%%%%%%%
 correction_angles.x_sup_inf_incl        = rad2deg(fossa_correction_ang.YZ(4));
 correction_angles.y_ant_retro_version   = rad2deg(fossa_correction_ang.XZ(4));
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Prox/Dist %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if flag_AthwalOr12mm == true
 
@@ -533,6 +518,39 @@ elseif flag_AthwalOr12mm == false
     correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
 
 end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Lateral Offset %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% "Most inferior" glenoid point onto glenoid plane
+plane_parameters = glenoid_plane.Parameters;
+% Constraint function (plane)
+f_con = @(y_m)plane_func_d(y_m, plane_parameters);
+options = optimset('MaxIter', 100, 'TolFun', 1e-4);
+
+% Cost function (distance)
+J_inferior = @(y_m)sqrt((glenoid_points(inf_point_idx_rim, 1) - y_m(1))^2 + (glenoid_points(inf_point_idx_rim, 2) - y_m(2))^2 + (glenoid_points(inf_point_idx_rim, 3) - y_m(3))^2);
+% Initial Condition (point on plane)
+y_m_0 = [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)];
+
+
+% Run fmincon
+[rim_on_glenoid_plane, ~] = fmincon(J_inferior,...
+    y_m_0,...
+    [],...
+    [],...
+    [],...
+    [],...
+    [],...
+    [],...
+    f_con,...
+    options);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+inf_point.rim_on_plane = rim_on_glenoid_plane;
+% scatter3(rim_on_glenoid_plane(1), rim_on_glenoid_plane(2), rim_on_glenoid_plane(3), 'filled','o','red');
+
+lat_offset_i = norm( inf_point.rim - inf_point.rim_on_plane);
+lat_offset_f = lat_offset_i + 0.002;
+hemi_gle_offsets.z_base_off = lat_offset_f;
 
 %% Change position of the cup
 
