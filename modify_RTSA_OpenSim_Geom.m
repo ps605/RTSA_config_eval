@@ -151,6 +151,7 @@ flag_runSim             = false;
 flag_correctVersion     = false;
 flag_correctInclination = true;
 flag_correctProxDist    = true;
+flag_correctLateral     = true;
 
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt        = false;
@@ -237,7 +238,7 @@ if flag_useParallel == true
         % data.
 
         % Define parametric implant on .stl anatomy & extract parameters in global
-        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist);
+        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral);
 
         % Define parametric implant on .stl anatomy & extract parameters in global
         humerus = humerusGeom(R, hemi_cup_offsets, rhash);
@@ -330,7 +331,7 @@ elseif flag_useParallel == false
         % data.
 
         % Define parametric implant on .stl anatomy & extract parameters in global
-        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist);
+        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral);
 
         % Define parametric implant on .stl anatomy & extract parameters in global
         humerus = humerusGeom(R, hemi_cup_offsets, rhash);

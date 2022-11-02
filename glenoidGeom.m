@@ -1,9 +1,9 @@
-function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateralisation)
+function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral)
 %% Set up
-% Flag for which prox/dist correction to use. 
+% Flag for which prox/dist correction to use.
 % True = 6.5 mm overhang assuming 29 mm baseplate on 42 mm glenosphere OR 7 mm overhang assuming 25 mm baseplate and 39 mm glenosphere.
 % Flase = 12 mm rule  inferior rim to central peg.
-flag_AthwalOr12mm = true; 
+flag_AthwalOr12mm = true;
 
 % Inferior overhang
 overhang = 0.007;
@@ -58,10 +58,10 @@ max_point_idx = [max_point_idx_1, max_point_idx_2];
 
 % % % [~, min_gl_p] = min(glenoid_points(:,2));
 % % % glenoid_inferior = glenoid_points(min_gl_p,:);
-% % % 
+% % %
 % % % % Calculate vector between barrycentre and most inferior point
 % % % bc_to_inferior_p =  glenoid_inferior - glenoid_barycentre;
-% % % 
+% % %
 % % % % Invert so it point superiorly and normalise
 % % % axial_normal = -(bc_to_inferior_p/norm(bc_to_inferior_p));
 
@@ -157,8 +157,8 @@ fossa_point_f = glenoid_barycentre + fossa_vector.*R;
 
 
 % scatter3(x(fossa_base.vertices(:)), y(fossa_base.vertices(:)), z(fossa_base.vertices(:)), 'cyan', 'filled', 'MarkerEdgeColor', 'black');
-% line([fossa_point_i(1) fossa_point_f(1)], [fossa_point_i(2) fossa_point_f(2)], [fossa_point_i(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan'); 
-line([glenoid_barycentre(1) fossa_point_f(1)], [glenoid_barycentre(2) fossa_point_f(2)], [glenoid_barycentre(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan'); 
+% line([fossa_point_i(1) fossa_point_f(1)], [fossa_point_i(2) fossa_point_f(2)], [fossa_point_i(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan');
+line([glenoid_barycentre(1) fossa_point_f(1)], [glenoid_barycentre(2) fossa_point_f(2)], [glenoid_barycentre(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan');
 scatter3(fossa_point_f(1), fossa_point_f(2), fossa_point_f(3), 'filled', 'cyan', 'o','MarkerEdgeColor','black')
 
 
@@ -205,9 +205,9 @@ end
 %% Calculate vector of glenoid and scapula plane intersection
 
 [~, intersect_v] = plane_intersect(glenoid_plane.Parameters(1:3),...
-                             [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)],...
-                             scap_plane.Parameters(1:3),...
-                             [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
+    [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)],...
+    scap_plane.Parameters(1:3),...
+    [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
 
 % Normalise intersection vector
 intersect_v = intersect_v/norm(intersect_v);
@@ -402,7 +402,7 @@ J_fossa_point_f = @(y_m)sqrt((fossa_point_f(1) - y_m(1))^2 + (fossa_point_f(2) -
     options);
 
 % Calculate Inclination correction angle
- 
+
 % Calculate unit vector from barycentre to projected point
 fossa_correction_v.YZ = (fossa_point_f_YZ - glenoid_barycentre)/norm(fossa_point_f_YZ - glenoid_barycentre);
 % Calcuate angle between correction angle about x_n
@@ -444,7 +444,7 @@ J_fossa_point_f = @(y_m)sqrt((fossa_point_f(1) - y_m(1))^2 + (fossa_point_f(2) -
     options);
 
 % Calculate Version correction angle
- 
+
 % Calculate unit vector from barycentre to projected point
 fossa_correction_v.XZ = (fossa_point_f_XZ - glenoid_barycentre)/norm(fossa_point_f_XZ - glenoid_barycentre);
 % Calcuate angle between correction angle about x_n
@@ -465,6 +465,61 @@ line([glenoid_barycentre(1) fossa_point_f_XZ(1)],...
 correction_angles.x_sup_inf_incl        = rad2deg(fossa_correction_ang.YZ(4));
 correction_angles.y_ant_retro_version   = rad2deg(fossa_correction_ang.XZ(4));
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The following need to be done before any rotations so it correctly
+% identifies inferior most point on the hemisphere from the rim
+if flag_AthwalOr12mm == true
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%% 6.5 mm rule Athwal %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Project a point inferiorly along glenoid -ive Y-axis
+    p_point = glenoid_barycentre-glenoid_plane_normals.y_n*R*2;
+
+    % Get mesh data for the hemisphere from Visualisation Object.
+    hemi_gle_mesh_data.X = hemisphere_gle.XData;
+    hemi_gle_mesh_data.Y = hemisphere_gle.YData;
+    hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
+
+    hemi_gle_points = [hemi_gle_mesh_data.X(:), hemi_gle_mesh_data.Y(:), hemi_gle_mesh_data.Z(:)];
+
+    min_hemi_points = vecnorm((hemi_gle_points - p_point), 2 , 2);
+    [~, inf_point_idx_hemi] = min(min_hemi_points);
+
+    % Get smallest Euclidian distance of glenoid rim points from projected
+    % point on -ive Y-axis. Not exact bur close ennough.
+    min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
+    [~, inf_point_idx_rim] = min(min_rim_points);
+
+    % Calculate distances
+    inf_point.rim = glenoid_points(inf_point_idx_rim, :);
+    d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
+
+    inf_point.hemisphere = hemi_gle_points(inf_point_idx_hemi, :);
+    d_inferior.hemisphere =  norm(inf_point.hemisphere - inf_point.rim );
+
+    correction_displacement.y_prox_dist = - overhang - d_inferior.hemisphere;
+
+elseif flag_AthwalOr12mm == false
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 12 mm rule %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Get mesh data for the hemisphere from Visualisation Object. This will
+    % then be continuesly updated through "hemisphere" Surface variable
+
+    hemi_gle_mesh_data.X = hemisphere_gle.XData;
+    hemi_gle_mesh_data.Y = hemisphere_gle.YData;
+    hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
+
+    % Get smallest Euclidian distance of glenoid rim points from projected
+    % point on -ive Y-axis. Not exact bur close ennough
+    min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
+    [~, inf_point_idx_rim] = min(min_rim_points);
+
+    % Calculate distances
+    inf_point.rim = glenoid_points(inf_point_idx_rim, :);
+    d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
+
+    correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
+
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Prox/Dist %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                   &
@@ -554,14 +609,14 @@ ppz = glenoid_barycentre + R*glenoid_plane_normals.z_n_r2;
 scatter3(ppz(1), ppz(2), ppz(3), 'green', 'filled');
 
 
-% Get transformed axes orientation offsets from origin 
+% Get transformed axes orientation offsets from origin
 
 % Final rotation matrix of glenosphere axes
 RM = [glenoid_plane_normals.x_n_r1;...
     glenoid_plane_normals.y_n_r1;...
     glenoid_plane_normals.z_n_r2];
 
-% Calculate eular angles of fianl RM in global
+% Calculate euler angles of fianl RM in global
 ZYX_Euler_ang = rotm2eul(RM, 'ZYX');
 
 % Invert calcutated angles
@@ -570,75 +625,24 @@ glenoid_plane_normals.theta(2) = - ZYX_Euler_ang(2);
 glenoid_plane_normals.theta(3) = - ZYX_Euler_ang(1);
 
 %% Calcuate offset of the rotated glenoid plane from inferior glenoid rim
-if flag_AthwalOr12mm == true
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%% 6.5 mm rule Athwal %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Project a point inferiorly along glenoid -ive Y-axis
-    p_point = glenoid_barycentre-glenoid_plane_normals.y_n*R*2;
-
-    % Get mesh data for the hemisphere from Visualisation Object. 
-    hemi_gle_mesh_data.X = hemisphere_gle.XData;
-    hemi_gle_mesh_data.Y = hemisphere_gle.YData;
-    hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
-
-    hemi_gle_points = [hemi_gle_mesh_data.X(:), hemi_gle_mesh_data.Y(:), hemi_gle_mesh_data.Z(:)];
-
-    min_hemi_points = vecnorm((hemi_gle_points - p_point), 2 , 2);
-    [~, inf_point_idx_hemi] = min(min_hemi_points);
-    
-    % Get smallest Euclidian distance of glenoid rim points from projected
-    % point on -ive Y-axis. Not exact bur close ennough
-    min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
-    [~, inf_point_idx_rim] = min(min_rim_points);
-
-    % Calculate distances
-    inf_point.rim = glenoid_points(inf_point_idx_rim, :);
-    d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
-
-    inf_point.hemisphere = hemi_gle_points(inf_point_idx_hemi, :);
-    d_inferior.hemisphere =  norm(inf_point.hemisphere - inf_point.rim );
-
-    correction_displacement.y_prox_dist = - overhang - d_inferior.hemisphere;
-
-elseif flag_AthwalOr12mm == false
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 12 mm rule %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Get mesh data for the hemisphere from Visualisation Object. This will
-    % then be continuesly updated through "hemisphere" Surface variable
-
-    hemi_gle_mesh_data.X = hemisphere_gle.XData;
-    hemi_gle_mesh_data.Y = hemisphere_gle.YData;
-    hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
-
-    % Get smallest Euclidian distance of glenoid rim points from projected
-    % point on -ive Y-axis. Not exact bur close ennough
-    min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
-    [~, inf_point_idx_rim] = min(min_rim_points);
-
-    % Calculate distances
-    inf_point.rim = glenoid_points(inf_point_idx_rim, :);
-    d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
-
-    correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
-
-end
 
 % % % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Lateral Offset %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % % % 
+% % % %
 % % % % % Calculate Plane parameters after rotations are applied (Ax+By+Cz+D=0)
 % % % % delta = -(glenoid_plane_normals.z_n_r2(1)*CoR_glen(1) + glenoid_plane_normals.z_n_r2(2)*CoR_glen(2) + glenoid_plane_normals.z_n_r2(3)*CoR_glen(3));
 % % % % plane_parameters = [glenoid_plane_normals.z_n_r2 delta];
-% % % % 
+% % % %
 % % % % % Constraint function (plane)
 % % % % f_con = @(y_m)plane_func_d(y_m, plane_parameters);
 % % % % options = optimset('MaxIter', 100, 'TolFun', 1e-4);
-% % % % 
+% % % %
 % % % % % Cost function (distance)
 % % % % J_inferior = @(y_m)sqrt((glenoid_points(inf_point_idx_rim, 1) - y_m(1))^2 + (glenoid_points(inf_point_idx_rim, 2) - y_m(2))^2 + (glenoid_points(inf_point_idx_rim, 3) - y_m(3))^2);
 % % % % % Initial Condition (point on plane)
 % % % % y_m_0 = [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)];
-% % % % 
-% % % % 
+% % % %
+% % % %
 % % % % % Run fmincon
 % % % % [rim_on_glenoid_plane, ~] = fmincon(J_inferior,...
 % % % %     y_m_0,...
@@ -650,10 +654,10 @@ end
 % % % %     [],...
 % % % %     f_con,...
 % % % %     options);
-% % % % 
+% % % %
 % % % % inf_point.rim_on_plane = rim_on_glenoid_plane;
 % % % % % scatter3(rim_on_glenoid_plane(1), rim_on_glenoid_plane(2), rim_on_glenoid_plane(3), 'filled','o','red');
-% % % % 
+% % % %
 % % % % lat_offset_i = norm( inf_point.rim - inf_point.rim_on_plane);
 % % % % lat_offset_f = lat_offset_i + offset;
 % % % % hemi_gle_offsets.z_base_off = lat_offset_f;
@@ -683,9 +687,7 @@ correction_vector.in_glenoid = (RM*correction_vector.in_global')';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Not applying correction to anterior/posterior (caused by non-allignment
 % of inferior rim and hemisphere points)
-% hemi_gle_offsets.x_ant_post = correction_vector.in_glenoid(1); 
-hemi_gle_offsets.y_prox_dist    =  correction_vector.in_glenoid(2);
-hemi_gle_offsets.z_base_off     =  correction_vector.in_glenoid(3);
+% hemi_gle_offsets.x_ant_post = correction_vector.in_glenoid(1);
 
 %% Position on glenoid surface (anterior/posterior, base offset, superior/inferior)
 
@@ -695,7 +697,7 @@ hemisphere_gle.YData = hemisphere_gle.YData + glenoid_plane_normals.x_n_r1(2)*he
 hemisphere_gle.ZData = hemisphere_gle.ZData + glenoid_plane_normals.x_n_r1(3)*hemi_gle_offsets.x_ant_post;
 
 % Adjust barrycentre to now be Joint CoR
-CoR_glen = CoR_glen + glenoid_plane_normals.x_n*hemi_gle_offsets.x_ant_post;
+CoR_glen = CoR_glen + glenoid_plane_normals.x_n_r1*hemi_gle_offsets.x_ant_post;
 
 %%%%%%%%%%%%%%%%%%%%%% Y - Proximal / Distal offsets %%%%%%%%%%%%%%%%%%%%%%
 if flag_correctProxDist == true && flag_AthwalOr12mm == false
@@ -709,11 +711,11 @@ hemisphere_gle.YData = hemisphere_gle.YData + glenoid_plane_normals.y_n_r1(2)*he
 hemisphere_gle.ZData = hemisphere_gle.ZData + glenoid_plane_normals.y_n_r1(3)*hemi_gle_offsets.y_prox_dist;
 
 % Adjust barrycentre to now be Joint CoR
-CoR_glen = CoR_glen + glenoid_plane_normals.y_n*hemi_gle_offsets.y_prox_dist;
+CoR_glen = CoR_glen + glenoid_plane_normals.y_n_r1*hemi_gle_offsets.y_prox_dist;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Z - Base offset %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if flag_correctLateralisation == true && flag_AthwalOr12mm == true
-    hemi_gle_offsets.y_prox_dist = correction_vector.in_glenoid(3);
+if flag_correctLateral == true && flag_AthwalOr12mm == true
+    hemi_gle_offsets.z_base_off = correction_vector.in_glenoid(3);
 end
 
 hemisphere_gle.XData = hemisphere_gle.XData + glenoid_plane_normals.z_n_r2(1)*hemi_gle_offsets.z_base_off;
@@ -721,7 +723,7 @@ hemisphere_gle.YData = hemisphere_gle.YData + glenoid_plane_normals.z_n_r2(2)*he
 hemisphere_gle.ZData = hemisphere_gle.ZData + glenoid_plane_normals.z_n_r2(3)*hemi_gle_offsets.z_base_off;
 
 % Adjust barrycentre to now be Joint CoR
-CoR_glen = CoR_glen + glenoid_plane_normals.z_n*hemi_gle_offsets.z_base_off;
+CoR_glen = CoR_glen + glenoid_plane_normals.z_n_r2*hemi_gle_offsets.z_base_off;
 
 scatter3(CoR_glen(1),CoR_glen(2), CoR_glen(3),'magenta','filled','o','MarkerEdgeColor','black')
 
