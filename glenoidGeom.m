@@ -418,9 +418,9 @@ line([glenoid_barycentre(1) fossa_point_f_YZ(1)],...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Inclination %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% XZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fossa_vector onto glenoid XZ plane (glenoid_plane_normals.y_n)
-% Constraint function (plane)
 delta = -(glenoid_plane_normals.y_n(1)*glenoid_plane_normals.z_p(1) + glenoid_plane_normals.y_n(2)*glenoid_plane_normals.z_p(2) + glenoid_plane_normals.y_n(3)*glenoid_plane_normals.z_p(3));
 plane_parameters = [glenoid_plane_normals.y_n delta];
+% Constraint function (plane)
 f_con = @(y_m)plane_func_d(y_m, plane_parameters);
 y_m_0 = glenoid_barycentre;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -522,6 +522,8 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Lateral Offset %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % "Most inferior" glenoid point onto glenoid plane
+delta = -(glenoid_plane_normals.z_n(1)*glenoid_plane_normals.z_p(1) + glenoid_plane_normals.z_n(2)*glenoid_plane_normals.z_p(2) + glenoid_plane_normals.z_n(3)*glenoid_plane_normals.z_p(3));
+plane_parameters = [glenoid_plane_normals.y_n delta];
 plane_parameters = glenoid_plane.Parameters;
 % Constraint function (plane)
 f_con = @(y_m)plane_func_d(y_m, plane_parameters);
@@ -544,7 +546,7 @@ y_m_0 = [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane
     [],...
     f_con,...
     options);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 inf_point.rim_on_plane = rim_on_glenoid_plane;
 % scatter3(rim_on_glenoid_plane(1), rim_on_glenoid_plane(2), rim_on_glenoid_plane(3), 'filled','o','red');
 
@@ -650,6 +652,42 @@ ZYX_Euler_ang = rotm2eul(RM, 'ZYX');
 glenoid_plane_normals.theta(1) = - ZYX_Euler_ang(3);
 glenoid_plane_normals.theta(2) = - ZYX_Euler_ang(2);
 glenoid_plane_normals.theta(3) = - ZYX_Euler_ang(1);
+
+%% Calcuate offset of the rotated glenoid plane from inferior glenoid rim
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Lateral Offset %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% "Most inferior" glenoid point onto glenoid plane
+delta = -(glenoid_plane_normals.z_n(1)*CoR_glen(1) + glenoid_plane_normals.z_n(2)*CoR_glen(2) + glenoid_plane_normals.z_n(3)*CoR_glen(3));
+plane_parameters = [glenoid_plane_normals.z_n delta];
+
+% Constraint function (plane)
+f_con = @(y_m)plane_func_d(y_m, plane_parameters);
+options = optimset('MaxIter', 100, 'TolFun', 1e-4);
+
+% Cost function (distance)
+J_inferior = @(y_m)sqrt((glenoid_points(inf_point_idx_rim, 1) - y_m(1))^2 + (glenoid_points(inf_point_idx_rim, 2) - y_m(2))^2 + (glenoid_points(inf_point_idx_rim, 3) - y_m(3))^2);
+% Initial Condition (point on plane)
+y_m_0 = [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)];
+
+
+% Run fmincon
+[rim_on_glenoid_plane, ~] = fmincon(J_inferior,...
+    y_m_0,...
+    [],...
+    [],...
+    [],...
+    [],...
+    [],...
+    [],...
+    f_con,...
+    options);
+
+inf_point.rim_on_plane = rim_on_glenoid_plane;
+% scatter3(rim_on_glenoid_plane(1), rim_on_glenoid_plane(2), rim_on_glenoid_plane(3), 'filled','o','red');
+
+lat_offset_i = norm( inf_point.rim - inf_point.rim_on_plane);
+lat_offset_f = lat_offset_i + 0.004;
+hemi_gle_offsets.z_base_off = lat_offset_f;
 %% Position on glenoid surface (anterior/posterior, base offset, superior/inferior)
 
 % X - Anterior / Posterior offsets
