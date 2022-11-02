@@ -549,7 +549,7 @@ inf_point.rim_on_plane = rim_on_glenoid_plane;
 % scatter3(rim_on_glenoid_plane(1), rim_on_glenoid_plane(2), rim_on_glenoid_plane(3), 'filled','o','red');
 
 lat_offset_i = norm( inf_point.rim - inf_point.rim_on_plane);
-lat_offset_f = lat_offset_i + 0.002;
+lat_offset_f = lat_offset_i + 0.004;
 hemi_gle_offsets.z_base_off = lat_offset_f;
 
 %% Change position of the cup
