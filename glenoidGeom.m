@@ -472,7 +472,7 @@ if flag_AthwalOr12mm == true
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%% 6.5 mm rule Athwal %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Project a point inferiorly along glenoid -ive Y-axis
-    p_point = glenoid_barycentre-glenoid_plane_normals.y_n*R*2;
+    p_point = glenoid_barycentre-glenoid_plane_normals.y_n_r1*R*2;
 
     % Get mesh data for the hemisphere from Visualisation Object. 
     hemi_gle_mesh_data.X = hemisphere_gle.XData;
@@ -493,10 +493,10 @@ if flag_AthwalOr12mm == true
     inf_point.rim = glenoid_points(inf_point_idx_rim, :);
     d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
 
-    inf_point.cup = hemi_gle_points(inf_point_idx_hemi, :);
-    d_inferior.cup =  norm(inf_point.rim - inf_point.cup);
+    inf_point.hemisphere = hemi_gle_points(inf_point_idx_hemi, :);
+    d_inferior.hemisphere =  norm(inf_point.hemisphere - inf_point.rim );
 
-    correction_displacement.y_prox_dist = - overhang - d_inferior.cup;
+    correction_displacement.y_prox_dist = - overhang - d_inferior.hemisphere;
 
 elseif flag_AthwalOr12mm == false
 
