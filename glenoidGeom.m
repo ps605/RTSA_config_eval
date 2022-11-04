@@ -50,11 +50,11 @@ glenoid_points = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '_rim_c
 glenoid_barycentre = mean(glenoid_points);
 
 % Get points to define coordinate system - Y-axis
-D = pdist(glenoid_points);
-D = squareform(D);
-[~,I] = max(D(:));
-[max_point_idx_1, max_point_idx_2] = ind2sub(size(D),I);
-max_point_idx = [max_point_idx_1, max_point_idx_2];
+% % % D = pdist(glenoid_points);
+% % % D = squareform(D);
+% % % [~,I] = max(D(:));
+% % % [max_point_idx_1, max_point_idx_2] = ind2sub(size(D),I);
+% % % max_point_idx = [max_point_idx_1, max_point_idx_2];
 
 % % % [~, min_gl_p] = min(glenoid_points(:,2));
 % % % glenoid_inferior = glenoid_points(min_gl_p,:);
@@ -72,8 +72,8 @@ scatter3(glenoid_barycentre(:,1), glenoid_barycentre(:,2), glenoid_barycentre(:,
 % Generate PointCloud of slected points and barycentre
 glenoid_pointCloud = pointCloud(vertcat(glenoid_points, glenoid_barycentre));
 
-figure (2);
-pcshow(glenoid_pointCloud, 'MarkerSize', 100)
+% figure (2);
+% pcshow(glenoid_pointCloud, 'MarkerSize', 100)
 
 % Linear Regresion method to fit plane
 x_gp = glenoid_points(:,1);

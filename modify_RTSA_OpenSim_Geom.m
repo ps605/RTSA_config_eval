@@ -45,7 +45,7 @@ design_param.glenoid_ant_post           = {0};
 design_param.glenoid_sup_inf_incl       = {0};
 design_param.gelnoid_ant_retro_version  = {0};
 
-design_param.humerus_base_off           = {0};
+design_param.humerus_base_off           = {0.001};
 design_param.humerus_prox_dist          = {0};
 design_param.humerus_ant_post           = {0};
 
