@@ -241,7 +241,7 @@ solver.set_verbosity(2);
 solver.set_optim_solver('ipopt');
 solver.set_optim_convergence_tolerance(1e-1);
 solver.set_optim_constraint_tolerance(1e-3);
-solver.set_optim_max_iterations(1500);
+solver.set_optim_max_iterations(2000);
 
 % % % % Create an initial guess
 % % % in_guess=solver.createGuess();
@@ -252,8 +252,12 @@ solver.set_optim_max_iterations(1500);
 % alterations when other conditions are testeed/
 if flag_keepRC == true
     solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_1.sto');
+elseif flag_keepRC == false && strcmp(task_name, 'LateralReach')
+    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto');
+elseif flag_keepRC == false && strcmp(task_name, 'UpwardReach')
+    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto');
 else
-    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto')
+
 end
 
 %% Solve
