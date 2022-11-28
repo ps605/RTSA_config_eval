@@ -24,7 +24,7 @@ problem.setModel(osim_model);
 %% Bounds and constraints
 
 % Set time bounds
-problem.setTimeBounds(0,[0.75 1.5]);
+problem.setTimeBounds(0,[0.75 2.5]);
 
 
 % This should be changed back to task_bounds - the ones used in Fox for first
@@ -255,7 +255,7 @@ if flag_keepRC == true
 elseif flag_keepRC == false && strcmp(task_name, 'LateralReach')
     solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto');
 elseif flag_keepRC == false && strcmp(task_name, 'UpwardReach')
-    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto');
+    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_UpwardReach_RC_0.sto');
 else
 
 end
