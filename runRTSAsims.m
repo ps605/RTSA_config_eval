@@ -67,7 +67,7 @@ if strcmp(task_name, 'HairTouch')
 
     %Prescribe the marker end point using the X and Z coordinates of
     %the C7 marker and add the arbitrary distance to the Y position
-    point_occiput = Vec3(C7.get(0),C7.get(1) + 0.25,C7.get(2));
+    point_occiput = Vec3(C7.get(0) + 0.05,C7.get(1) + 0.25,C7.get(2));
 
     end_point_cost_1 = MocoMarkerFinalGoal('marker_MiddleFinger', 60);
     end_point_cost_1.setPointName('/markerset/MiddleFinger');
@@ -256,8 +256,8 @@ elseif flag_keepRC == false && strcmp(task_name, 'LateralReach')
     solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto');
 elseif flag_keepRC == false && strcmp(task_name, 'UpwardReach')
     solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_UpwardReach_RC_0.sto');
-else
-
+elseif flag_keepRC == false && strcmp(task_name, 'HairTouch')
+    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_HairTouch_RC_0.sto');
 end
 
 %% Solve

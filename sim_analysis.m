@@ -8,6 +8,14 @@ close all
 clc
 %% Setup
 
+
+% Flags
+flag_AnalysisTool   = false;
+flag_NormTime       = true;
+flag_HairTouch      = false; % O-RS_02
+flag_LateralReach   = true; % O-RS_01 - sim_J46apu924ga
+flag_UpwardReach    = false; % C-O-RS_01 - sim_J46apu924ga
+
 % Import OpenSim 4.3 libraries
 import org.opensim.modeling.*
 
@@ -41,20 +49,11 @@ muscle_colours = [215 181 216;
     44 127 184;
     37 52 148]./255;
 
-jrf_colours = [240 59 32;
-    254 217 118
-    44 127 184;
-    221 28 119]./255;
-% Blues
-sd_colours = [222, 235, 247;
-    158, 202, 225;
-    66, 146, 198;
-    8, 69, 148]./255;
-% Reds
-% sd_colours = [254,153,41;
-%     236,112,20;
-%     204,76,2;
-%     140,45,4]./255;
+jrf_colours = [255,109,106;
+    240,230,140;
+    222, 235, 247;
+    221,160,221]./255;
+
 
 jointF_to_plot = {'unrothum_on_scapula_in_scapula_offset_fx'...
     'unrothum_on_scapula_in_scapula_offset_fy',...
@@ -67,9 +66,9 @@ muscleF_to_plot = {'DELT1',...
 coords_to_plot = {
     'shoulder_elv'};
 
-modes = {%'m2',...
-    %'m4',...
-    %'m5',...
+modes = {'m2',...
+    'm4',...
+    'm5',...
     'm6',...
     'm7',...
     'm9'};
@@ -79,41 +78,115 @@ SDs = {'-3',...
     '1',...
     '3'};
 
-y_lims_force = {[-300, 200],...
-    [0, 500],...
-    [0, 600],...
-    [0, 600]};
+if flag_HairTouch == true
 
-y_lims_muscle_force = {[0, 100],...
-    [0, 400],...
-    [0, 200]};
+    % Greens
+    sd_colours = [229,245,224;
+        161,217,155;
+        65,171,93;
+        0,109,44]./255;
 
-y_lims_muscle_lengths = {[0.15, 0.22],...
-    [0.11, 0.18],...
-    [0.15, 0.18]};
+    y_lims_force = {[-300, 200],...
+        [-100, 500],...
+        [0, 1200],...
+        [0, 1200]};
 
-y_lims_muscle_moment = {%[0, 1], [-3, 0], [-2, 0];...
-    [0, 5], [0, 10], [-1, 1];...
-    %[-1.5, 0.2], [-7, 0], [-1.2, 0]...
-    };
+    y_lims_muscle_force = {[0, 100],...
+        [0, 600],...
+        [0, 150]};
 
-y_lims_muscle_moment_arm = {[-5, 15], [-18, 0], [-30, 0];...
-    [10, 50], [20, 50], [-15, 10];...
-    [-20, 50], [-30, 0], [-15, 10]};
+    y_lims_muscle_lengths = {[0.13, 0.22],...
+        [0.10, 0.18],...
+        [0.15, 0.19]};
 
-analysis_folder = '../../OpenSim/Out/Moco/Analysis/CORS_01/';
+    y_lims_muscle_moment = {%[0, 1], [-3, 0], [-2, 0];...
+        [0, 5], [0, 10], [-1, 1];...
+        %[-1.5, 0.2], [-7, 0], [-1.2, 0]...
+        };
+
+    y_lims_muscle_moment_arm = {[-5, 15], [-18, 0], [-30, 0];...
+        [10, 50], [20, 50], [-15, 10];...
+        [-20, 50], [-30, 0], [-15, 10]};
+
+    task_name = 'HairTouch';
+
+elseif flag_LateralReach == true
+
+    % Reds
+    sd_colours = [254,153,41;
+        236,112,20;
+        204,76,2;
+        140,45,4]./255;
+
+    y_lims_force = {[0, 500],...
+        [0, 500],...
+        [0, 500],...
+        [0, 600]};
+
+    y_lims_muscle_force = {[0, 100],...
+        [0, 600],...
+        [0, 150]};
+
+    y_lims_muscle_lengths = {[0.13, 0.22],...
+        [0.10, 0.18],...
+        [0.15, 0.19]};
+
+    y_lims_muscle_moment = {%[0, 1], [-3, 0], [-2, 0];...
+        [0, 5], [0, 10], [-1, 1];...
+        %[-1.5, 0.2], [-7, 0], [-1.2, 0]...
+        };
+
+    y_lims_muscle_moment_arm = {[10, 45], [10, 45], [-20, 5];...
+        [10, 50], [20, 50], [-15, 10];...
+        [-20, 50], [-30, 0], [-15, 10]};
+
+    task_name = 'LateralReach';
+
+elseif flag_UpwardReach == true
+
+    % Blues
+    sd_colours = [222, 235, 247;
+        158, 202, 225;
+        66, 146, 198;
+        8, 69, 148]./255;
+
+    y_lims_force = {[-400, 200],...
+        [0, 500],...
+        [0, 1000],...
+        [0, 1100]};
+
+    y_lims_muscle_force = {[0, 100],...
+        [0, 600],...
+        [0, 150]};
+
+    y_lims_muscle_lengths = {[0.13, 0.22],...
+        [0.10, 0.18],...
+        [0.15, 0.19]};
+
+    y_lims_muscle_moment = {%[0, 1], [-3, 0], [-2, 0];...
+        [0, 5], [0, 10], [-1, 1];...
+        %[-1.5, 0.2], [-7, 0], [-1.2, 0]...
+        };
+
+    y_lims_muscle_moment_arm = {[10, 35], [10, 35], [-20, 5];...
+        [10, 50], [20, 50], [-15, 10];...
+        [-20, 50], [-30, 0], [-15, 10]};
+
+    task_name = 'UpwardReach';
+
+end
+
+analysis_folder = '../../OpenSim/Out/Moco/Analysis/ORS_01/';
 
 % List simulation folders
 sims = dir([analysis_folder '/sim_*']);
 
 num_sims = numel(sims);
 
-log_table = readtable('..\..\OpenSim\Out\Moco\Analysis\CORS_01\CORS_01_sims.xlsx');
+log_table = readtable('..\..\OpenSim\Out\Moco\Analysis\ORS_01\ORS_01_sims.txt');
 
-task_name = 'LateralReach';
 
-% Flags
-flag_AnalysisTool = false;
+
 
 %% Re-run AnalysisTool if needed
 if flag_AnalysisTool == true
@@ -173,82 +246,167 @@ if flag_AnalysisTool == true
     end
 end
 
-%% Analysis Joint Reaction Analysis
+%% Analysis Joint Reaction Analysis and kinematics
 for i_sim = 1 : num_sims
     %%%%%%%%%%%%%%%%%%%%%%%%%%%% Import data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Import JRF data
     joint_reaction = importdata([analysis_folder sims(i_sim).name '/Moco_JointReaction_ReactionLoads.sto']);
-    states = importdata([analysis_folder sims(i_sim).name '/MocoSol_UpwardReach.sto']);
+    % Import States and Kinematics
+    states = importdata([analysis_folder sims(i_sim).name '/MocoSol_' task_name '.sto']);
     shoulder_elv_theta.(sims(i_sim).name) = rad2deg(states.data(:,19));
+    elv_angle_theta.(sims(i_sim).name) = rad2deg(states.data(:,18));
+    shoulder_rot_theta.(sims(i_sim).name) = rad2deg(states.data(:,21));
 
     % Import Kinematics data
-    %%% sim_JRF = importdata([analysis_folder sims(i_sim).name '/MocoSol_LateralReach.sto']);
+    %%% sim_JRF = importdata([analysis_folder sims(i_sim).name '/MocoSol_' task_name '.sto']);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% JRF %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Get time
-    JRA.(sims(i_sim).name).time = joint_reaction.data(:,1);
-    
+    if flag_NormTime == true
+        time_vec = linspace(0, 100, 101)';
+        JRA.(sims(i_sim).name).time_og = 100*joint_reaction.data(:,1)/max(joint_reaction.data(:,1));
+        JRA.(sims(i_sim).name).time = 100*joint_reaction.data(:,1)/max(joint_reaction.data(:,1));
+    else
+        JRA.(sims(i_sim).name).time = joint_reaction.data(:,1);
+    end
+
+
     for i_joint = 1:numel(jointF_to_plot)
         % Get handle of coordinates to plot
         JRA.(sims(i_sim).name).pos(:, i_joint) = find(contains(joint_reaction.colheaders, jointF_to_plot{i_joint}));
         JRA.(sims(i_sim).name).label{1,i_joint} = joint_reaction.colheaders{JRA.(sims(i_sim).name).pos(i_joint)};
 
-        if contains(JRA.(sims(i_sim).name).label{1,i_joint}, 'fz')
-            JRA.(sims(i_sim).name).data(:, i_joint) = abs(joint_reaction.data(:,JRA.(sims(i_sim).name).pos(i_joint)));
-        else
-            JRA.(sims(i_sim).name).data(:, i_joint) = joint_reaction.data(:,JRA.(sims(i_sim).name).pos(i_joint));
+        if flag_NormTime == false
+            if contains(JRA.(sims(i_sim).name).label{1,i_joint}, 'fz')
+                JRA.(sims(i_sim).name).data(:, i_joint) = abs(joint_reaction.data(:,JRA.(sims(i_sim).name).pos(i_joint)));
+            else
+                JRA.(sims(i_sim).name).data(:, i_joint) = joint_reaction.data(:,JRA.(sims(i_sim).name).pos(i_joint));
+            end
+        elseif flag_NormTime == true
+
+            if contains(JRA.(sims(i_sim).name).label{1,i_joint}, 'fz')
+                JRA.(sims(i_sim).name).data(:, i_joint) = interp1(JRA.(sims(i_sim).name).time_og,...
+                    abs(joint_reaction.data(:,JRA.(sims(i_sim).name).pos(i_joint))),...
+                    time_vec);
+            else
+                JRA.(sims(i_sim).name).data(:, i_joint) = interp1(JRA.(sims(i_sim).name).time_og,...
+                    joint_reaction.data(:,JRA.(sims(i_sim).name).pos(i_joint)),...
+                    time_vec);
+            end
+
+            JRA.(sims(i_sim).name).time = time_vec;
+
+            
         end
 
-        % Get max force values
-        [max_F_final(i_sim, i_joint), max_point] = max(JRA.(sims(i_sim).name).data(round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6):end,i_joint));
-
-        % Create q plots
+        % Create JRF plots
         figure (i_joint)
-
 
         plot(JRA.(sims(i_sim).name).time, JRA.(sims(i_sim).name).data(:, i_joint), 'LineWidth', 1.5, 'Color', jrf_colours(i_joint,:))
 
         hold on;
-        scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-        xlabel('Time (s)');
+        xlabel('Movement Duration (%)');
         ylabel(['JRF [' jointF_to_plot{i_joint}(end) '] (N)']);
         ylim(y_lims_force{i_joint});
         hold on;
 
+
+
     end
 
+    % Normalise Kinematics
+    shoulder_elv_theta.(sims(i_sim).name) = interp1(JRA.(sims(i_sim).name).time_og,...
+        shoulder_elv_theta.(sims(i_sim).name),...
+        time_vec);
+
+    elv_angle_theta.(sims(i_sim).name) = interp1(JRA.(sims(i_sim).name).time_og,...
+        elv_angle_theta.(sims(i_sim).name),...
+        time_vec);
+
+    shoulder_rot_theta.(sims(i_sim).name) = interp1(JRA.(sims(i_sim).name).time_og,...
+        shoulder_rot_theta.(sims(i_sim).name),...
+        time_vec);
+
+    % Calculate resultant Force
     JRA.(sims(i_sim).name).F_res = sqrt(JRA.(sims(i_sim).name).data(:, 1).^2 + JRA.(sims(i_sim).name).data(:, 2).^2 + JRA.(sims(i_sim).name).data(:, 3).^2);
+
     figure(4)
 
-    plot(JRA.(sims(i_sim).name).time, JRA.(sims(i_sim).name).F_res, 'LineWidth', 1.5, 'Color', 'magenta')
+    plot(JRA.(sims(i_sim).name).time, JRA.(sims(i_sim).name).F_res, 'LineWidth', 1.5, 'Color', jrf_colours(4,:))
 
     hold on;
     %scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-    xlabel('Time (s)');
+    xlabel('Movement Duration (%)');
     ylabel('JRF [Resultant] (N)');
     ylim(y_lims_force{4});
     hold on;
 
+    % Plot Joint Kinematics
+
+    figure (11)
+
+    plot(JRA.(sims(i_sim).name).time, shoulder_elv_theta.(sims(i_sim).name), 'LineWidth', 1.5, 'Color', jrf_colours(1,:))
+
+    hold on;
+    xlabel('Movement Duration (%)');
+    ylabel(['Glenohumeral Elevation (deg)']);
+    hold on;
+
+    figure (12)
+
+    plot(JRA.(sims(i_sim).name).time, elv_angle_theta.(sims(i_sim).name), 'LineWidth', 1.5, 'Color', jrf_colours(2,:))
+
+    hold on;
+    xlabel('Movement Duration (%)');
+    ylabel(['Elevation angle (deg)']);
+    hold on;
+
+    figure (13)
+
+    plot(JRA.(sims(i_sim).name).time, shoulder_rot_theta.(sims(i_sim).name), 'LineWidth', 1.5, 'Color', jrf_colours(3,:))
+
+    hold on;
+    xlabel('Movement Duration (%)');
+    ylabel(['Shoulder Rotation (deg)']);
+    hold on;
 
 end
 
 % Plot mean scapula data on top of other trials
 figure(1)
-plot(JRA.sim_M35afr903vv.time, JRA.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fx.tiff','tiff')
+plot(JRA.sim_J46apu924ga.time, JRA.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Fx_norm.tiff','tiff')
+
 figure(2)
-plot(JRA.sim_M35afr903vv.time, JRA.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fy.tiff','tiff')
+plot(JRA.sim_J46apu924ga.time, JRA.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Fy_norm.tiff','tiff')
+
 figure(3)
-plot(JRA.sim_M35afr903vv.time, JRA.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fz.tiff','tiff')
+plot(JRA.sim_J46apu924ga.time, JRA.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Fz_norm.tiff','tiff')
+
 figure(4)
-plot(JRA.sim_M35afr903vv.time, JRA.sim_M35afr903vv.F_res(:, 1), 'LineWidth', 1.5, 'Color', 'black')
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(4), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fres.tiff','tiff')
+plot(JRA.sim_J46apu924ga.time, JRA.sim_J46apu924ga.F_res(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(4), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Fres_norm.tiff','tiff')
+
+figure(11)
+plot(JRA.sim_J46apu924ga.time, shoulder_elv_theta.sim_J46apu924ga, 'LineWidth', 1.5, 'Color', 'black')
+% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(11), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\shoulder_elv_norm.tiff','tiff')
+
+figure(12)
+plot(JRA.sim_J46apu924ga.time, elv_angle_theta.sim_J46apu924ga, 'LineWidth', 1.5, 'Color', 'black')
+% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(12), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\elv_ang_norm.tiff','tiff')
+
+figure(13)
+plot(JRA.sim_J46apu924ga.time, shoulder_rot_theta.sim_J46apu924ga, 'LineWidth', 1.5, 'Color', 'black')
+% set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(13), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\shoulder_rot_norm.tiff','tiff')
 
 close all
 
@@ -265,19 +423,19 @@ for i_mode = 1:numel(modes)
 
             figure (i_joint)
             subplot(2,3, i_mode)
-%             plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
-%                 JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_joint), ...
-%                 'LineWidth', 1.5,...
-%                 'Color', sd_colours(i_sd,:))
-
-            plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]),...
+            plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
                 JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_joint), ...
                 'LineWidth', 1.5,...
                 'Color', sd_colours(i_sd,:))
 
+            %             plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]),...
+            %                 JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_joint), ...
+            %                 'LineWidth', 1.5,...
+            %                 'Color', sd_colours(i_sd,:))
+
             hold on;
             %             scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-            xlabel('Glenohumeral ABD (deg)');
+            xlabel('Movement Duration (%)');
             ylabel(['JRF [' jointF_to_plot{i_joint}(end) '] (N)']);
             ylim(y_lims_force{i_joint});
             title(modes{i_mode})
@@ -287,50 +445,77 @@ for i_mode = 1:numel(modes)
 
         figure(4)
         subplot(2,3, i_mode)
-%         plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time, ...
-%             JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).F_res ,...
-%             'LineWidth', 1.5, ...
-%             'Color', sd_colours(i_sd,:))
-        
-        plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]), ...
+        plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time, ...
             JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).F_res ,...
             'LineWidth', 1.5, ...
-            'Color', sd_colours(i_sd,:))    
+            'Color', sd_colours(i_sd,:))
+
+
+        %         plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]), ...
+        %             JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).F_res ,...
+        %             'LineWidth', 1.5, ...
+        %             'Color', sd_colours(i_sd,:))
 
         hold on;
         %scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-        xlabel('Glenohumeral ABD (deg)','FontWeight', 'bold');
+        xlabel('Movement Duration (%)','FontWeight', 'bold');
         ylabel('JRF [Resultant] (N)', 'FontWeight', 'bold');
         ylim(y_lims_force{4});
-        xlim([0 80])
+        %xlim([0 80])
         title(modes{i_mode})
         hold on;
 
+        % Plot Force ratio
+        figure(5)
+
+        fr = sqrt(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, 3).^2)./...
+            (sqrt(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, 1).^2) + sqrt(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, 2).^2));
+
+
+        subplot(2,3, i_mode)
+        plot(JRA.(sims(i_sim).name).time, fr, 'LineWidth', 1.5, 'Color', sd_colours(i_sd,:),'LineStyle', '--')
+        hold on
+        ylabel('JRF Compressive to Shear Ratio', 'FontWeight', 'bold');
+        xlabel('Movement Duration (%)','FontWeight', 'bold');
+        ylim([0, 2])
+        title(modes{i_mode})
+
+
     end
 
+    % Average morphology data
     figure(1)
-    plot(shoulder_elv_theta.sim_M35afr903vv, JRA.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(JRA.sim_J46apu924ga.time, JRA.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
     figure(2)
-    plot(shoulder_elv_theta.sim_M35afr903vv, JRA.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(JRA.sim_J46apu924ga.time, JRA.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
     figure(3)
-    plot(shoulder_elv_theta.sim_M35afr903vv, JRA.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(JRA.sim_J46apu924ga.time, JRA.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
     figure(4)
-    plot(shoulder_elv_theta.sim_M35afr903vv, JRA.sim_M35afr903vv.F_res(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(JRA.sim_J46apu924ga.time, JRA.sim_J46apu924ga.F_res(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 
+    figure(5)
+    fr_av = sqrt(JRA.sim_J46apu924ga.data(:, 3).^2)./...
+        (sqrt(JRA.sim_J46apu924ga.data(:, 1).^2) + sqrt(JRA.sim_J46apu924ga.data(:, 2).^2));
+    plot(JRA.sim_J46apu924ga.time, fr_av, 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 end
 
 figure(1)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fx_vs_ABD_modes.tiff','tiff')
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Fx_vs_NORM_modes.tiff','tiff')
 figure(2)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fy_vs_ABD_modes.tiff','tiff')
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Fy_vs_NORM_modes.tiff','tiff')
 figure(3)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fz_vs_ABD_modes.tiff','tiff')
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Fz_vs_NORM_modes.tiff','tiff')
 figure(4)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(4), '..\..\OpenSim\Out\Moco\Analysis\Plots\Fres_vs_ABD_modes.tiff','tiff')
+saveas(figure(4), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Fres_vs_NORM_modes.tiff','tiff')
+figure(5)
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+saveas(figure(5), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\FR_vs_NORM_modes.tiff','tiff')
+
+
 
 close all
 %% Analysis muscle forces
@@ -368,17 +553,17 @@ end
 
 % Plot mean scapula data on top of other trials
 figure(1)
-plot(TF.sim_M35afr903vv.time, TF.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+plot(TF.sim_J46apu924ga.time, TF.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_DELT1.tiff','tiff')
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Force_DELT1.tiff','tiff')
 figure(2)
-plot(TF.sim_M35afr903vv.time, TF.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+plot(TF.sim_J46apu924ga.time, TF.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_DELT2.tiff','tiff')
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Force_DELT2.tiff','tiff')
 figure(3)
-plot(TF.sim_M35afr903vv.time, TF.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+plot(TF.sim_J46apu924ga.time, TF.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_DELT3.tiff','tiff')
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Force_DELT3.tiff','tiff')
 
 close all
 
@@ -395,11 +580,11 @@ for i_mode = 1:numel(modes)
 
             figure (i_mus)
             subplot(2,3, i_mode)
-%             plot(TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
-%                 TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-%                 'LineWidth', 1.5,...
-%                 'Color', sd_colours(i_sd,:))
-    
+            %             plot(TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+            %                 TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
+            %                 'LineWidth', 1.5,...
+            %                 'Color', sd_colours(i_sd,:))
+
             plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]),...
                 TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
                 'LineWidth', 1.5,...
@@ -419,24 +604,24 @@ for i_mode = 1:numel(modes)
     end
 
     figure(1)
-    plot(shoulder_elv_theta.sim_M35afr903vv, TF.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(shoulder_elv_theta.sim_J46apu924ga, TF.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
     figure(2)
-    plot(shoulder_elv_theta.sim_M35afr903vv, TF.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(shoulder_elv_theta.sim_J46apu924ga, TF.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
     figure(3)
-    plot(shoulder_elv_theta.sim_M35afr903vv, TF.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(shoulder_elv_theta.sim_J46apu924ga, TF.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 
 end
 
 
 figure(1)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_vs_ABD_DELT1_modes.tiff','tiff')
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Force_vs_ABD_DELT1_modes.tiff','tiff')
 figure(2)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_vs_ABD_DELT2_modes.tiff','tiff')
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Force_vs_ABD_DELT2_modes.tiff','tiff')
 figure(3)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Force_vs_ABD_DELT3_modes.tiff','tiff')
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Force_vs_ABD_DELT3_modes.tiff','tiff')
 
 close all
 
@@ -461,7 +646,7 @@ for i_sim = 1: num_sims
         figure (i_mus)
 
 
-        plot(ML.(sims(i_sim).name).time, ML.(sims(i_sim).name).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+        plot(shoulder_elv_theta.(sims(i_sim).name), ML.(sims(i_sim).name).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
 
         hold on;
         %         scatter(TF.(sims(i_sim).name).time(max_point + round(numel(TF.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
@@ -475,17 +660,17 @@ end
 
 % Plot mean scapula data on top of other trials
 figure(1)
-plot(ML.sim_M35afr903vv.time, ML.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+plot(ML.sim_J46apu924ga.time, ML.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_DELT1.tiff','tiff')
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Length_DELT1.tiff','tiff')
 figure(2)
-plot(ML.sim_M35afr903vv.time, ML.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+plot(ML.sim_J46apu924ga.time, ML.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_DELT2.tiff','tiff')
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Length_DELT2.tiff','tiff')
 figure(3)
-plot(ML.sim_M35afr903vv.time, ML.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+plot(ML.sim_J46apu924ga.time, ML.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_DELT3.tiff','tiff')
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Length_DELT3.tiff','tiff')
 
 close all
 
@@ -503,10 +688,10 @@ for i_mode = 1:numel(modes)
 
             figure (i_mus)
             subplot(2,3, i_mode)
-%             plot(ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
-%                 ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-%                 'LineWidth', 1.5,...
-%                 'Color', sd_colours(i_sd,:))
+            %             plot(ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+            %                 ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
+            %                 'LineWidth', 1.5,...
+            %                 'Color', sd_colours(i_sd,:))
 
             plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]),...
                 ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
@@ -527,31 +712,31 @@ for i_mode = 1:numel(modes)
     end
 
     figure(1)
-    plot(shoulder_elv_theta.sim_M35afr903vv, ML.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(shoulder_elv_theta.sim_J46apu924ga, ML.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
     figure(2)
-    plot(shoulder_elv_theta.sim_M35afr903vv, ML.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(shoulder_elv_theta.sim_J46apu924ga, ML.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
     figure(3)
-    plot(shoulder_elv_theta.sim_M35afr903vv, ML.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(shoulder_elv_theta.sim_J46apu924ga, ML.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 
 end
 
 
 figure(1)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_vs_ABD_DELT1_modes.tiff','tiff')
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Length_vs_ABD_DELT1_modes.tiff','tiff')
 figure(2)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_vs_ABD_DELT2_modes.tiff','tiff')
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Length_vs_ABD_DELT2_modes.tiff','tiff')
 figure(3)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Length_vs_ABD_DELT3_modes.tiff','tiff')
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Length_vs_ABD_DELT3_modes.tiff','tiff')
 close all
 
 %% Muscle Activations
 for i_sim = 1: num_sims
 
     % Import ForceReporter data
-    muscle_activation = importdata([analysis_folder sims(i_sim).name '/MocoSol_LateralReach.sto']);
+    muscle_activation = importdata([analysis_folder sims(i_sim).name '/MocoSol_' task_name '.sto']);
 
     % Get time
     MAct.(sims(i_sim).name).time = muscle_activation.data(:,1);
@@ -583,17 +768,17 @@ end
 
 % Plot mean scapula data on top of other trials
 figure(1)
-plot(MAct.sim_M35afr903vv.time, MAct.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+plot(MAct.sim_J46apu924ga.time, MAct.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT1.tiff','tiff')
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Activation_DELT1.tiff','tiff')
 figure(2)
-plot(MAct.sim_M35afr903vv.time, MAct.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+plot(MAct.sim_J46apu924ga.time, MAct.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT2.tiff','tiff')
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Activation_DELT2.tiff','tiff')
 figure(3)
-plot(MAct.sim_M35afr903vv.time, MAct.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+plot(MAct.sim_J46apu924ga.time, MAct.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT3.tiff','tiff')
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Activation_DELT3.tiff','tiff')
 
 close all
 
@@ -630,26 +815,26 @@ for i_mode = 1:numel(modes)
     end
 
     figure(1)
-    plot(MAct.sim_M35afr903vv.time, MAct.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(MAct.sim_J46apu924ga.time, MAct.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
     figure(2)
-    plot(MAct.sim_M35afr903vv.time, MAct.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(MAct.sim_J46apu924ga.time, MAct.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
     figure(3)
-    plot(MAct.sim_M35afr903vv.time, MAct.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(MAct.sim_J46apu924ga.time, MAct.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 
 end
 
 
 figure(1)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT1_modes.tiff','tiff')
+saveas(figure(1), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Activation_DELT1_modes.tiff','tiff')
 figure(2)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT2_modes.tiff','tiff')
+saveas(figure(2), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Activation_DELT2_modes.tiff','tiff')
 figure(3)
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\Activation_DELT3_modes.tiff','tiff')
+saveas(figure(3), '..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Activation_DELT3_modes.tiff','tiff')
 
-%% Analysis muscle moment 
+%% Analysis muscle moment
 for i_coord = 1:numel(coords_to_plot)
 
     coord = coords_to_plot{i_coord};
@@ -674,7 +859,7 @@ for i_coord = 1:numel(coords_to_plot)
             figure (i_mus)
 
 
-            plot(MM.(sims(i_sim).name).time, MM.(sims(i_sim).name).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+            plot(shoulder_elv_theta.(sims(i_sim).name), MM.(sims(i_sim).name).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
 
             hold on;
             %         scatter(TF.(sims(i_sim).name).time(max_point + round(numel(TF.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
@@ -688,17 +873,17 @@ for i_coord = 1:numel(coords_to_plot)
 
     % Plot mean scapula data on top of other trials
     figure(1)
-    plot(MM.sim_M35afr903vv.time, MM.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+    plot(MM.sim_J46apu924ga.time, MM.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\Moment_DELT1_' coord '.tiff'],'tiff')
+    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Moment_DELT1_' coord '.tiff'],'tiff')
     figure(2)
-    plot(MM.sim_M35afr903vv.time, MM.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+    plot(MM.sim_J46apu924ga.time, MM.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\Moment_DELT2_' coord '.tiff'],'tiff')
+    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Moment_DELT2_' coord '.tiff'],'tiff')
     figure(3)
-    plot(MM.sim_M35afr903vv.time, MM.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+    plot(MM.sim_J46apu924ga.time, MM.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\Moment_DELT3_' coord '.tiff'],'tiff')
+    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Moment_DELT3_' coord '.tiff'],'tiff')
 
     close all
 
@@ -715,10 +900,10 @@ for i_coord = 1:numel(coords_to_plot)
 
                 figure (i_mus)
                 subplot(2,3, i_mode)
-%                 plot(MM.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
-%                     MM.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-%                     'LineWidth', 1.5,...
-%                     'Color', sd_colours(i_sd,:))
+                %                 plot(MM.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+                %                     MM.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
+                %                     'LineWidth', 1.5,...
+                %                     'Color', sd_colours(i_sd,:))
 
                 plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]),...
                     MM.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
@@ -739,24 +924,24 @@ for i_coord = 1:numel(coords_to_plot)
         end
 
         figure(1)
-        plot(shoulder_elv_theta.sim_M35afr903vv, MM.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+        plot(shoulder_elv_theta.sim_J46apu924ga, MM.sim_J46apu924ga.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
         figure(2)
-        plot(shoulder_elv_theta.sim_M35afr903vv, MM.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+        plot(shoulder_elv_theta.sim_J46apu924ga, MM.sim_J46apu924ga.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
         figure(3)
-        plot(shoulder_elv_theta.sim_M35afr903vv, MM.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+        plot(shoulder_elv_theta.sim_J46apu924ga, MM.sim_J46apu924ga.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 
     end
 
 
     figure(1)
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\Moment_vs_ABD_DELT1_' coord '_modes.tiff'],'tiff')
+    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Moment_vs_ABD_DELT1_' coord '_modes.tiff'],'tiff')
     figure(2)
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\Moment_vs_ABD_DELT2_' coord '_modes.tiff'],'tiff')
+    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Moment_vs_ABD_DELT2_' coord '_modes.tiff'],'tiff')
     figure(3)
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\Moment_vs_ABD_DELT3_' coord '_modes.tiff'],'tiff')
+    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\Moment_vs_ABD_DELT3_' coord '_modes.tiff'],'tiff')
 
     close all
 end
@@ -786,12 +971,15 @@ for i_coord = 1:numel(coords_to_plot)
             figure (i_mus)
 
 
-            plot(MA.(sims(i_sim).name).time, MA.(sims(i_sim).name).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+            plot(shoulder_elv_theta.(sims(i_sim).name),...
+                MA.(sims(i_sim).name).data(:, i_mus)*1000, ...
+                'LineWidth', 1.5, ...
+                'Color', jrf_colours(i_mus,:))
 
             hold on;
             %         scatter(TF.(sims(i_sim).name).time(max_point + round(numel(TF.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-            xlabel('Time (s)');
-            ylabel(['Muscle Moment Arm [' muscleF_to_plot{i_mus} '] (m)']);
+            xlabel('Glenohumeral ABD (deg)');
+            ylabel(['Muscle Moment Arm [' muscleF_to_plot{i_mus} '] (mm)']);
             hold on;
         end
 
@@ -800,17 +988,17 @@ for i_coord = 1:numel(coords_to_plot)
 
     % Plot mean scapula data on top of other trials
     figure(1)
-    plot(MA.sim_M35afr903vv.time, MA.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+    plot(shoulder_elv_theta.sim_J46apu924ga, MA.sim_J46apu924ga.data(:, 1)*1000, 'LineWidth', 1.5, 'Color', 'black')
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT1_' coord '.tiff'],'tiff')
+    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\MomentArm_DELT1_' coord '.tiff'],'tiff')
     figure(2)
-    plot(MA.sim_M35afr903vv.time, MA.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+    plot(shoulder_elv_theta.sim_J46apu924ga, MA.sim_J46apu924ga.data(:, 2)*1000, 'LineWidth', 1.5, 'Color', 'black')
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT2_' coord '.tiff'],'tiff')
+    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\MomentArm_DELT2_' coord '.tiff'],'tiff')
     figure(3)
-    plot(MA.sim_M35afr903vv.time, MA.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+    plot(shoulder_elv_theta.sim_J46apu924ga, MA.sim_J46apu924ga.data(:, 3)*1000, 'LineWidth', 1.5, 'Color', 'black')
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT3_' coord '.tiff'],'tiff')
+    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\MomentArm_DELT3_' coord '.tiff'],'tiff')
 
     close all
 
@@ -827,16 +1015,16 @@ for i_coord = 1:numel(coords_to_plot)
 
                 figure (i_mus)
                 subplot(2,3, i_mode)
-                plot(MA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
-                    MA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
+                plot(shoulder_elv_theta.(sims(i_sim).name),...
+                    MA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000, ...
                     'LineWidth', 1.5,...
                     'Color', sd_colours(i_sd,:))
 
                 hold on;
                 %             scatter(JRA.(sims(i_sim).name).time(max_point + round(numel(JRA.(sims(i_sim).name).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-                xlabel('Time (s)');
-                ylabel(['Muscle Moment Arm [' muscleF_to_plot{i_mus} '] (m)']);
-                ylim(y_lims_muscle_moment_arm{i_coord, i_mus}/1000);
+                xlabel('Glenohumeral ABD (deg)');
+                ylabel(['Muscle Moment Arm [' muscleF_to_plot{i_mus} '] (mm)']);
+                ylim(y_lims_muscle_moment_arm{i_coord, i_mus});
                 title(modes{i_mode})
                 hold on;
 
@@ -846,24 +1034,24 @@ for i_coord = 1:numel(coords_to_plot)
         end
 
         figure(1)
-        plot(MA.sim_M35afr903vv.time, MA.sim_M35afr903vv.data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+        plot(shoulder_elv_theta.sim_J46apu924ga, MA.sim_J46apu924ga.data(:, 1)*1000, 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
         figure(2)
-        plot(MA.sim_M35afr903vv.time, MA.sim_M35afr903vv.data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+        plot(shoulder_elv_theta.sim_J46apu924ga, MA.sim_J46apu924ga.data(:, 2)*1000, 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
         figure(3)
-        plot(MA.sim_M35afr903vv.time, MA.sim_M35afr903vv.data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+        plot(shoulder_elv_theta.sim_J46apu924ga, MA.sim_J46apu924ga.data(:, 3)*1000, 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 
     end
 
 
     figure(1)
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT1_' coord '_modes.tiff'],'tiff')
+    saveas(figure(1), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\MomentArm_DELT1_' coord '_modes.tiff'],'tiff')
     figure(2)
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT2_' coord '_modes.tiff'],'tiff')
+    saveas(figure(2), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\MomentArm_DELT2_' coord '_modes.tiff'],'tiff')
     figure(3)
     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\MomentArm_DELT3_' coord '_modes.tiff'],'tiff')
+    saveas(figure(3), ['..\..\OpenSim\Out\Moco\Analysis\Plots\ORS_01\MomentArm_DELT3_' coord '_modes.tiff'],'tiff')
 
     close all
 end
