@@ -288,6 +288,7 @@ if flag_DELT2 == true
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
     ub(1) = p_sim_0(1);
+    ub(2) = p_sim_0(2);
     lb(3) = p_sim_0(3);
 
     figure(101);
