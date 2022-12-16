@@ -152,8 +152,8 @@ flag_correctLateral     = true;
 flag_viaPointOpt        = true;
 
 flag_DELT1              = true; % Optimises position of via-point
-flag_DELT2              = false; % Deletes via-point
-flag_DELT3              = false; % Deletes via-point
+flag_DELT2              = true; % Optimises or Deletes via-point
+flag_DELT3              = true; % Optimises or Deletes via-point
 
 %% Pass setup parameters and prepare models/simulations
 if flag_useParallel == true

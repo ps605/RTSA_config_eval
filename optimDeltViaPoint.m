@@ -16,8 +16,8 @@ max_stallGenerations     = 20;
 
 % Flags
 flag_delt1ViaDelete = false;
-flag_delt2ViaDelete = true;
-flag_delt3ViaDelete = true;
+flag_delt2ViaDelete = false;
+flag_delt3ViaDelete = false;
 
 % Get model
 import org.opensim.modeling.*
@@ -287,6 +287,7 @@ if flag_DELT2 == true
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
+    ub(1) = p_sim_0(1);
     lb(3) = p_sim_0(3);
 
     figure(101);
