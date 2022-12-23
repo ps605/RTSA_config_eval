@@ -218,6 +218,29 @@ for i_joint = 1:numel(joints_to_alter)
 
 end
 
+% Add Lateral Axis coord to Shoulder
+shoulder2 = osim_model.getJointSet.get('shoulder2');
+shoulder2_dc = CustomJoint.safeDownCast(shoulder2);
+
+new_axis = Vec3(0,0,1,0,2,1);
+dummy_coord = Coordinate();
+dummy_coord.setName('dummy_coord')
+% dummy_coord_name = ArrayStr('dummy_coord');
+
+shoulder2_dc.set_coordinates(1,dummy_coord)
+
+shoulder2_dc.upd_SpatialTransform().upd_rotation3.set_coordinates(0,'dummy_coord');
+shoulder2_dc.upd_SpatialTransform().upd_rotation3.set_axis(new_axis);
+
+coeffs = ArrayDouble();
+coeffs.set(0,1);
+coeffs.set(1,0);
+
+coord_func = LinearFunction();
+% coord_func_dc = Function.safeDownCast(coord_func);
+coord_func.setCoefficients(coeffs);
+shoulder2_dc.upd_SpatialTransform().upd_rotation3.set_function(coord_func);
+
 %% Update muscle locationtions and (initial) via-point locations
 % SSM scapula muscle locations
 muscle_locs = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '_muscle_coords.txt'], ' ');
