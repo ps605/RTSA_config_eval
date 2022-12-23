@@ -54,32 +54,56 @@ end
 figure;
 hold on
 title([muscle_name ' ' char(coord_for_MA.getName()) ' MA after via point opt'], 'Interpreter','none')
-xlabel('Shoulder elevation angle (deg)');
+xlabel( [char(coord_for_MA.getName()) ' angle (deg)']);
 ylabel('Moment arm (m)');
 xlim([-5 125]);
 xticks([2.5, 30, 60, 90, 120]);
 
 hold on
 
-for i_angle = 1:length(data_RTSA.angles)
-   
-    % Re-calculate moment arms at each of the poses
-    %%%%%%%%%%%%%%%%%%% POS 1-5 - 2.5/30/60/90/120 DEG %%%%%%%%%%%%%%%%%%%%
-    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)), true);
-    osim_model.realizePosition(init_state);
-    model_MA_optim.DELTx(i_angle) = delt_GP.computeMomentArm(init_state,coord_for_MA);
-    
-    % Initial MA
-    scatter(data_RTSA.angles(i_angle) , model_MA_init(i_angle),'filled','o','red');
-    
-    % Optimised MA    
-    scatter(data_RTSA.angles(i_angle) , model_MA_optim.DELTx(i_angle),'filled','o','black');
-    scatter(data_RTSA.angles(i_angle), exp_MA_mean(i_angle),'filled','o','magenta');
-    scatter(data_RTSA.angles(i_angle) , exp_MA_mean(i_angle) + exp_MA_sd(i_angle),'+','magenta');
-    scatter(data_RTSA.angles(i_angle) , exp_MA_mean(i_angle) - exp_MA_sd(i_angle), '+','magenta');
+if strcmp(coord_for_MA.getName(), 'shoulder_elv')
+    for i_angle = 1:length(data_RTSA.angles)
 
+        % Re-calculate moment arms at each of the poses
+        %%%%%%%%%%%%%%%%%%% POS 1-5 - 2.5/30/60/90/120 DEG %%%%%%%%%%%%%%%%%%%%
+        osim_model.updCoordinateSet().get('elv_angle').setValue(init_state, 0, true);
+
+        osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)), true);
+        osim_model.realizePosition(init_state);
+        model_MA_optim.DELTx(i_angle) = delt_GP.computeMomentArm(init_state,coord_for_MA);
+
+        % Initial MA
+        scatter(data_RTSA.angles(i_angle) , model_MA_init(i_angle),'filled','o','red');
+
+        % Optimised MA
+        scatter(data_RTSA.angles(i_angle) , model_MA_optim.DELTx(i_angle),'filled','o','black');
+        scatter(data_RTSA.angles(i_angle), exp_MA_mean(i_angle),'filled','o','magenta');
+        scatter(data_RTSA.angles(i_angle) , exp_MA_mean(i_angle) + exp_MA_sd(i_angle),'+','magenta');
+        scatter(data_RTSA.angles(i_angle) , exp_MA_mean(i_angle) - exp_MA_sd(i_angle), '+','magenta');
+
+    end
+elseif strcmp(coord_for_MA.getName(), 'elv_angle')
+    for i_angle = 1:length(data_RTSA.angles)
+
+        % Re-calculate moment arms at each of the poses
+        %%%%%%%%%%%%%%%%%%% POS 1-5 - 2.5/30/60/90/120 DEG %%%%%%%%%%%%%%%%%%%%
+        osim_model.updCoordinateSet().get('elv_angle').setValue(init_state, deg2rad(70), true);
+
+        osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)), true);
+        osim_model.realizePosition(init_state);
+        model_MA_optim.DELTx(i_angle) = delt_GP.computeMomentArm(init_state,coord_for_MA);
+
+        % Initial MA
+        scatter(data_RTSA.angles(i_angle) , model_MA_init(i_angle),'filled','o','red');
+
+        % Optimised MA
+        scatter(data_RTSA.angles(i_angle) , model_MA_optim.DELTx(i_angle),'filled','o','black');
+        scatter(data_RTSA.angles(i_angle), exp_MA_mean(i_angle),'filled','o','magenta');
+        scatter(data_RTSA.angles(i_angle) , exp_MA_mean(i_angle) + exp_MA_sd(i_angle),'+','magenta');
+        scatter(data_RTSA.angles(i_angle) , exp_MA_mean(i_angle) - exp_MA_sd(i_angle), '+','magenta');
+
+    end
 end
-
 
 txt = ['\leftarrow J at optimum via point = ' num2str(J_opt) ' m for ' muscle_name];
 text(data_RTSA.angles(1)+0.01,model_MA_optim.DELTx(1),txt)

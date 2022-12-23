@@ -8,13 +8,13 @@ init_state = osim_model.initSystem();
 w1      = 10;
 w2      = 10;
 w3      = 10;
-w4      = 5;
-w5      = 2;
+w4      = 10;
+w5      = 10;
 w6      = 10;
 w7      = 10;
 w8      = 10;
-w9      = 5;
-w10     = 2;
+w9      = 10;
+w10     = 10;
 
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
