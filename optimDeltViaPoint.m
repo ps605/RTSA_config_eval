@@ -86,10 +86,17 @@ end
 
 % DELT1 moment arm before any optimisation
 for i_angle = 1:length(data_adb_RTSA.angles)
+
+    osim_model.updCoordinateSet().get('elv_angle').setValue(init_state, 0, true);
     osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_adb_RTSA.angles(i_angle)));
     osim_model.realizePosition(init_state);
 
     model_abd_MA_init.DELT1(i_angle) = delt1_GP.computeMomentArm(init_state,shoulder_elv);
+
+    osim_model.updCoordinateSet().get('elv_angle').setValue(init_state, deg2rad(70), true);
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_flx_RTSA.angles(i_angle)));
+    osim_model.realizePosition(init_state);
+
     model_flx_MA_init.DELT1(i_angle) = delt1_GP.computeMomentArm(init_state,elv_angle);
 
 end
@@ -128,10 +135,17 @@ end
 
 % DELT2 moment arm before any optimisation
 for i_angle = 1:length(data_adb_RTSA.angles)
+
+    osim_model.updCoordinateSet().get('elv_angle').setValue(init_state, 0, true);
     osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_adb_RTSA.angles(i_angle)));
     osim_model.realizePosition(init_state);
 
     model_abd_MA_init.DELT2(i_angle) = delt2_GP.computeMomentArm(init_state,shoulder_elv);
+
+    osim_model.updCoordinateSet().get('elv_angle').setValue(init_state, deg2rad(70), true);
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_flx_RTSA.angles(i_angle)));
+    osim_model.realizePosition(init_state);
+
     model_flx_MA_init.DELT2(i_angle) = delt2_GP.computeMomentArm(init_state,elv_angle);
 
 end
@@ -174,10 +188,17 @@ end
 
 % DELT3 moment arm before any optimisation
 for i_angle = 1:length(data_adb_RTSA.angles)
+
+    osim_model.updCoordinateSet().get('elv_angle').setValue(init_state, 0, true);
     osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_adb_RTSA.angles(i_angle)));
     osim_model.realizePosition(init_state);
 
     model_abd_MA_init.DELT3(i_angle) = delt3_GP.computeMomentArm(init_state,shoulder_elv);
+
+    osim_model.updCoordinateSet().get('elv_angle').setValue(init_state, deg2rad(70), true);
+    osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_flx_RTSA.angles(i_angle)));
+    osim_model.realizePosition(init_state);
+
     model_flx_MA_init.DELT3(i_angle) = delt3_GP.computeMomentArm(init_state,elv_angle);
 
 end
@@ -193,12 +214,12 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT1 == true
     % Search radius around init location
-    radius = 0.025; %0.025
+    radius = 0.035; %0.025
     p_sim_0 = delt1_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
-    lb(3) = p_sim_0(3);
+%     lb(3) = p_sim_0(3);
 
     figure(101);
     hold on
@@ -282,14 +303,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT2 == true
     % Search radius around init location
-    radius = 0.025;
+    radius = 0.035;
     p_sim_0 = delt2_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
-    ub(1) = p_sim_0(1);
-    ub(2) = p_sim_0(2);
-    lb(3) = p_sim_0(3);
+%     ub(1) = p_sim_0(1);
+%     ub(2) = p_sim_0(2);
+%     lb(3) = p_sim_0(3);
 
     figure(101);
     hold on
@@ -411,12 +432,12 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT3 == true
     % Search radius around init location
-    radius = 0.025;
+    radius = 0.035;
     p_sim_0 = delt3_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
-    ub(1) = p_sim_0(1);
+%     ub(1) = p_sim_0(1);
     %     lb(3) = p_sim_0(3);
 
     figure(101);
@@ -537,9 +558,15 @@ if flag_DELT3 == true
     end
 
 end
-%% Print out model
+%% Print out model and save figures
 osim_model.print(model_file);
 % osim_model.print([model_file(1:end-5) '_wtf.osim']);
 
+saveas(figure(2),['C:\Users\lab\Pavlos\Research\UVic\Project_RTSA_config_eval\OpenSim\Out\Verification_Validation\Moment_arms\DELT1_shoulder_elv_10-10_' model_file(end-15:end-5) '.tif'],'tif')
+saveas(figure(3),['C:\Users\lab\Pavlos\Research\UVic\Project_RTSA_config_eval\OpenSim\Out\Verification_Validation\Moment_arms\DELT1_elv_angle_10-10_' model_file(end-15:end-5) '.tif'],'tif')
+saveas(figure(4),['C:\Users\lab\Pavlos\Research\UVic\Project_RTSA_config_eval\OpenSim\Out\Verification_Validation\Moment_arms\DELT2_shoulder_elv_10-10_' model_file(end-15:end-5) '.tif'],'tif')
+saveas(figure(5),['C:\Users\lab\Pavlos\Research\UVic\Project_RTSA_config_eval\OpenSim\Out\Verification_Validation\Moment_arms\DELT2_elv_angle_10-10_' model_file(end-15:end-5) '.tif'],'tif')
+saveas(figure(6),['C:\Users\lab\Pavlos\Research\UVic\Project_RTSA_config_eval\OpenSim\Out\Verification_Validation\Moment_arms\DELT3_shoulder_elv_10-10_' model_file(end-15:end-5) '.tif'],'tif')
+saveas(figure(7),['C:\Users\lab\Pavlos\Research\UVic\Project_RTSA_config_eval\OpenSim\Out\Verification_Validation\Moment_arms\DELT3_elv_angle_10-10_' model_file(end-15:end-5) '.tif'],'tif')
 disp(opt_via);
 end
