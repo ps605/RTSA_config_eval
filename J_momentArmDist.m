@@ -19,6 +19,7 @@ w10     = 10;
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
 elv_angle    = osim_model.getCoordinateSet().get('elv_angle');
+dummy_coord  =  osim_model.getCoordinateSet().get('dummy_coord');
 
 % Get muscle handles
 deltx = osim_model.getMuscles.get(muscle_name);
@@ -63,7 +64,7 @@ osim_model.updCoordinateSet().get('elv_angle').setValue(new_state, deg2rad(70), 
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_abd_RTSA.angles(1)), true);
 osim_model.realizePosition(new_state);
 
-delt_flx_MA.pos1 = delt_GP.computeMomentArm(new_state, elv_angle);
+delt_flx_MA.pos1 = delt_GP.computeMomentArm(new_state, dummy_coord);
 delt_flx_MA.diff1 = delt_flx_MA.pos1 - exp_flx_MA_mean(1);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 2 - 30 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -78,7 +79,7 @@ osim_model.updCoordinateSet().get('elv_angle').setValue(new_state, deg2rad(70), 
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_abd_RTSA.angles(2)), true);
 osim_model.realizePosition(new_state);
 
-delt_flx_MA.pos2 = delt_GP.computeMomentArm(new_state, elv_angle);
+delt_flx_MA.pos2 = delt_GP.computeMomentArm(new_state, dummy_coord);
 delt_flx_MA.diff2 = delt_flx_MA.pos2 - exp_flx_MA_mean(2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 3 - 60 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -93,7 +94,7 @@ osim_model.updCoordinateSet().get('elv_angle').setValue(new_state, deg2rad(70), 
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_abd_RTSA.angles(3)), true);
 osim_model.realizePosition(new_state);
 
-delt_flx_MA.pos3 = delt_GP.computeMomentArm(new_state, elv_angle);
+delt_flx_MA.pos3 = delt_GP.computeMomentArm(new_state, dummy_coord);
 delt_flx_MA.diff3 = delt_flx_MA.pos3 - exp_flx_MA_mean(3);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 4 - 90 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,7 +109,7 @@ osim_model.updCoordinateSet().get('elv_angle').setValue(new_state, deg2rad(70), 
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_abd_RTSA.angles(4)), true);
 osim_model.realizePosition(new_state);
 
-delt_flx_MA.pos4 = delt_GP.computeMomentArm(new_state, elv_angle);
+delt_flx_MA.pos4 = delt_GP.computeMomentArm(new_state, dummy_coord);
 delt_flx_MA.diff4 = delt_flx_MA.pos4 - exp_flx_MA_mean(4);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% POSITION 5 - 120 DEG %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -123,7 +124,7 @@ osim_model.updCoordinateSet().get('elv_angle').setValue(new_state, deg2rad(70), 
 osim_model.updCoordinateSet().get('shoulder_elv').setValue(new_state, deg2rad(data_abd_RTSA.angles(5)), true);
 osim_model.realizePosition(new_state);
 
-delt_flx_MA.pos5 = delt_GP.computeMomentArm(new_state, elv_angle);
+delt_flx_MA.pos5 = delt_GP.computeMomentArm(new_state, dummy_coord);
 delt_flx_MA.diff5 = delt_flx_MA.pos5 - exp_flx_MA_mean(5);
 
 % Assemble model

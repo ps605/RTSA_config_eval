@@ -53,6 +53,7 @@ delt3 = osim_model.getMuscles.get('DELT3');
 % Get coordinate handle
 shoulder_elv = osim_model.getCoordinateSet().get('shoulder_elv');
 elv_angle    = osim_model.getCoordinateSet().get('elv_angle');
+dummy_coord  =  osim_model.getCoordinateSet().get('dummy_coord');
 
 % Get PathPointSet(s)
 
@@ -97,7 +98,7 @@ for i_angle = 1:length(data_adb_RTSA.angles)
     osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_flx_RTSA.angles(i_angle)));
     osim_model.realizePosition(init_state);
 
-    model_flx_MA_init.DELT1(i_angle) = delt1_GP.computeMomentArm(init_state,elv_angle);
+    model_flx_MA_init.DELT1(i_angle) = delt1_GP.computeMomentArm(init_state,dummy_coord);
 
 end
 
@@ -146,7 +147,7 @@ for i_angle = 1:length(data_adb_RTSA.angles)
     osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_flx_RTSA.angles(i_angle)));
     osim_model.realizePosition(init_state);
 
-    model_flx_MA_init.DELT2(i_angle) = delt2_GP.computeMomentArm(init_state,elv_angle);
+    model_flx_MA_init.DELT2(i_angle) = delt2_GP.computeMomentArm(init_state,dummy_coord);
 
 end
 
@@ -199,7 +200,7 @@ for i_angle = 1:length(data_adb_RTSA.angles)
     osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_flx_RTSA.angles(i_angle)));
     osim_model.realizePosition(init_state);
 
-    model_flx_MA_init.DELT3(i_angle) = delt3_GP.computeMomentArm(init_state,elv_angle);
+    model_flx_MA_init.DELT3(i_angle) = delt3_GP.computeMomentArm(init_state,dummy_coord);
 
 end
 

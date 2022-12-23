@@ -84,6 +84,8 @@ if strcmp(coord_for_MA.getName(), 'shoulder_elv')
     end
 elseif strcmp(coord_for_MA.getName(), 'elv_angle')
     for i_angle = 1:length(data_RTSA.angles)
+        % Get handle to dummy coordinate
+        dummy_coord  =  osim_model.getCoordinateSet().get('dummy_coord');
 
         % Re-calculate moment arms at each of the poses
         %%%%%%%%%%%%%%%%%%% POS 1-5 - 2.5/30/60/90/120 DEG %%%%%%%%%%%%%%%%%%%%
@@ -91,7 +93,7 @@ elseif strcmp(coord_for_MA.getName(), 'elv_angle')
 
         osim_model.updCoordinateSet().get('shoulder_elv').setValue(init_state, deg2rad(data_RTSA.angles(i_angle)), true);
         osim_model.realizePosition(init_state);
-        model_MA_optim.DELTx(i_angle) = delt_GP.computeMomentArm(init_state,coord_for_MA);
+        model_MA_optim.DELTx(i_angle) = delt_GP.computeMomentArm(init_state, dummy_coord);
 
         % Initial MA
         scatter(data_RTSA.angles(i_angle) , model_MA_init(i_angle),'filled','o','red');
