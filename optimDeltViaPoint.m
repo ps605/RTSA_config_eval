@@ -215,12 +215,12 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT1 == true
     % Search radius around init location
-    radius = 0.035; %0.025
+    radius = 0.025; %0.025
     p_sim_0 = delt1_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
-%     lb(3) = p_sim_0(3);
+    lb(3) = p_sim_0(3);
 
     figure(101);
     hold on
@@ -304,13 +304,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT2 == true
     % Search radius around init location
-    radius = 0.035;
+    radius = 0.025;
     p_sim_0 = delt2_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
-%     ub(1) = p_sim_0(1);
-%     ub(2) = p_sim_0(2);
+    ub(1) = p_sim_0(1) + radius/2;
+%     ub(2) = p_sim_0(2) + radius/2;
 %     lb(3) = p_sim_0(3);
 
     figure(101);
@@ -433,13 +433,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT3 == true
     % Search radius around init location
-    radius = 0.035;
+    radius = 0.025;
     p_sim_0 = delt3_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
 %     ub(1) = p_sim_0(1);
-    %     lb(3) = p_sim_0(3);
+    lb(3) = p_sim_0(3);
 
     figure(101);
     hold on

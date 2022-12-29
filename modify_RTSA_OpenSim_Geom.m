@@ -34,7 +34,7 @@ clc;
 % Time the run
 time_i = datetime;
 %% Set-up
-
+set(0,'DefaultFigureVisible','on');
 %%%%%%%%%%%%%%%%% Create parameter combinations for loops %%%%%%%%%%%%%%%%%
 design_param.diameter                   = {0.039};
 
@@ -237,10 +237,10 @@ if flag_useParallel == true
 
         % Define parametric implant on .stl anatomy & extract parameters in global
         humerus = humerusGeom(R, hemi_cup_offsets, rhash);
-
+       
         % Read in defined implant parameters and .stl and calculate GHJ centre
         [GHJ_in_parent, GHJ_in_child] = jointCalculationGH(scapula,humerus);
-
+       
         % Define OpenSim model with new GHJ parameters from 'Virtual Surgery'
         model_file = adjustOpenSimModelGHJ(GHJ_in_parent,...
             scapula.glenoid_plane_normals.theta,...
