@@ -129,6 +129,10 @@ for i_point = 0:delt2_PPS_size-1
             delt2_via_downCast.get_location().get(1),...
             delt2_via_downCast.get_location().get(2)];
 
+    elseif strcmp(point_name, 'default')
+
+        point_count_low = i_point;
+
     else
         continue
     end
@@ -152,12 +156,12 @@ for i_angle = 1:length(data_adb_RTSA.angles)
 end
 
 % Delete via point
-if flag_delt2ViaDelete == true
-   delt2_GP.deletePathPoint(init_state, point_count_3);
+% if flag_delt2ViaDelete == true
+   delt2_GP.deletePathPoint(init_state, point_count_low);
    osim_model.initSystem();
    osim_model.finalizeConnections();
    osim_model.initSystem();
-end
+% end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get GeometryPath to calculate MomentArm later
@@ -309,9 +313,9 @@ if flag_DELT2 == true
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
-    ub(1) = p_sim_0(1) + radius/2;
-%     ub(2) = p_sim_0(2) + radius/2;
-%     lb(3) = p_sim_0(3);
+%     ub(1) = p_sim_0(1) + radius/2;
+    ub(2) = p_sim_0(2);
+    lb(3) = p_sim_0(3);
 
     figure(101);
     hold on

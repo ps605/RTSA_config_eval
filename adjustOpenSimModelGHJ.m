@@ -222,7 +222,7 @@ end
 shoulder2 = osim_model.getJointSet.get('shoulder2');
 shoulder2_dc = CustomJoint.safeDownCast(shoulder2);
 
-new_axis = Vec3(0,0,1,0,2,1);
+new_axis = Vec3(0,0,1);
 dummy_coord = Coordinate();
 dummy_coord.setName('dummy_coord')
 % dummy_coord_name = ArrayStr('dummy_coord');
