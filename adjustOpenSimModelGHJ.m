@@ -14,7 +14,10 @@ function new_model_file = adjustOpenSimModelGHJ(GHJ_in_parent, GHJ_in_parent_rot
 import org.opensim.modeling.*
 
 % Baseline model file
-model_name = 'FullShoulderModel_glC.osim'; %'FullShoulderModelglC_understand_jointDefs_implant.osim';_viaRTSA
+model_name = 'FullShoulderModel_glC_viaRTSA.osim'; %'FullShoulderModelglC_understand_jointDefs_implant.osim';_viaRTSA
+
+% Flags
+flag_AddDummyCoord = false;
 
 % To change JCS position and relative geometry
 conds_GHJ_geom.tran = [
@@ -50,12 +53,12 @@ clear i_coord
 %% Add CoordinateActuators (or Reserve) depending if muscles are used in % simulation (torque_flag == false)
 if flag_useTorque==true
 
-%     % Remove Muscles and replace with Actuators
-%     createTorqueDrivenModel(osim_model,...
-%         coords_to_actuate,...
-%         actuator_values,...
-%         actuator_controls,...
-%         '_torque');
+    %     % Remove Muscles and replace with Actuators
+    %     createTorqueDrivenModel(osim_model,...
+    %         coords_to_actuate,...
+    %         actuator_values,...
+    %         actuator_controls,...
+    %         '_torque');
 
 else
 
@@ -218,29 +221,30 @@ for i_joint = 1:numel(joints_to_alter)
 
 end
 
-% Add Lateral Axis coord to Shoulder
-shoulder2 = osim_model.getJointSet.get('shoulder2');
-shoulder2_dc = CustomJoint.safeDownCast(shoulder2);
+if flag_AddDummyCoord == true
+    % Add Lateral Axis coord to Shoulder
+    shoulder2 = osim_model.getJointSet.get('shoulder2');
+    shoulder2_dc = CustomJoint.safeDownCast(shoulder2);
 
-new_axis = Vec3(0,0,1);
-dummy_coord = Coordinate();
-dummy_coord.setName('dummy_coord')
-% dummy_coord_name = ArrayStr('dummy_coord');
+    new_axis = Vec3(0,0,1);
+    dummy_coord = Coordinate();
+    dummy_coord.setName('dummy_coord')
+    % dummy_coord_name = ArrayStr('dummy_coord');
 
-shoulder2_dc.set_coordinates(1,dummy_coord)
+    shoulder2_dc.set_coordinates(1,dummy_coord)
 
-shoulder2_dc.upd_SpatialTransform().upd_rotation3.set_coordinates(0,'dummy_coord');
-shoulder2_dc.upd_SpatialTransform().upd_rotation3.set_axis(new_axis);
+    shoulder2_dc.upd_SpatialTransform().upd_rotation3.set_coordinates(0,'dummy_coord');
+    shoulder2_dc.upd_SpatialTransform().upd_rotation3.set_axis(new_axis);
 
-coeffs = ArrayDouble();
-coeffs.set(0,1);
-coeffs.set(1,0);
+    coeffs = ArrayDouble();
+    coeffs.set(0,1);
+    coeffs.set(1,0);
 
-coord_func = LinearFunction();
-% coord_func_dc = Function.safeDownCast(coord_func);
-coord_func.setCoefficients(coeffs);
-shoulder2_dc.upd_SpatialTransform().upd_rotation3.set_function(coord_func);
-
+    coord_func = LinearFunction();
+    % coord_func_dc = Function.safeDownCast(coord_func);
+    coord_func.setCoefficients(coeffs);
+    shoulder2_dc.upd_SpatialTransform().upd_rotation3.set_function(coord_func);
+end
 %% Update muscle locationtions and (initial) via-point locations
 % SSM scapula muscle locations
 muscle_locs = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '_muscle_coords.txt'], ' ');
@@ -302,8 +306,9 @@ for i_muscle = 0:muscle_set.getSize()-1
             if strcmp(point_name(end-2:end), 'via') && strcmp('DELT2', char(muscle.getName))
 
                 % Via point offset from the scap muscle attachement -
-                % calculated manually offline
-                delt2_via_off = [-0.001, -0.0016, 0.0169];
+                % calculated manually offline ( offset = via_point - origin
+                % on optimised via point model)
+                delt2_via_off = [0.0115, -0.0043, 0.0169];
                 location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1) + delt2_via_off(1),...
                     muscle_locs(idx_muscle_data,2) + delt2_via_off(2),...
                     muscle_locs(idx_muscle_data,3) + delt2_via_off(3));
@@ -312,8 +317,9 @@ for i_muscle = 0:muscle_set.getSize()-1
             elseif strcmp(point_name(end-2:end), 'via') && strcmp('DELT3', char(muscle.getName))
 
                 % Via point offset from the scap muscle attachement -
-                % calculated manually offline
-                delt3_via_off = [-0.0131, -0.0222, 0.0444];
+                % calculated manually offline ( offset = via_point - origin
+                % on optimised via point model)
+                delt3_via_off = [0.0088, -0.0073, 0.0276];
                 location_Vec3 = Vec3(muscle_locs(idx_muscle_data,1) + delt3_via_off(1),...
                     muscle_locs(idx_muscle_data,2) + delt3_via_off(2),...
                     muscle_locs(idx_muscle_data,3) + delt3_via_off(3));
