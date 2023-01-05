@@ -19,6 +19,8 @@ flag_delt1ViaDelete = false;
 flag_delt2ViaDelete = false;
 flag_delt3ViaDelete = false;
 
+flag_delt2ViaLow    = true;
+flag_delt3ViaLow    = false;
 % Get model
 import org.opensim.modeling.*
 
@@ -156,12 +158,12 @@ for i_angle = 1:length(data_adb_RTSA.angles)
 end
 
 % Delete via point
-% if flag_delt2ViaDelete == true
+if flag_delt2ViaLow == true
    delt2_GP.deletePathPoint(init_state, point_count_low);
    osim_model.initSystem();
    osim_model.finalizeConnections();
    osim_model.initSystem();
-% end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get GeometryPath to calculate MomentArm later
@@ -185,6 +187,10 @@ for i_point = 0:delt3_PPS_size-1
         delt3_via_loc = [delt3_via_downCast.get_location().get(0),...
             delt3_via_downCast.get_location().get(1),...
             delt3_via_downCast.get_location().get(2)];
+
+    elseif strcmp(point_name, 'DELT3-P2_low')
+
+        pointD3_count_low = i_point;
 
     else
         continue
@@ -211,6 +217,13 @@ end
 % Delete via point
 if flag_delt3ViaDelete == true
    delt3_GP.deletePathPoint(init_state, point_count_3);
+   osim_model.initSystem();
+   osim_model.finalizeConnections();
+   osim_model.initSystem();
+end
+
+if flag_delt3ViaLow == true
+   delt3_GP.deletePathPoint(init_state, pointD3_count_low);
    osim_model.initSystem();
    osim_model.finalizeConnections();
    osim_model.initSystem();
@@ -313,7 +326,7 @@ if flag_DELT2 == true
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
-%     ub(1) = p_sim_0(1) + radius/2;
+    ub(1) = p_sim_0(1) + radius/2;
     ub(2) = p_sim_0(2);
     lb(3) = p_sim_0(3);
 
@@ -437,13 +450,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELT3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_DELT3 == true
     % Search radius around init location
-    radius = 0.025;
+    radius = 0.05;
     p_sim_0 = delt3_via_loc;
 
     ub = p_sim_0 + radius;% delt1_via_loc + radius;%[0.05, 0.05, 0.05];
     lb = p_sim_0 - radius; %delt1_via_loc - radius;%[-0.05, -0.05, -0.05];
 %     ub(1) = p_sim_0(1);
-    lb(3) = p_sim_0(3);
+%     ub(2) = p_sim_0(2);
+%     lb(3) = p_sim_0(3);
 
     figure(101);
     hold on

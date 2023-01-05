@@ -82,8 +82,8 @@ design_param.humerus_ant_retro_version  = {0};
 % scapula_morphologies = scapula_morphologies(randperm(numel(scapula_morphologies)));
 
 motion_tasks                            = {
-                                           %'UpwardReach',...
-                                           %'LateralReach',...
+                                           'UpwardReach',...
+                                           'LateralReach',...
                                            'HairTouch'
                                             };
 
@@ -140,7 +140,7 @@ flag_keepRC             = false;
 flag_ReplaceMuscles     = true;
 
 % Run Moco after model is defined?
-flag_runSim             = false;
+flag_runSim             = true;
 
 % Correct morphology's Version / Inclination angles and 12 mm rule
 flag_correctVersion     = false;
@@ -149,7 +149,7 @@ flag_correctProxDist    = true;
 flag_correctLateral     = true;
 
 % Optimise DELT1, DELT2 and DELT3 via points
-flag_viaPointOpt        = true;
+flag_viaPointOpt        = false;
 
 flag_DELT1              = true; % Optimises position of via-point
 flag_DELT2              = true; % Optimises or Deletes via-point
