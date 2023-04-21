@@ -4,7 +4,7 @@
 
 ![converged_RTSA_C95kco121ij_gif](https://user-images.githubusercontent.com/30126218/193943443-6037a2a0-08df-469d-99ed-ceb3e39c7210.gif)
 
-[Silvestros et al., 2022]
+[Silvestros P., Athwal G.S and Giles J.W., 2023; Journal of Orthopaedic Research (Under Review)]
 
 This is a project that aims to improve surgical pre-operative planning technology by progressing for pure geometrical surgery planning to functional and biomechanical outcome based planning.
 
