@@ -1,26 +1,26 @@
-function runRTSAsims(model_file, rhash, flag_keepRC, task_name)
-%runRTSAsims Summary of this function goes here
-%   Detailed explanation goes here
-
-
+function runRTSAtrack(model_file, rhash, flag_keepRC, task_name)
 %% Set-up
 
 % Import OpenSim 4.3 libraries
 import org.opensim.modeling.*
-
+% model_file='..\..\OpenSim\In\Models\RTSA_Adjusted\FSModel_GHJoint_H02nwk890vg.osim'
 osim_model = Model(model_file);
 
 %% Simulation
 
 % Moco
-study=MocoStudy();
-
-% Initialise and Access optimisation Problem
-problem=study.updProblem();
+track = MocoTrack();
 
 % Pass Model (system dynamics) to Problem
-problem.setModel(osim_model);
+track.setModel(ModelProcessor(osim_model));
 
+% Set reference states 
+track.setStatesReference(TableProcessor('..\..\OpenSim\Out\Moco\Analysis\paper_v02\Final\sim_U94wbx134tf\RSA_U94wbx134tf_StatesReporter_states.sto'))
+
+study = track.initialize();
+
+% Initialise and Access optimisation Problem
+problem = study.updProblem();
 %% Bounds and constraints
 
 % Set time bounds

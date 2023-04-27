@@ -279,7 +279,7 @@ for i_muscle = 0:muscle_set.getSize()-1
     if isempty(idx_muscle_data)
         continue
     end
-
+    
     % Get muscle path points
     muscle_PathPointSet = muscle.getGeometryPath().getPathPointSet();
 

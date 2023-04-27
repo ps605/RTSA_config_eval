@@ -19,7 +19,7 @@ flag_delt1ViaDelete = false;
 flag_delt2ViaDelete = false;
 flag_delt3ViaDelete = false;
 
-flag_delt2ViaLow    = true;
+flag_delt2ViaLow    = false;
 flag_delt3ViaLow    = false;
 % Get model
 import org.opensim.modeling.*

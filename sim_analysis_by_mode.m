@@ -12,9 +12,9 @@ clc
 % Flags
 flag_AnalysisTool   = false;
 flag_NormTime       = true;
-flag_HairTouch      = true; 
-flag_LateralReach   = false; 
-flag_UpwardReach    = false; 
+flag_HairTouch      = true;
+flag_LateralReach   = false;
+flag_UpwardReach    = false;
 flag_AddDummyCoord  = true;
 % Import OpenSim 4.3 libraries
 import org.opensim.modeling.*
@@ -54,6 +54,8 @@ jrf_colours = [255,109,106;
     222, 235, 247;
     221,160,221]./255;
 
+axis_label_size = 18;
+line_width = 2.5;
 
 jointF_to_plot = {'unrothum_on_scapula_in_scapula_offset_fx'...
     'unrothum_on_scapula_in_scapula_offset_fy',...
@@ -147,8 +149,8 @@ elseif flag_LateralReach == true
         [-10 10], [-50 45]}; % shoulder_rot
 
     y_lims_muscle_force = {[0, 100],...
-        [0, 600],...
-        [0, 150]};
+        [0, 400],...
+        [0, 400]};
 
     y_lims_muscle_lengths = {[0.13, 0.22],...
         [0.10, 0.18],...
@@ -181,15 +183,15 @@ elseif flag_UpwardReach == true
     y_lims_force = {[-400, 200],...
         [0, 500],...
         [0, 1100],...
-        [0, 1200]};
+        [0, 800]};
 
     y_lims_q = {[0 90], [0 120];...
         [0 70], [-40 60];...
         [0 45], [-50 45]};
 
-    y_lims_muscle_force = {[0, 100],...
+    y_lims_muscle_force = {[0, 150],...
         [0, 600],...
-        [0, 150]};
+        [0, 250]};
 
     y_lims_muscle_lengths = {[0.13, 0.22],...
         [0.10, 0.18],...
@@ -249,14 +251,14 @@ if flag_AnalysisTool == true
 
             % Re name file with dummy coord
             modle_file_dCoord = ['..\..\OpenSim\In\Models\RTSA_Adjusted\FSModel_GHJoint_' log_table.Model_Hash{i_sim} '_dummyCoord.osim'];
-            
+
             % Re-assemble model
             osim_model.finalizeConnections()
             osim_model.print(modle_file_dCoord);
 
         end
 
-        
+
         solution_file = [analysis_folder ['sim_' log_table.Model_Hash{i_sim}] '/MocoSol_' task_name '.sto'];
 
         states_storage=Storage(solution_file);
@@ -291,18 +293,18 @@ if flag_AnalysisTool == true
 
         analyzeTool.setResultsDir(['..\..\OpenSim\Out\Moco\Analysis\paper_v02\Final\' ['sim_' log_table.Model_Hash{i_sim}] '\']);
 
-%         JR_Analysis = analyzeTool.updAnalysisSet.get(0);
-%         JR_downCast = JointReaction.safeDownCast(JR_Analysis);
-%         JR_downCast.setEndTime(time_array.getLast);
-%         JR_downCast.setInFrame(in_frames);
-%         JR_downCast.setOnBody(on_bodies);
-%         JR_downCast.setJointNames(joints);
-% 
-%         FR = analyzeTool.updAnalysisSet.get(1);
-%         FR.setEndTime(time_array.getLast);
-% 
-%         MA = analyzeTool.updAnalysisSet.get(2);
-%         MA.setEndTime(time_array.getLast);
+        %         JR_Analysis = analyzeTool.updAnalysisSet.get(0);
+        %         JR_downCast = JointReaction.safeDownCast(JR_Analysis);
+        %         JR_downCast.setEndTime(time_array.getLast);
+        %         JR_downCast.setInFrame(in_frames);
+        %         JR_downCast.setOnBody(on_bodies);
+        %         JR_downCast.setJointNames(joints);
+        %
+        %         FR = analyzeTool.updAnalysisSet.get(1);
+        %         FR.setEndTime(time_array.getLast);
+        %
+        %         MA = analyzeTool.updAnalysisSet.get(2);
+        %         MA.setEndTime(time_array.getLast);
 
         % Print and read back in as bug workaround
         analyzeTool.print('runAnalyzeTool.xml');
@@ -331,8 +333,8 @@ for i_sim = 1 : num_sims
     % Get time
     if flag_NormTime == true
         time_vec = linspace(0, 100, 101)';
-        JRA.(['sim_' log_table.Model_Hash{i_sim}]).time_og = 100*joint_reaction.data(:,1)/max(joint_reaction.data(:,1));
-        JRA.(['sim_' log_table.Model_Hash{i_sim}]).time = 100*joint_reaction.data(:,1)/max(joint_reaction.data(:,1));
+        JRA.(['sim_' log_table.Model_Hash{i_sim}]).time_og = 100*(joint_reaction.data(:,1)/max(joint_reaction.data(:,1)));
+        JRA.(['sim_' log_table.Model_Hash{i_sim}]).time = 100*(joint_reaction.data(:,1)/max(joint_reaction.data(:,1)));
     else
         JRA.(['sim_' log_table.Model_Hash{i_sim}]).time = joint_reaction.data(:,1);
     end
@@ -369,11 +371,11 @@ for i_sim = 1 : num_sims
         % Create JRF plots
         figure (i_joint)
 
-        plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, JRA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint), 'LineWidth', 1.5, 'Color', jrf_colours(i_joint,:))
+        plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, JRA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint), 'LineWidth', line_width, 'Color', jrf_colours(i_joint,:))
 
         hold on;
-        xlabel('Movement Duration (%)', 'FontWeight', 'bold');
-        ylabel(['JRF [' jointF_to_plot{i_joint}(end) '] (N)'], 'FontWeight', 'bold');
+        xlabel('Movement Duration (%)', 'FontWeight', 'bold', 'FontSize', axis_label_size);
+        ylabel(['JRF [' jointF_to_plot{i_joint}(end) '] (N)'], 'FontWeight', 'bold', 'FontSize', axis_label_size);
         ylim(y_lims_force{i_joint});
         hold on;
 
@@ -399,12 +401,12 @@ for i_sim = 1 : num_sims
 
     figure(4)
 
-    plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, JRA.(['sim_' log_table.Model_Hash{i_sim}]).F_res, 'LineWidth', 1.5, 'Color', jrf_colours(4,:))
+    plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, JRA.(['sim_' log_table.Model_Hash{i_sim}]).F_res, 'LineWidth', line_width, 'Color', jrf_colours(4,:))
 
     hold on;
     %scatter(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(JRA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-    xlabel('Movement Duration (%)','FontWeight', 'bold');
-    ylabel('JRF [Resultant] (N)','FontWeight', 'bold');
+    xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+    ylabel('Resultant JRF (N)','FontWeight', 'bold','FontSize', axis_label_size);
     ylim(y_lims_force{4});
     hold on;
 
@@ -412,72 +414,83 @@ for i_sim = 1 : num_sims
 
     figure (11)
 
-    plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, shoulder_elv_theta.(['sim_' log_table.Model_Hash{i_sim}]), 'LineWidth', 1.5, 'Color', jrf_colours(1,:))
+    plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, shoulder_elv_theta.(['sim_' log_table.Model_Hash{i_sim}]), 'LineWidth', line_width, 'Color', jrf_colours(1,:))
 
     hold on;
     ylim(y_lims_q{1,2});
-    xlabel('Movement Duration (%)','FontWeight', 'bold');
-    ylabel(['Glenohumeral Elevation (' char(176) ')'],'FontWeight', 'bold');
+    xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+    ylabel(['Shoulder Elevation (' char(176) ')'],'FontWeight', 'bold','FontSize', axis_label_size);
     hold on;
 
     figure (12)
 
-    plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, elv_angle_theta.(['sim_' log_table.Model_Hash{i_sim}]), 'LineWidth', 1.5, 'Color', jrf_colours(2,:))
+    plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, elv_angle_theta.(['sim_' log_table.Model_Hash{i_sim}]), 'LineWidth', line_width, 'Color', jrf_colours(2,:))
 
     hold on;
     ylim(y_lims_q{2,2});
-    xlabel('Movement Duration (%)','FontWeight', 'bold');
-    ylabel(['Forward Flexion (' char(176) ')'],'FontWeight', 'bold');
+    xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+    ylabel(['Elevation Plane (' char(176) ')'],'FontWeight', 'bold','FontSize', axis_label_size);
     hold on;
 
     figure (13)
 
-    plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, shoulder_rot_theta.(['sim_' log_table.Model_Hash{i_sim}]), 'LineWidth', 1.5, 'Color', jrf_colours(3,:))
+    plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, shoulder_rot_theta.(['sim_' log_table.Model_Hash{i_sim}]), 'LineWidth', line_width, 'Color', jrf_colours(3,:))
 
     hold on;
     ylim(y_lims_q{3,2});
-    xlabel('Movement Duration (%)','FontWeight', 'bold');
-    ylabel(['Shoulder Rotation (' char(176) ')'],'FontWeight', 'bold');
+    xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+    ylabel(['Shoulder Rotation (' char(176) ')'],'FontWeight', 'bold','FontSize', axis_label_size);
     hold on;
 
 end
 
 % Plot mean scapula data on top of other trials
 figure(1)
-plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', line_width, 'Color', 'black')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(1), [analysis_folder task_name '/Fx_norm.tiff'],'tiff')
 
 figure(2)
-plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', line_width, 'Color', 'black')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(2), [analysis_folder task_name '/Fy_norm.tiff'],'tiff')
 
 figure(3)
-plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', line_width, 'Color', 'black')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(3), [analysis_folder task_name '/Fz_norm.tiff'],'tiff')
 
 figure(4)
-plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).F_res(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).F_res(:, 1), 'LineWidth', line_width, 'Color', 'black')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(4), [analysis_folder task_name '/Fres_norm.tiff'],'tiff')
 
 figure(11)
-plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(11), [analysis_folder task_name '/shoulder_elv_norm.tiff'],'tiff')
 
 figure(12)
-plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, elv_angle_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, elv_angle_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);['sim_' log_table.Model_Hash{idx_sim_table}]
 saveas(figure(12), [analysis_folder task_name '/elv_ang_norm.tiff'],'tiff')
 
 figure(13)
-plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_rot_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_rot_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(13), [analysis_folder task_name '/shoulder_rot_norm.tiff'],'tiff')
 
+save([analysis_folder task_name '/data_JRA'], 'JRA')
+save([analysis_folder task_name '/data_shoulder_elv_theta'], 'shoulder_elv_theta')
+save([analysis_folder task_name '/data_elv_angle_theta'], "elv_angle_theta")
+save([analysis_folder task_name '/data_shoulder_rot_theta'], "shoulder_rot_theta")
 close all
 
 %% By mode
@@ -492,21 +505,21 @@ for i_mode = 1:numel(modes)
         for i_joint = 1:3
 
             figure (i_joint)
-            subplot(2,3, i_mode) % subplot(6,3, i_mode + (i_mode -1)*2)
+%             subplot(2,3, i_mode) % subplot(6,3, i_mode + (i_mode -1)*2)
             plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
                 JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_joint), ...
-                'LineWidth', 1.5,...
+                'LineWidth', line_width,...
                 'Color', sd_colours(i_sd,:))
 
             %             plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]),...
             %                 JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_joint), ...
-            %                 'LineWidth', 1.5,...
+            %                 'LineWidth', line_width,...
             %                 'Color', sd_colours(i_sd,:))
 
             hold on;
             %             scatter(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(JRA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-            xlabel('Movement Duration (%)', 'FontWeight', 'bold');
-            ylabel(['JRF [' jointF_to_plot{i_joint}(end) '] (N)'], 'FontWeight', 'bold');
+            xlabel('Movement Duration (%)', 'FontWeight', 'bold','FontSize', axis_label_size);
+            ylabel(['JRF [' jointF_to_plot{i_joint}(end) '] (N)'], 'FontWeight', 'bold','FontSize', axis_label_size);
             ylim(y_lims_force{i_joint});
             title(modes{i_mode})
             hold on;
@@ -514,16 +527,16 @@ for i_mode = 1:numel(modes)
         end
 
         figure(4)
-        subplot(2,3, i_mode)
+%         subplot(2,3, i_mode)
         plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time, ...
             JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).F_res ,...
-            'LineWidth', 1.5, ...
+            'LineWidth', line_width, ...
             'Color', sd_colours(i_sd,:))
 
         hold on;
         %scatter(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(JRA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-        xlabel('Movement Duration (%)','FontWeight', 'bold');
-        ylabel('JRF [Resultant] (N)', 'FontWeight', 'bold');
+        xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+        ylabel('Resultant JRF (N)', 'FontWeight', 'bold','FontSize', axis_label_size);
         ylim(y_lims_force{4});
         %xlim([0 80])
         title(modes{i_mode})
@@ -531,64 +544,64 @@ for i_mode = 1:numel(modes)
 
         % Plot Force ratio
         figure(5)
-
+        
         fr = sqrt(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, 3).^2)./...
             (sqrt(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, 1).^2) + sqrt(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, 2).^2));
 
 
-        subplot(2,3, i_mode)
-        plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, fr, 'LineWidth', 1.5, 'Color', sd_colours(i_sd,:),'LineStyle', '--')
+%         subplot(2,3, i_mode)
+        plot(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time, fr, 'LineWidth', line_width, 'Color', sd_colours(i_sd,:),'LineStyle', '-')
         hold on
-        ylabel('JRF Compressive to Shear Ratio', 'FontWeight', 'bold');
-        xlabel('Movement Duration (%)','FontWeight', 'bold');
-        ylim([0, 2])
+        ylabel('FR', 'FontWeight', 'bold','FontSize', axis_label_size);
+        xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+        ylim([0, 1.6])
         title(modes{i_mode})
 
 
         % Plot shoulder_elv by mode
         figure(6)
-        subplot(2,3, i_mode)
+%         subplot(2,3, i_mode)
 
         plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time, ...
             shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]), ...
-            'LineWidth', 1.5, ...
+            'LineWidth', line_width, ...
             'Color', sd_colours(i_sd,:))
 
         hold on;
-        xlabel('Movement Duration (%)','FontWeight', 'bold');
-        ylabel(['Glenohumeral Elevation (' char(176) ')'], 'FontWeight', 'bold');
+        xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+        ylabel(['Shoulder Elevation (' char(176) ')'], 'FontWeight', 'bold','FontSize', axis_label_size);
         ylim(y_lims_q{1,1});
         title(modes{i_mode})
         hold on;
 
         % Plot elv_angle by mode
         figure(7)
-        subplot(2,3, i_mode)
+%         subplot(2,3, i_mode)
 
         plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time, ...
             elv_angle_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]), ...
-            'LineWidth', 1.5, ...
+            'LineWidth', line_width, ...
             'Color', sd_colours(i_sd,:))
 
         hold on;
-        xlabel('Movement Duration (%)','FontWeight', 'bold');
-        ylabel(['Forward Flexion (' char(176) ')'], 'FontWeight', 'bold');
+        xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+        ylabel(['Elevation Plane (' char(176) ')'], 'FontWeight', 'bold','FontSize', axis_label_size);
         ylim(y_lims_q{2,1});
         title(modes{i_mode})
         hold on;
 
         % Plot shoulder_rot by mode
         figure(8)
-        subplot(2,3, i_mode)
+%         subplot(2,3, i_mode)
 
         plot(JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).time, ...
             shoulder_rot_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]), ...
-            'LineWidth', 1.5, ...
+            'LineWidth', line_width, ...
             'Color', sd_colours(i_sd,:))
 
         hold on;
-        xlabel('Movement Duration (%)','FontWeight', 'bold');
-        ylabel(['Shoulder Rotation (' char(176) ')'], 'FontWeight', 'bold');
+        xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+        ylabel(['Shoulder Rotation (' char(176) ')'], 'FontWeight', 'bold','FontSize', axis_label_size);
         ylim(y_lims_q{3,1});
         title(modes{i_mode})
         hold on;
@@ -597,55 +610,65 @@ for i_mode = 1:numel(modes)
 
     % Average morphology data
     figure(1)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
     figure(2)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
     figure(3)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
     figure(4)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).F_res(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).F_res(:, 1), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 
     figure(5)
     fr_av = sqrt(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3).^2)./...
         (sqrt(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1).^2) + sqrt(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2).^2));
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, fr_av, 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, fr_av, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 
     figure(6)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', 1.5, 'Color', 'black')
+    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
     figure(7)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, elv_angle_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', 1.5, 'Color', 'black')
+    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, elv_angle_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
     figure(8)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_rot_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', 1.5, 'Color', 'black')
+    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_rot_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 
-    
+
+    figure(1)
+    set(gca,'FontWeight', 'bold')
+%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(1), [analysis_folder task_name '/Fx_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+    figure(2)
+    set(gca,'FontWeight', 'bold')
+%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(2), [analysis_folder task_name '/Fy_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+    figure(3)
+    set(gca,'FontWeight', 'bold')
+%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(3), [analysis_folder task_name '/Fz_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+    figure(4)
+    set(gca,'FontWeight', 'bold')
+%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(4), [analysis_folder task_name '/Fres_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+    figure(5)
+    set(gca,'FontWeight', 'bold')
+%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(5), [analysis_folder task_name '/FR_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+    figure(6)
+    set(gca,'FontWeight', 'bold')
+%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(6), [analysis_folder task_name '/shoulder_elv_norm_mode_' modes{i_mode} '.tiff'],'tiff')
+    figure(7)
+    set(gca,'FontWeight', 'bold')
+%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(7), [analysis_folder task_name '/elv_angle_norm_mode_' modes{i_mode} '.tiff'],'tiff')
+    figure(8)
+    set(gca,'FontWeight', 'bold')
+%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    saveas(figure(8), [analysis_folder task_name '/shoulder_rotation_norm_mode_' modes{i_mode} '.tiff'],'tiff')
+
+    close all
+
 end
 
-figure(1)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), [analysis_folder task_name '/Fx_vs_NORM_modes.tiff'],'tiff')
-figure(2)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), [analysis_folder task_name '/Fy_vs_NORM_modes.tiff'],'tiff')
-figure(3)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), [analysis_folder task_name '/Fz_vs_NORM_modes.tiff'],'tiff')
-figure(4)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(4), [analysis_folder task_name '/Fres_vs_NORM_modes.tiff'],'tiff')
-figure(5)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(5), [analysis_folder task_name '/FR_vs_NORM_modes.tiff'],'tiff')
-figure(6)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(6), [analysis_folder task_name '/shoulder_elv_norm_modes.tiff'],'tiff')
-figure(7)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(7), [analysis_folder task_name '/elv_angle_norm_modes.tiff'],'tiff')
-figure(8)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(8), [analysis_folder task_name '/shoulder_rotation_norm_modes.tiff'],'tiff')
 
-close all
 %% Analysis muscle forces
 for i_sim = 1: num_sims
 
@@ -664,8 +687,8 @@ for i_sim = 1: num_sims
 
         %%%%%%%%%%%%%%% To normalise %%%%%%%%%%%%%%%%%%%%%5
         if flag_NormTime == true
-            TF.(['sim_' log_table.Model_Hash{i_sim}]).time_og = 100*tendon_force.data(:,1)/max(tendon_force.data(:,1));
-            TF.(['sim_' log_table.Model_Hash{i_sim}]).time = 100*tendon_force.data(:,1)/max(tendon_force.data(:,1));
+            TF.(['sim_' log_table.Model_Hash{i_sim}]).time_og = 100*(tendon_force.data(:,1)/max(tendon_force.data(:,1)));
+            TF.(['sim_' log_table.Model_Hash{i_sim}]).time = 100*(tendon_force.data(:,1)/max(tendon_force.data(:,1)));
 
             TF.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus) = interp1(TF.(['sim_' log_table.Model_Hash{i_sim}]).time_og,...
                 tendon_force.data(:,TF.(['sim_' log_table.Model_Hash{i_sim}]).pos(i_mus)),...
@@ -681,12 +704,12 @@ for i_sim = 1: num_sims
         figure (i_mus)
 
 
-        plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time, TF.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+        plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time, TF.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus), 'LineWidth', line_width, 'Color', jrf_colours(i_mus,:))
 
         hold on;
         %         scatter(TF.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(TF.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-        xlabel('Movement Duratio, (%)', 'FontWeight', 'bold');
-        ylabel(['Total Tendon Force [' muscleF_to_plot{i_mus} '] (N)'], 'FontWeight', 'bold');
+        xlabel('Movement Duration (%)', 'FontWeight', 'bold','FontSize', axis_label_size);
+        ylabel('Tendon Force (N)', 'FontWeight', 'bold','FontSize', axis_label_size);
         hold on;
     end
 
@@ -695,76 +718,62 @@ end
 
 % Plot mean scapula data on top of other trials
 figure(1)
-plot(TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(1), [analysis_folder task_name '/Force_DELT1.tiff'],'tiff')
 figure(2)
-plot(TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(2), [analysis_folder task_name '/Force_DELT2.tiff'],'tiff')
 figure(3)
-plot(TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(3), [analysis_folder task_name '/Force_DELT3.tiff'],'tiff')
 
+save([analysis_folder task_name '/data_TF'], 'TF')
 close all
 
 %% By mode
-for i_mode = 1:numel(modes)
-    for i_sd = 1:numel(SDs)
+for i_mus = 1:3
+    for i_mode = 1:numel(modes)
+        for i_sd = 1:numel(SDs)
 
-        morphology = [modes{i_mode} '_' SDs{i_sd}];
+            morphology = [modes{i_mode} '_' SDs{i_sd}];
 
-        idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
+            idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
 
-        for i_mus = 1:3
-
-            figure (i_mus)
-%             subplot(2,3, i_mode)
-            %             plot(TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
-            %                 TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-            %                 'LineWidth', 1.5,...
-            %                 'Color', sd_colours(i_sd,:))
-
+            figure(1)
             plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time,...
                 TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-                'LineWidth', 1.5,...
+                'LineWidth', line_width,...
                 'Color', sd_colours(i_sd,:))
 
-            hold on;
-            %             scatter(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(JRA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-            xlabel('Movement Duration (%)','FontWeight', 'bold');
-            ylabel(['Total Muscle (Tendon) Force [' muscleF_to_plot{i_mus} '] (N)'], 'FontWeight', 'bold');
-            %             ylim(y_lims_muscle_force{i_mus});
-            title(modes{i_mode})
             hold on;
 
         end
 
+        figure(1)
+        plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 
+        xlabel('Movement Duration (%)','FontWeight', 'bold', 'FontSize', axis_label_size);
+        ylabel('Tendon Force (N)', 'FontWeight', 'bold', 'FontSize', axis_label_size);
+        ylim(y_lims_muscle_force{i_mus});
+        title(modes{i_mode})
+        hold on;
+
+        figure(1)
+        set(gca,'FontWeight', 'bold')
+        %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+        saveas(figure(1), [analysis_folder task_name '/Force_vs_ABD_DELT' num2str(i_mus) '_' num2str(modes{i_mode}) '.tiff'],'tiff')
+        close all
     end
 
-    figure(1)
-    plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
-    figure(2)
-    plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
-    figure(3)
-    plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 
 end
 
-
-figure(1)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), [analysis_folder task_name '/Force_vs_ABD_DELT1_modes.tiff'],'tiff')
-figure(2)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), [analysis_folder task_name '/Force_vs_ABD_DELT2_modes.tiff'],'tiff')
-figure(3)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), [analysis_folder task_name '/Force_vs_ABD_DELT3_modes.tiff'],'tiff')
-
-close all
 
 % % % % % % % % % %% Muscle Lengths
 % % % % % % % % % for i_sim = 1: num_sims
@@ -787,7 +796,7 @@ close all
 % % % % % % % % %         figure (i_mus)
 % % % % % % % % %
 % % % % % % % % %
-% % % % % % % % %         plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{i_sim}]), ML.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+% % % % % % % % %         plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{i_sim}]), ML.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus), 'LineWidth', line_width, 'Color', jrf_colours(i_mus,:))
 % % % % % % % % %
 % % % % % % % % %         hold on;
 % % % % % % % % %         %         scatter(TF.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(TF.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
@@ -801,15 +810,15 @@ close all
 % % % % % % % % %
 % % % % % % % % % % Plot mean scapula data on top of other trials
 % % % % % % % % % figure(1)
-% % % % % % % % % plot(ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+% % % % % % % % % plot(ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', line_width, 'Color', 'black')
 % % % % % % % % % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 % % % % % % % % % saveas(figure(1), [analysis_folder task_name '/Length_DELT1.tiff'],'tiff')
 % % % % % % % % % figure(2)
-% % % % % % % % % plot(ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+% % % % % % % % % plot(ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', line_width, 'Color', 'black')
 % % % % % % % % % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 % % % % % % % % % saveas(figure(2), [analysis_folder task_name '/Length_DELT2.tiff'],'tiff')
 % % % % % % % % % figure(3)
-% % % % % % % % % plot(ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+% % % % % % % % % plot(ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', line_width, 'Color', 'black')
 % % % % % % % % % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 % % % % % % % % % saveas(figure(3), [analysis_folder task_name '/Length_DELT3.tiff'],'tiff')
 % % % % % % % % %
@@ -831,12 +840,12 @@ close all
 % % % % % % % % %             subplot(2,3, i_mode)
 % % % % % % % % %             %             plot(ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
 % % % % % % % % %             %                 ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-% % % % % % % % %             %                 'LineWidth', 1.5,...
+% % % % % % % % %             %                 'LineWidth', line_width,...
 % % % % % % % % %             %                 'Color', sd_colours(i_sd,:))
 % % % % % % % % %
 % % % % % % % % %             plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]),...
 % % % % % % % % %                 ML.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-% % % % % % % % %                 'LineWidth', 1.5,...
+% % % % % % % % %                 'LineWidth', line_width,...
 % % % % % % % % %                 'Color', sd_colours(i_sd,:))
 % % % % % % % % %
 % % % % % % % % %             hold on;
@@ -853,11 +862,11 @@ close all
 % % % % % % % % %     end
 % % % % % % % % %
 % % % % % % % % %     figure(1)
-% % % % % % % % %     plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+% % % % % % % % %     plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % % % % % % % % %     figure(2)
-% % % % % % % % %     plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+% % % % % % % % %     plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % % % % % % % % %     figure(3)
-% % % % % % % % %     plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+% % % % % % % % %     plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), ML.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % % % % % % % % %
 % % % % % % % % % end
 % % % % % % % % %
@@ -889,8 +898,8 @@ for i_sim = 1: num_sims
 
         %%%%%%%%%%%%%%% To normalise %%%%%%%%%%%%%%%%%%%%%5
         if flag_NormTime == true
-            MAct.(['sim_' log_table.Model_Hash{i_sim}]).time_og = 100*muscle_activation.data(:,1)/max(muscle_activation.data(:,1));
-            MMActA.(['sim_' log_table.Model_Hash{i_sim}]).time = 100*muscle_activation.data(:,1)/max(muscle_activation.data(:,1));
+            MAct.(['sim_' log_table.Model_Hash{i_sim}]).time_og = 100*(muscle_activation.data(:,1)/max(muscle_activation.data(:,1)));
+            MMActA.(['sim_' log_table.Model_Hash{i_sim}]).time = 100*(muscle_activation.data(:,1)/max(muscle_activation.data(:,1)));
 
             MAct.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus) = interp1(MAct.(['sim_' log_table.Model_Hash{i_sim}]).time_og,...
                 muscle_activation.data(:,MAct.(['sim_' log_table.Model_Hash{i_sim}]).pos(i_mus)),...
@@ -906,13 +915,13 @@ for i_sim = 1: num_sims
         figure (i_mus)
 
 
-        plot(MAct.(['sim_' log_table.Model_Hash{i_sim}]).time, MAct.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
+        plot(MAct.(['sim_' log_table.Model_Hash{i_sim}]).time, MAct.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus) *100, 'LineWidth', line_width, 'Color', jrf_colours(i_mus,:))
 
         hold on;
         %         scatter(TF.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(TF.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-        xlabel('Movement Duration (%)','FontWeight', 'bold');
-        ylabel(['Muscle Activation [' muscleF_to_plot{i_mus} ']'], 'FontWeight', 'bold');
-        ylim([0, 1]);
+        xlabel('Movement Duration (%)','FontWeight', 'bold', 'FontSize', axis_label_size);
+        ylabel('Muscle Activation (%)' , 'FontWeight', 'bold', 'FontSize', axis_label_size);
+        ylim([0, 60]);
         hold on;
     end
 
@@ -921,150 +930,142 @@ end
 
 % Plot mean scapula data on top of other trials
 figure(1)
-plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1)*100, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(1), [analysis_folder task_name '/Activation_DELT1.tiff'],'tiff')
 figure(2)
-plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2)*100, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(2), [analysis_folder task_name '/Activation_DELT2.tiff'],'tiff')
 figure(3)
-plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+set(gca,'FontWeight', 'bold')
+plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3)*100, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 saveas(figure(3), [analysis_folder task_name '/Activation_DELT3.tiff'],'tiff')
 
+save([analysis_folder task_name '/data_MAct'], 'MAct')
 close all
 
 %% By mode
+for i_mus = 1:3
+    for i_mode = 1:numel(modes)
 
-for i_mode = 1:numel(modes)
+        for i_sd = 1:numel(SDs)
 
-    for i_sd = 1:numel(SDs)
+            morphology = [modes{i_mode} '_' SDs{i_sd}];
 
-        morphology = [modes{i_mode} '_' SDs{i_sd}];
+            idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
 
-        idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
+            figure (1)
 
-        for i_mus = 1:3
-
-            figure (i_mus)
-            subplot(2,3, i_mode)
             plot(MAct.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
-                MAct.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-                'LineWidth', 1.5,...
+                MAct.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*100, ...
+                'LineWidth', line_width,...
                 'Color', sd_colours(i_sd,:))
 
-            hold on;
-            %             scatter(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(JRA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-            xlabel('Movement Duration (%)','FontWeight', 'bold');
-            ylabel(['Muscle Activation [' muscleF_to_plot{i_mus} ']'], 'FontWeight', 'bold');
-            ylim([0, 1]);
-            title(modes{i_mode})
             hold on;
 
         end
 
+        figure(1)
+        plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus)*100, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+
+
+        xlabel('Movement Duration (%)','FontWeight', 'bold', 'FontSize', axis_label_size);
+        ylabel('Muscle Activation (%)' , 'FontWeight', 'bold', 'FontSize', axis_label_size);
+        ylim([0, 60]);
+        title(modes{i_mode})
+        hold on;
+        figure(1)
+        set(gca,'FontWeight', 'bold')
+        %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+        saveas(figure(1), [analysis_folder task_name '/Activation_DELT' num2str(i_mus) '_' num2str(modes{i_mode}) '.tiff'],'tiff')
+        close all
 
     end
-
-    figure(1)
-    plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
-    figure(2)
-    plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
-    figure(3)
-    plot(MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MAct.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 
 end
 
 
-figure(1)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(1), [analysis_folder task_name '/Activation_DELT1_modes.tiff'],'tiff')
-figure(2)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(2), [analysis_folder task_name '/Activation_DELT2_modes.tiff'],'tiff')
-figure(3)
-set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-saveas(figure(3), [analysis_folder task_name '/Activation_DELT3_modes.tiff'],'tiff')
-
-close all
 
 % % % %  %% Analysis muscle moment
 % % % % for i_coord = 1:numel(coords_to_plot)
-% % % % 
+% % % %
 % % % %     coord = coords_to_plot{i_coord};
-% % % % 
+% % % %
 % % % %     for i_sim = 1: num_sims
-% % % % 
+% % % %
 % % % %         % Import ForceReporter data
 % % % %         muscle_moment = importdata([analysis_folder ['sim_' log_table.Model_Hash{i_sim}] '/Moco_MuscleAnalysis_Moment_' coord '.sto']);
-% % % % 
+% % % %
 % % % %         % Get time
 % % % %         MM.(['sim_' log_table.Model_Hash{i_sim}]).time = muscle_moment.data(:,1);
-% % % % 
+% % % %
 % % % %         for i_mus = 1:numel(muscleF_to_plot)
 % % % %             % Get handle of coordinates to plot
 % % % %             MM.(['sim_' log_table.Model_Hash{i_sim}]).pos(:, i_mus) = find(contains(muscle_moment.colheaders, muscleF_to_plot{i_mus}));
 % % % %             MM.(['sim_' log_table.Model_Hash{i_sim}]).label{1,i_mus} = muscle_moment.colheaders{MM.(['sim_' log_table.Model_Hash{i_sim}]).pos(i_mus)};
-% % % % 
+% % % %
 % % % %             MM.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus) = muscle_moment.data(:,MM.(['sim_' log_table.Model_Hash{i_sim}]).pos(i_mus));
-% % % % 
-% % % % 
+% % % %
+% % % %
 % % % %             % Create q plots
 % % % %             figure (i_mus)
-% % % % 
-% % % % 
-% % % %             plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{i_sim}]), MM.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus), 'LineWidth', 1.5, 'Color', jrf_colours(i_mus,:))
-% % % % 
+% % % %
+% % % %
+% % % %             plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{i_sim}]), MM.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus), 'LineWidth', line_width, 'Color', jrf_colours(i_mus,:))
+% % % %
 % % % %             hold on;
 % % % %             %         scatter(TF.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(TF.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
 % % % %             xlabel('Time (s)');
 % % % %             ylabel(['Muscle Moment [' muscleF_to_plot{i_mus} '] (Nm)']);
 % % % %             hold on;
 % % % %         end
-% % % % 
+% % % %
 % % % %     end
-% % % % 
-% % % % 
+% % % %
+% % % %
 % % % %     % Plot mean scapula data on top of other trials
 % % % %     figure(1)
-% % % %     plot(MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black')
+% % % %     plot(MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', line_width, 'Color', 'black')
 % % % %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 % % % %     saveas(figure(1), [analysis_folder task_name '/Moment_DELT1_' coord '.tiff'],'tiff')
 % % % %     figure(2)
-% % % %     plot(MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black')
+% % % %     plot(MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', line_width, 'Color', 'black')
 % % % %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 % % % %     saveas(figure(2), [analysis_folder task_name '/Moment_DELT2_' coord '.tiff'],'tiff')
 % % % %     figure(3)
-% % % %     plot(MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black')
+% % % %     plot(MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', line_width, 'Color', 'black')
 % % % %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 % % % %     saveas(figure(3), [analysis_folder task_name '/Moment_DELT3_' coord '.tiff'],'tiff')
-% % % % 
+% % % %
 % % % %     close all
-% % % % 
+% % % %
 % % % %     %% By mode
 % % % %     for i_mode = 1:numel(modes)
-% % % % 
+% % % %
 % % % %         for i_sd = 1:numel(SDs)
-% % % % 
+% % % %
 % % % %             morphology = [modes{i_mode} '_' SDs{i_sd}];
-% % % % 
+% % % %
 % % % %             idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
-% % % % 
+% % % %
 % % % %             for i_mus = 1:3
-% % % % 
+% % % %
 % % % %                 figure (i_mus)
 % % % %                 subplot(2,3, i_mode)
 % % % %                 %                 plot(MM.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
 % % % %                 %                     MM.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-% % % %                 %                     'LineWidth', 1.5,...
+% % % %                 %                     'LineWidth', line_width,...
 % % % %                 %                     'Color', sd_colours(i_sd,:))
-% % % % 
+% % % %
 % % % %                 plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_sim_table}]),...
 % % % %                     MM.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
-% % % %                     'LineWidth', 1.5,...
+% % % %                     'LineWidth', line_width,...
 % % % %                     'Color', sd_colours(i_sd,:))
-% % % % 
+% % % %
 % % % %                 hold on;
 % % % %                 %             scatter(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(JRA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
 % % % %                 xlabel(['Glenohumeral ABD (' char(176) ')']);
@@ -1072,22 +1073,22 @@ close all
 % % % %                 ylim(y_lims_muscle_moment{i_coord, i_mus});
 % % % %                 title(modes{i_mode})
 % % % %                 hold on;
-% % % % 
+% % % %
 % % % %             end
-% % % % 
-% % % % 
+% % % %
+% % % %
 % % % %         end
-% % % % 
+% % % %
 % % % %         figure(1)
-% % % %         plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+% % % %         plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % % % %         figure(2)
-% % % %         plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+% % % %         plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 % % % %         figure(3)
-% % % %         plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
-% % % % 
+% % % %         plot(shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), MM.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+% % % %
 % % % %     end
-% % % % 
-% % % % 
+% % % %
+% % % %
 % % % %     figure(1)
 % % % %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 % % % %     saveas(figure(1), [analysis_folder task_name '/Moment_vs_ABD_DELT1_' coord '_modes.tiff'],'tiff')
@@ -1097,7 +1098,7 @@ close all
 % % % %     figure(3)
 % % % %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
 % % % %     saveas(figure(3), [analysis_folder task_name '/Moment_vs_ABD_DELT3_' coord '_modes.tiff'],'tiff')
-% % % % 
+% % % %
 % % % %     close all
 % % % % end
 
@@ -1124,8 +1125,8 @@ for i_coord = 1:numel(coords_to_plot)
 
             %%%%%%%%%%%%%%% To normalise %%%%%%%%%%%%%%%%%%%%%5
             if flag_NormTime == true
-                MA.(['sim_' log_table.Model_Hash{i_sim}]).time_og = 100*muscle_moment_arm.data(:,1)/max(muscle_moment_arm.data(:,1));
-                MA.(['sim_' log_table.Model_Hash{i_sim}]).time = 100*muscle_moment_arm.data(:,1)/max(muscle_moment_arm.data(:,1));
+                MA.(['sim_' log_table.Model_Hash{i_sim}]).time_og = 100*(muscle_moment_arm.data(:,1)/max(muscle_moment_arm.data(:,1)));
+                MA.(['sim_' log_table.Model_Hash{i_sim}]).time = 100*(muscle_moment_arm.data(:,1)/max(muscle_moment_arm.data(:,1)));
 
                 MA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus) = interp1(MA.(['sim_' log_table.Model_Hash{i_sim}]).time_og,...
                     muscle_moment_arm.data(:,MA.(['sim_' log_table.Model_Hash{i_sim}]).pos(i_mus)),...
@@ -1142,13 +1143,13 @@ for i_coord = 1:numel(coords_to_plot)
 
             plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time,...
                 MA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_mus)*1000, ...
-                'LineWidth', 1.5, ...
+                'LineWidth', line_width, ...
                 'Color', jrf_colours(i_mus,:))
 
             hold on;
             %         scatter(TF.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(TF.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-            xlabel('Movement Duration (%)','FontWeight', 'bold');
-            ylabel(['Muscle Moment Arm [' muscleF_to_plot{i_mus} '] (mm)'],'FontWeight', 'bold');
+            xlabel('Movement Duration (%)','FontWeight', 'bold', 'FontSize', axis_label_size);
+            ylabel('Muscle Moment Arm (mm)','FontWeight', 'bold', 'FontSize', axis_label_size);
             hold on;
         end
 
@@ -1157,21 +1158,70 @@ for i_coord = 1:numel(coords_to_plot)
 
     % Plot mean scapula data on top of other trials
     figure(1)
-    plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1)*1000, 'LineWidth', 1.5, 'Color', 'black')
-%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    set(gca,'FontWeight', 'bold')
+    plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1)*1000, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
     saveas(figure(1), [analysis_folder task_name '/MomentArm_DELT1_' coord '.tiff'],'tiff')
     figure(2)
-    plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2)*1000, 'LineWidth', 1.5, 'Color', 'black')
-%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    set(gca,'FontWeight', 'bold')
+    plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2)*1000, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
     saveas(figure(2), [analysis_folder task_name '/MomentArm_DELT2_' coord '.tiff'],'tiff')
     figure(3)
-    plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3)*1000, 'LineWidth', 1.5, 'Color', 'black')
-%     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+    set(gca,'FontWeight', 'bold')
+    plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3)*1000, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
     saveas(figure(3), [analysis_folder task_name '/MomentArm_DELT3_' coord '.tiff'],'tiff')
-
+    
+    save([analysis_folder task_name '/data_MA'], 'MA')
     close all
 
     %% By mode
+    for i_mus = 1:3
+        for i_mode = 1:numel(modes)
+
+            for i_sd = 1:numel(SDs)
+
+                morphology = [modes{i_mode} '_' SDs{i_sd}];
+
+                idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
+
+                figure (1)
+                plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time,...
+                    MA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000, ...
+                    'LineWidth', line_width,...
+                    'Color', sd_colours(i_sd,:))
+
+                hold on;
+
+            end
+            figure(1)
+            plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus)*1000, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+
+            xlabel('Movement Duration (%)','FontWeight', 'bold', 'FontSize', axis_label_size);
+            ylabel('Muscle Moment Arm (mm)', 'FontWeight', 'bold', 'FontSize', axis_label_size);
+            ylim(y_lims_muscle_moment_arm{i_coord, i_mus});
+            title(modes{i_mode})
+            hold on;
+
+            figure(1)
+            set(gca,'FontWeight', 'bold')
+            %             set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+            saveas(figure(1), [analysis_folder task_name '/MomentArm_' coord '_DELT' num2str(i_mus) '_' num2str(modes{i_mode}) '.tiff'],'tiff')
+            close all
+
+        end
+
+    end
+
+    if strcmp(coord, 'shoulder_elv')
+        MA_shoulder_elv = MA;
+    elseif strcmp(coord, 'elv_angle')
+        MA_elv = MA;
+    end
+end
+
+for i_mus = 1:3
     for i_mode = 1:numel(modes)
 
         for i_sd = 1:numel(SDs)
@@ -1180,50 +1230,107 @@ for i_coord = 1:numel(coords_to_plot)
 
             idx_sim_table =  find(contains(log_table.Scapula_morphology, morphology));
 
-            for i_mus = 1:3
+%             figure (1)
+%             plot(MA_elv.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000,...
+%                 (MA_shoulder_elv.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000 - MA_shoulder_elv.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(1, i_mus)*1000), ...
+%                 'LineWidth', line_width,...
+%                 'Color', sd_colours(i_sd,:))
+% %  MA_shoulder_elv.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000 -...
+%             hold on;
 
+            figure(2)
+%             yyaxis left
+            subplot(2,1,1)
+            plot(MA_elv.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+                MA_shoulder_elv.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000, ...
+                'LineWidth', line_width,...
+                'LineStyle', '-',...
+                'Color', sd_colours(i_sd,:), ...
+                'Marker', 'none')
+            hold on
 
-
-
-                figure (i_mus)
-                subplot(2,3, i_mode)
-                plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time,...
-                    MA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000, ...
-                    'LineWidth', 1.5,...
-                    'Color', sd_colours(i_sd,:))
-
-                hold on;
-                %             scatter(JRA.(['sim_' log_table.Model_Hash{i_sim}]).time(max_point + round(numel(JRA.(['sim_' log_table.Model_Hash{i_sim}]).data(:, i_joint))*0.6) - 1) , max_F_final(i_sim, i_joint), 'cyan')
-                xlabel('Movement Duration (%)','FontWeight', 'bold');
-                ylabel(['Muscle Moment Arm [' muscleF_to_plot{i_mus} '] (mm)'], 'FontWeight', 'bold');
-                ylim(y_lims_muscle_moment_arm{i_coord, i_mus});
-                title(modes{i_mode})
-                hold on;
-
-            end
-
-
+%             yyaxis right
+            subplot(2,1,2)
+            plot(MA_elv.(['sim_' log_table.Model_Hash{idx_sim_table}]).time,...
+                MA_elv.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000, ...
+                'LineWidth', line_width,...
+                'LineStyle', '-',...
+                'Color', sd_colours(i_sd,:), ...
+                'Marker', 'none')
+            hold on
         end
+    %% Figure one cross hairs
+%         figure(1)
+%         plot(MA_elv.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus)*1000,...
+%             MA_shoulder_elv.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus)*1000 - MA_shoulder_elv.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(1, i_mus)*1000,...
+%             'LineWidth', line_width,...
+%             'Color','black', ...
+%             'LineStyle','-')
+% 
+%         xlabel(['Muscle Moment Arm Elevation Plane [' muscleF_to_plot{i_mus} '] (mm)'],'FontWeight', 'bold', 'FontSize', axis_label_size);
+%         ylabel(['Muscle Moment Arm Abduction [' muscleF_to_plot{i_mus} '] (mm)'], 'FontWeight', 'bold', 'FontSize', axis_label_size);
+%         %         ylim(y_lims_muscle_moment_arm{1, i_mus});
+%         ylim([-max(abs(y_lims_muscle_moment_arm{1, i_mus})) max(abs(y_lims_muscle_moment_arm{1, i_mus}))]);
+% 
+%         xlim([-max(abs(y_lims_muscle_moment_arm{2, i_mus})) max(abs(y_lims_muscle_moment_arm{2, i_mus}))]);
+% 
+%         xline(0);
+%         yline(0);
+%         title(modes{i_mode})
+%         hold on;
+% 
+%         figure(1)
+%         %             set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+%         saveas(figure(1), [analysis_folder task_name '/MomentArm_ABDvsELV_DELT' num2str(i_mus) '_' num2str(modes{i_mode}) '.tiff'],'tiff')
 
-        figure(1)
-        plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1)*1000, 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
+        %% Figure two Y-axes
         figure(2)
-        plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2)*1000, 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
-        figure(3)
-        plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3)*1000, 'LineWidth', 1.5, 'Color', 'black','LineStyle','-.')
 
+%         yyaxis left
+        subplot(2,1,1)
+        plot(MA_elv.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time,...
+            MA_shoulder_elv.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus)*1000, ...
+            'LineWidth', line_width,...
+            'Color', 'black', ...
+            'LineStyle', '-.', ...
+            'Marker', 'none')
+% 
+%         yyaxis right
+        
+        subplot(2,1,2)
+        plot(MA_elv.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time,...
+            MA_elv.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus)*1000, ...
+            'LineWidth', line_width,...
+            'Color', 'black', ...
+            'LineStyle', '-.', ...
+            'Marker', 'none')
+% 
+        xlabel('Movement Duration (%)','FontWeight', 'bold', 'FontSize', axis_label_size);
+        xticks([0:20:100])
+%         yyaxis left
+        subplot(2,1,1)
+        ylabel({'Sh. Elv. (mm)'}, 'Color', 'black', 'FontWeight', 'bold', 'FontSize', axis_label_size);
+%         ylim([-10 10]);
+        ylim(y_lims_muscle_moment_arm{1, i_mus});
+        set(gca,'YColor',[0 0 0], 'FontWeight', 'bold')
+        xticks([0:20:100])
+
+%         yyaxis right
+        subplot(2,1,2)
+        ylabel({'Elv. Pl. (mm)'}, 'Color', 'black','FontWeight', 'bold', 'FontSize', axis_label_size);
+%         ylim([-10 10])
+        ylim(y_lims_muscle_moment_arm{2, i_mus});
+        set(gca,'YColor',[0 0 0], 'FontWeight', 'bold')
+        xlabel('Movement Duration (%)','FontWeight', 'bold', 'FontSize', axis_label_size);
+        xticks([0:20:100])
+        hold on;
+
+        figure(2)
+        set(gca,'FontWeight', 'bold')
+        sgtitle(modes{i_mode},'FontWeight', 'bold')
+        %             set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+        saveas(figure(2), [analysis_folder task_name '/MomentArm_ABDvsELV2_DELT' num2str(i_mus) '_' num2str(modes{i_mode}) '.tiff'],'tiff')
+
+        close all
     end
-
-
-    figure(1)
-    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(1), [analysis_folder task_name '/MomentArm_DELT1_' coord '_modes.tiff'],'tiff')
-    figure(2)
-    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(2), [analysis_folder task_name '/MomentArm_DELT2_' coord '_modes.tiff'],'tiff')
-    figure(3)
-    set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(3), [analysis_folder task_name '/MomentArm_DELT3_' coord '_modes.tiff'],'tiff')
-
-    close all
 end
