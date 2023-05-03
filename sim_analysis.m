@@ -12,10 +12,10 @@ clc
 % Flags
 flag_AnalysisTool   = false;
 flag_NormTime       = true;
-flag_HairTouch      = true; 
+flag_HairTouch      = false; 
 flag_LateralReach   = false; 
-flag_UpwardReach    = false; 
-flag_AddDummyCoord  = true;
+flag_UpwardReach    = true; 
+flag_AddDummyCoord  = false;
 % Import OpenSim 4.3 libraries
 import org.opensim.modeling.*
 
@@ -81,12 +81,12 @@ SDs = {'-3',...
     '1',...
     '3'};
 
-analysis_folder = '../../OpenSim/Out/Moco/Analysis/paper_v02/Final/';
+analysis_folder = '../../OpenSim/Out/Moco/Analysis/MocoTrack/';
 
 % List simulation folders
 %sims = dir([analysis_folder '/sim_*']);
 
-log_table = readtable([analysis_folder 'RTSA_model_log_table_final_rerun_20230404.csv']);
+log_table = readtable([analysis_folder 'RTSA_model_log_table_MocoTrack.csv']); %'RTSA_model_log_table_final_rerun_20230404.csv'
 
 if flag_HairTouch == true
 

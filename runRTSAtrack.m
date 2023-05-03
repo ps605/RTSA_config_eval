@@ -14,9 +14,9 @@ track = MocoTrack();
 % Pass Model (system dynamics) to Problem
 track.setModel(ModelProcessor(osim_model));
 
-% Set reference states 
+% Set reference states and use them as guess
 track.setStatesReference(TableProcessor('..\..\OpenSim\Out\Moco\Analysis\paper_v02\Final\sim_U94wbx134tf\RSA_U94wbx134tf_StatesReporter_states.sto'))
-
+track.set_apply_tracked_states_to_guess(true)
 study = track.initialize();
 
 % Initialise and Access optimisation Problem
@@ -232,16 +232,15 @@ end
 %% 3 - Minimise effort
 
 problem.addGoal(MocoControlGoal('effort',10));
+% track.set_control_effort_weight(0.1);
 
 %% Configure the solver.
 
-solver = study.initCasADiSolver();
-solver.set_num_mesh_intervals(100);
-solver.set_verbosity(2);
-solver.set_optim_solver('ipopt');
-solver.set_optim_convergence_tolerance(1e-1);
-solver.set_optim_constraint_tolerance(1e-3);
-solver.set_optim_max_iterations(3000);
+solver = study.updSolver();
+casadiSolver = MocoCasADiSolver.safeDownCast(solver);
+casadiSolver.set_optim_convergence_tolerance(1e-1);
+% casadiSolver.set_optim_constraint_tolerance(1e-3);
+
 
 % % % % Create an initial guess
 % % % in_guess=solver.createGuess();
@@ -250,15 +249,15 @@ solver.set_optim_max_iterations(3000);
 
 % Set guess from previous (~ good) solution. This will need
 % alterations when other conditions are testeed/
-if flag_keepRC == true
-    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_1.sto');
-elseif flag_keepRC == false && strcmp(task_name, 'LateralReach')
-    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto');
-elseif flag_keepRC == false && strcmp(task_name, 'UpwardReach')
-    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_UpwardReach_RC_0.sto');
-elseif flag_keepRC == false && strcmp(task_name, 'HairTouch')
-    solver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_HairTouch_RC_0.sto');
-end
+% if flag_keepRC == true
+%     casadiSolver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_1.sto');
+% elseif flag_keepRC == false && strcmp(task_name, 'LateralReach')
+%     casadiSolver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto');
+% elseif flag_keepRC == false && strcmp(task_name, 'UpwardReach')
+%     casadiSolver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_UpwardReach_RC_0.sto');
+% elseif flag_keepRC == false && strcmp(task_name, 'HairTouch')
+%     casadiSolver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_HairTouch_RC_0.sto');
+% end
 
 %% Solve
 
@@ -276,6 +275,9 @@ osim_model.print(model_file);
 % If failed, unseal
 if ~predicted_solution.success()
     predicted_solution.unseal();
+    success_tag = 'failed';
+elseif predicted_solution.success()
+    success_tag = 'success';
 end
 
 print_folder_name = ['sim_' rhash];
