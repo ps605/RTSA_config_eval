@@ -1,4 +1,4 @@
-function runRTSAtrack(model_file, rhash, flag_keepRC, task_name)
+function runRTSAtrack(model_file, flag_keepRC, task_name, GHJ_in_parent, GHJ_in_child,  hemi_gle_offsets, hemi_cup_offsets, R, rhash, model_SSM)
 %% Set-up
 
 % Import OpenSim 4.3 libraries
@@ -291,6 +291,12 @@ solution_file = ['..\..\OpenSim\Out\Moco\' print_folder_name '\MocoSol_' task_na
 predicted_solution.write(['..\..\OpenSim\Out\Moco\' print_folder_name '\MocoSol_' task_name '.sto']);
 
 % Read individual model table and .txt in logs
+
+% Add random pause between 0.25-0.50 seconds to print files in parfor
+pause(0.250 + rand*0.250)
+
+date_time_now = datestr(datetime);
+
 var_names_table = {'Date_Generated',...
     'Model_Hash',...
     'Scapula_morphology', ...
