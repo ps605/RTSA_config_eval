@@ -1,0 +1,907 @@
+[33mcommit 18c1c0c61481432638c61ae159624cceb7c735cf[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed May 3 12:27:31 2023 -0700
+
+     moved model logging to .txt from adjustOpenSimModelGHJ.m to runRTSAtrack to include success_tag. ### Do the same with runRTSAsims (for predictions ###
+
+[33mcommit b81830aa2aa316bf4964fac948fa8e8428608e09[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed May 3 11:54:47 2023 -0700
+
+    Test log table update
+
+[33mcommit c2264936eaaadbf0e42fcd38b66d64cf1f9adc59[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed May 3 11:52:26 2023 -0700
+
+    Update tracking tests and analysis
+
+[33mcommit 8c9241c7056995b359caa755b46a688bc41d35b9[m
+Merge: d4639c9 78a44a0
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Apr 27 16:16:00 2023 -0700
+
+    Merge branch 'main' of https://github.com/ps605/RTSA_config_eval
+
+[33mcommit d4639c9713e70ab41b7118443c12e42f3b12221b[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Apr 27 16:12:07 2023 -0700
+
+    Include function for MocoTrack testing
+
+[33mcommit 78a44a02e07ed172202f716b4404584eed074aab[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Apr 21 11:25:54 2023 -0700
+
+    Update README.md
+
+[33mcommit faf4720bde6e01332cb7c995949f7f7626eee598[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Mar 7 12:16:51 2023 -0800
+
+    Hail Marry update records
+
+[33mcommit e5f0a37826f112d80ad68acb7fd3f7ee45b054e5[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Jan 6 14:37:22 2023 -0800
+
+    update scap morphologies list
+
+[33mcommit ea60ff11525a92ff489f952a73dcc10a7a73974b[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jan 5 13:24:51 2023 -0800
+
+    updates
+
+[33mcommit ebbf156c2ec61b1b57130055774573317454e7a8[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jan 5 13:23:59 2023 -0800
+
+    Included flag for addeing the dummy cooordinate and updated the viapoint offset for DELT2/3 from optimisaiton. DELT1 is stable as it is of clavicle
+
+[33mcommit d1f0a569ca95430beb60fb77231578351d0ffd92[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Dec 30 15:34:05 2022 -0800
+
+    Delete DELT2 lower via point
+
+[33mcommit 8cf7b8c5049471e954cc58f2d1fff220972b035c[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Dec 29 10:41:57 2022 -0800
+
+    Checks
+
+[33mcommit f94061e1fc65bf7c2c017893c5b1e7df664cd2eb[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Dec 23 11:49:29 2022 -0800
+
+    Changed elve_ang to dummy_coord for new MA calcs
+
+[33mcommit 0d43b9a21036be77afa25920fd6f24ef59fd0679[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Dec 23 11:10:59 2022 -0800
+
+    changes and test of weights and plots
+
+[33mcommit 27b0a5bf86c46d0448fdbc85105c7d11d4910035[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Dec 23 11:09:38 2022 -0800
+
+    Included definition of dummy coordinate lateral pointing from glenoid to help calc moment arms similar to Ackland ref system
+
+[33mcommit ea784e7b5067297c865be7e4c469cf30859b1cb6[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Dec 23 11:08:22 2022 -0800
+
+    Included code fore stationary elv_angle at 70 deg and shoulder_elv to go through the range
+
+[33mcommit 7548da59639eeb6ead779658b1bbf6388a3b47d1[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Dec 16 11:38:47 2022 -0800
+
+    Updated posing of model for flexion calc
+
+[33mcommit 0390c77eed4594314a2c09286d95f468fb2efcc7[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Dec 15 18:16:05 2022 -0800
+
+    Re-run for optimisation
+
+[33mcommit 5cbf5ad07bc8e5a48e96ccf17c283d215710623b[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Dec 15 16:24:58 2022 -0800
+
+    Improve analysis sscript and included HairTouch initial conditions for task sims
+
+[33mcommit 6c624e36018354addd5106b2d69c9a5890f85b5b[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Nov 28 11:58:27 2022 -0800
+
+    Changes for new sim run and corrections
+
+[33mcommit b6781832e666f708962ed0210da302e547670177[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Nov 28 11:57:07 2022 -0800
+
+    Manually changed analysis code to different set of sims - NOT HTE BEST NEEDS IMPROVEMENT
+
+[33mcommit def265ac48b87f117831e59b5ce76ad72dff3954[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Nov 9 13:36:13 2022 -0800
+
+    updated coordinate bounds for upward reach
+
+[33mcommit 44a30f1ac4366f11b7be615c57ccef8295e26df4[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Nov 9 10:54:22 2022 -0800
+
+     Included if statement to select inital condition depending on motion task
+
+[33mcommit 35a0beaceafbfc8053bad7e4395d158008f085b1[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Nov 9 10:47:39 2022 -0800
+
+    Included reading of acromion_offset row by row incase it is not a single row reads column by column, adding the wrong offset
+
+[33mcommit 1f67bbe4fda837aca38f91fa3b3d43159b420ed9[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Nov 4 11:12:08 2022 -0700
+
+    changes for parfor loop
+
+[33mcommit 8a875180d7ebf6a0d76d5d8b55c7e313db542cdd[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Nov 3 17:30:40 2022 -0700
+
+    Corrected statements passed to adjustOpenSimModelGHJ in parfor loop
+
+[33mcommit 18161f9b6e376f8cb82284d1d30625a17bd36731[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Nov 2 16:03:30 2022 -0700
+
+    Ran test
+
+[33mcommit 675099621f486623432222f22a26b38cfc042c87[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Nov 2 15:48:06 2022 -0700
+
+    Include flag for lateral offset used with Athwal correction flag
+
+[33mcommit 74ddc65a54b8846f149abab980c9e2ff146d8fa7[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Nov 2 15:24:25 2022 -0700
+
+    Alteredhot offsets are calculated and applied for the corrections proposed by Athwal. Translational corrections are now applied to the inferior rim point then Y and Z translations are applied to the hemisphere after it is rotated (X is ignored)
+
+[33mcommit 1df8a672774a3fd3cf1fad0c9c9af1740a1a9141[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Nov 2 12:25:17 2022 -0700
+
+    Corrected variable name
+
+[33mcommit f25bc2546432aefb7479deb274b63aaed5dfd954[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Nov 2 11:34:24 2022 -0700
+
+    Lateral offset now after rotations and corrected prox/dist displacement calculation
+
+[33mcommit 60fec5cb083cde7aad1213558a47d721d4e7bb81[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Nov 2 10:46:38 2022 -0700
+
+    Test lateral offset calculation after rotations are applied to the glenosphere. Gets offset from roatted glenoid plane instead of the initally calculated one
+
+[33mcommit ee1d6b53ed4e807c78ac2ce5d98b2745e793d17a[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Nov 1 17:51:09 2022 -0700
+
+    changed offset value - #### NEEDS FIXING###
+
+[33mcommit 0785a0e1aefea22eeeb805f4148c76e90a2df987[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Nov 1 17:30:20 2022 -0700
+
+     Included dirty method for lateral offset. It is calculated before any rotations so it might be thrown off
+
+[33mcommit 70a323fa2f02851c64fdfb5243f24656439a72ba[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Nov 1 10:34:16 2022 -0700
+
+    Updated modify_RTSA_OpenSim_Geom.m to pass updated offsets from scapula and humerus structures to function that writes the log table. To correct for automatic offset calculation of inclination, version and prox/dist translation
+
+[33mcommit 77a2667105ab8be32447527356d81d6d89247a0c[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Oct 31 16:05:16 2022 -0700
+
+    Changed flag name
+
+[33mcommit cbdbec65c2f1e81f00e7b7b24ac02821441e9655[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Oct 31 15:04:30 2022 -0700
+
+    corrected calculation of overhang
+
+[33mcommit ddf3285f7f501b79a6ef3e12d157f618b77c4c2b[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Oct 31 14:41:46 2022 -0700
+
+    included 6.5 mm overhang rule by Athwal
+
+[33mcommit 01c727d2c52554cf6ff1e689f2f03fe093b88ae3[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 27 16:54:34 2022 -0700
+
+    small corrections
+
+[33mcommit 2321b02c323bd1816c001a241220c4398ffd3f40[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 27 15:39:53 2022 -0700
+
+    Icluded logic and correction for 12 mm inferior rule
+
+[33mcommit 2b5089a55adba3d0c92019264be6c146c799252a[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 27 14:18:38 2022 -0700
+
+    Included logic to select if correction angles to be implemented. Replaces defined values for inclination and version with calculated correction ones
+
+[33mcommit a56bdfa9ea094e318658263cfe8fa57ace5b4812[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 27 13:39:27 2022 -0700
+
+    Include calculation of correction angles for version and inclination as well as visualisation
+
+[33mcommit f3fcafb3ce1355eb705e1a90ad712aa24b8e67c8[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 27 11:43:30 2022 -0700
+
+    Included projection of fossa_vector from glenoid_barrycentre on the glenoid XZ and YZ planes to be able to calculate vension and inclination angles:
+
+[33mcommit 52424c1fb74e45737f7d57100280d0c3a80d65e9[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Oct 26 16:46:37 2022 -0700
+
+    Included supraspinatus fossa data and vector calculation. Need to find angle from it for inclination of glenosphere
+
+[33mcommit e1c24a1cff86562cc3d93bf8d409a3e11eee82ff[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Oct 21 10:01:30 2022 -0700
+
+    Updated joint strings for plotting post simulation
+
+[33mcommit a1a4654a685a1d3168f74b938e1bab6a3158b15a[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Oct 19 16:42:34 2022 -0700
+
+    Re-run only on mode 5 to test after the geometry output from SSM was indeed corrected
+
+[33mcommit 6a6fa5869c6faf7874b0b666e278778d690a1cb5[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Oct 19 16:22:55 2022 -0700
+
+    included underscore for reading .stl geometry outputed data .txt files (acromion_offset; muscle_coords; glenoid_coords
+
+[33mcommit b381e38e068062f1fd00bd3012c653f382314aec[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 18 11:49:39 2022 -0700
+
+    Included moment arm analysis
+
+[33mcommit 27c6054bc61f8a95bbd138d6abc0f94c14374a92[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 18 10:45:15 2022 -0700
+
+    Included analysis of the DELT1/2/3 moments about shoulder coordinates
+
+[33mcommit 2441606b50918b6671f2150cf1c2c926a3781a8a[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Oct 17 15:27:23 2022 -0700
+
+    Corrected AnalyzeTool for Joint Reaction Analysis coordinate definitions
+
+[33mcommit a4219184c7e0391c76051a09779bb1613a52f3c8[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Oct 17 15:24:28 2022 -0700
+
+    Added code to re-run AnalyzeTool in sim_analysis.m as Joint Reaction Analysis definition in post processing wass wrong (new joints not passed to .xml file
+
+[33mcommit 6c06801616cd46a0a34a9f7a2dca89b23528f6e7[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Oct 17 14:29:05 2022 -0700
+
+    Randomise ordr of morphology simulations and create analysis script
+
+[33mcommit 2e414173b911c104e02a71a07c0ee91c364581b9[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Oct 7 16:30:52 2022 -0700
+
+    Prepare for 8 mode evaluation 4 levels each
+
+[33mcommit 6df340f5fd71320e95f5b7440a1d7b5e913346e8[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Oct 7 13:57:56 2022 -0700
+
+    Tests
+
+[33mcommit cb69c89219164a65ea343262c2a088b54f6b4cde[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 6 17:07:16 2022 -0700
+
+    Included flexion moment arm data argument to J_momentArmDist
+
+[33mcommit 3806eb4fe373bfbe992bc64cad5f6d92bd3135dd[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 6 15:45:20 2022 -0700
+
+    Included flexion (elv_angle) moment arm in via poit optimisation cost function with weighting terms if it wants to be ignored (=0)
+
+[33mcommit cdb061f9f5b41f5df4d9d30339ff3b99de61b70b[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 6 15:20:59 2022 -0700
+
+    Included functionality to plot DELT1/2/3 MA against Ackland experimental data:
+
+[33mcommit 8f7a77df695192dc02b6b29394a6d33293668b5c[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 6 14:29:38 2022 -0700
+
+    Start including flexion moment arm comparisons in MA comp
+
+[33mcommit df895df953ffeab5c3ab92c4e4f6a6813afaa219[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 6 10:59:21 2022 -0700
+
+    Corrected Frame for JRA in post simulation analysis
+
+[33mcommit e61c31d9feaf6f2793c2f3961188b473483cd392[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Oct 6 10:32:11 2022 -0700
+
+    Included MuscleAnalysis to Analysis set and pointed to \Analysis\template_JRA_FR_MA.xml
+
+[33mcommit 5712b386f61cb29ec7b20aea66a4c311f8827b70[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Oct 5 17:13:42 2022 -0700
+
+    Create simulation data analysis script
+
+[33mcommit 033c8b9b1feafad2873f99dc895d98a331d96207[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 15:40:59 2022 -0700
+
+    Update README.md
+
+[33mcommit 0dcf9a671c3d092f79f8bc38cc9d08fd5ac5f5d3[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 15:40:44 2022 -0700
+
+    added ref to gif
+
+[33mcommit 6a9e71cad5b0ad055ffc1a1cfb9809f406012c19[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 15:38:44 2022 -0700
+
+    Added gif to readme
+
+[33mcommit db094dd0a8791f1ec11daaa11bfbcd563fb06521[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 15:27:04 2022 -0700
+
+    Corrected readme
+
+[33mcommit 158448c8e1aa1ff027eee882ff4d5f233672ab51[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 15:25:38 2022 -0700
+
+    Corrected readme
+
+[33mcommit 39856dc6124ea7b41cf88116257b51bbb76283cb[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 15:24:30 2022 -0700
+
+    Test new axis definition - OK
+
+[33mcommit f7f7231c7a4f962737405506ae8b46782a717f8e[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 15:02:39 2022 -0700
+
+    Calculated Euler rotation angles for final glenoid coord system orientation (in global) then invert and negate values to be passed to OpenSim to define joint coord system from global (body) to local (joint)
+
+[33mcommit d63d2888df9d3d414d2d91bcd48e446db86f6dbf[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 14:28:12 2022 -0700
+
+    Switch rotations of glenosphere so X-axis is first (inclination) then Y-axis (version)
+
+[33mcommit cb91092bc3f2006625bea3640761cf9fa7920959[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 13:28:21 2022 -0700
+
+    Added plotting of roated coord axis points after rotate glenosphere and corrected readme
+
+[33mcommit 8f3bed07178bbd8ea4a5066534e7422b783baf5b[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 13:18:52 2022 -0700
+
+    Added readme file with pic to repo
+
+[33mcommit 8ae3ea91198f29a207e997d974517414f9710ebe[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Oct 4 13:18:12 2022 -0700
+
+    Create README.md
+
+[33mcommit b465d5043a5ffd89ab3d13455dd809948b7808f9[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Oct 3 14:54:21 2022 -0700
+
+    Update glenosphere axis definitions to rototranslation
+
+[33mcommit b8da612aaa0c1d6a8e4ea12564087be7bd9fbe15[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Sep 28 09:32:34 2022 -0700
+
+    Include logic to point new axis superiorly
+
+[33mcommit 3fdf9167d3784bc1eb5cbea2898e6709b1b43dbc[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Sep 27 17:21:02 2022 -0700
+
+    Visualise new Y-axis of the glenoid
+
+[33mcommit 28e946ee6c13e35d7eef21906f7f6fbef4291fa0[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Sep 27 16:28:16 2022 -0700
+
+    Change glenoid Y-axis definition to use the intersection of the glenoid and scapula planes and originating from glenoid barycentre
+
+[33mcommit dce61a0296cf2c4cc7d7d742eccfdaefd31eef68[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Sep 27 11:15:17 2022 -0700
+
+    Altered glenoid plane colour for visualisation
+
+[33mcommit 9530ad000097fa4696bef0d1d903bfa67e654f60[m[33m ([m[1;31morigin/end_point_goal_refine[m[33m, [m[1;32mend_point_goal_refine[m[33m)[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Sep 26 16:25:16 2022 -0700
+
+    Altered definition of glenoid plane Y-axis to point between the rim points with the greatest distance between them
+
+[33mcommit 485b172a2b3c2f9233f7196210e7101e3cd4a7fb[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Sep 26 14:31:43 2022 -0700
+
+    Included marker definition for both tasks and print out model again
+
+[33mcommit fbc0e30577394406fed3676694ecf7c73ffec8c0[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Sep 26 14:29:40 2022 -0700
+
+    Included definition of wrist marker end point markers in model for visualisation
+
+[33mcommit cf223f815f4aa339ede098050915a826b4ea73ab[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Sep 22 17:50:13 2022 -0700
+
+    Run test same config varying morphology
+
+[33mcommit a48d7fd73384aaddb55b8a14a36dd7b01ace4a6f[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Sep 22 17:46:32 2022 -0700
+
+    Testing increasing time bouncs - ONLY lateral raise
+
+[33mcommit 596e0d84f3668dbe893c32bfcd53ee2e3a6a6398[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Sep 22 11:10:55 2022 -0700
+
+    Do not apply rotation offset to unrotscap parent frame
+
+[33mcommit fe544a4b983db52d9278ce093b940c1e62116f4c[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Sep 21 16:59:35 2022 -0700
+
+    Test new task bound values for forward reach
+
+[33mcommit cd7ed8a76a54d07403ac9699a324e8baa3630bc7[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Sep 21 16:13:41 2022 -0700
+
+    Substituted motion name string with variable name for dynamic changes and correction when sellecting task bounds
+
+[33mcommit b6b96833be4df706b4f3e08acddced95ad7f6d24[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Sep 21 16:06:01 2022 -0700
+
+    Included Forward reach marker definition in runRTSAsims.m
+
+[33mcommit d50626774bd9defc28a4d2bd29d8de3efc2822f5[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Sep 20 17:22:28 2022 -0700
+
+    Increased tab for motion task log read out
+
+[33mcommit a4e472db72217e905f13f222cdb7c796357f1f4d[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Sep 20 17:12:52 2022 -0700
+
+    Included option to select motion task to simulate. Also added info of motion task to print out log
+
+[33mcommit faeeffd35339a4cde075ccf8cf30e14c796c9b06[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Sep 20 16:35:33 2022 -0700
+
+    Define endpoint locations at 2.25*ForeArm Length vs 2.0*. Closer to wrist joint this way
+
+[33mcommit c935612b6bcc111857f6ff861607761e5c2f0b4e[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Sep 20 15:52:44 2022 -0700
+
+    Included programatic definition of end point markers for lateral reach task based on shoulder joint position
+
+[33mcommit 84725f83ca1531f99582d8db5bc30cb229525cca[m[33m ([m[1;31morigin/coord_system_improve[m[33m, [m[1;32mcoord_system_improve[m[33m)[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Sep 16 17:52:52 2022 -0700
+
+     Included the glenosphere coordinate offset in the definition of the OpenSim model across adjustOpenSimModelGHJ, glenoidGeom, modify_RTSA_OpenSim_Geom - NEEDS CHECKING AND CLEARUP - but creates model correctly
+
+[33mcommit d898ef8697864c646b9047e90dab62e306bfad98[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Sep 16 17:14:14 2022 -0700
+
+    Extract angle offsets of transformed glenosphere to input in OpenSim model definition
+
+[33mcommit 1f06b5e209fda215cb2a1f514bcfe664caccbef1[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Sep 16 15:52:01 2022 -0700
+
+    Included rotation calculation of Y' axis after second calculation
+
+[33mcommit 6e6f74b5092cf54fff5a050c30aa7e2ef51b3f09[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Sep 16 14:46:20 2022 -0700
+
+    Testing plotting with point cloud
+
+[33mcommit e363f8a24838d76ba2446ccdcb569eb913873e14[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Sep 13 17:27:23 2022 -0700
+
+    Added section to calculate scapular plane in glenoidGeom.m for future use (to define glenoid coordinate system maube?)
+
+[33mcommit f29c34ed576c4b6d32ba3f65fa233c5a8669f65a[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Sep 12 16:21:47 2022 -0700
+
+    Added ForceReporter Analysis to .xml template and reset time tin runRTSAsims.m. Included new joint realisation to evaluate elv_angle for sensitivity analysis scap_muscle_sens_analysis.m.
+
+[33mcommit 8fb0b999d2266f2835e793876c6de19cda6337f1[m[33m ([m[1;32msens_analysis[m[33m)[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Sep 7 17:13:15 2022 -0700
+
+    Create initial script to test model's sensitivity to muscle attachement locations on scapula wrt moment arm
+
+[33mcommit a2f76400ca591710dc1b032e2c6b0424ca775039[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Aug 26 16:46:23 2022 -0700
+
+    Added TRP4 wrapping surfaces to baseline model and ran checks for stability - OK
+
+[33mcommit d6a24276d13fdecf1c5ffb02f6768d1465f8673c[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Aug 26 15:56:43 2022 -0700
+
+    Fixed error, now appends to RTSA_log_table.txt rather than overwritting
+
+[33mcommit e256446010ce3edd99b2046a249f4dd7e5378c73[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Aug 26 14:43:53 2022 -0700
+
+    Added append hash to model name to be vislble in OpenSim and included all design parameters in permutation matrix
+
+[33mcommit 8403e2a37e05a46faead2a5c84d7b7d5fadfe36a[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Aug 24 16:55:35 2022 -0700
+
+    Added automated scapula offset with acromion. Offset calculated from Python added to unrotscap in adjustOpenSimModelGHJ.m
+
+[33mcommit bb6dd24b1f0be5d1c7c293e6ed320760e2f6a829[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Aug 19 14:58:43 2022 -0700
+
+    Included flags and options to delete DELT2/3 viapoints. ###Final checks needed##
+
+[33mcommit 65188e95303ab6bb528e0c9623d92e5c72edd770[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Aug 19 14:06:43 2022 -0700
+
+    Added option to delete via point instead of placing it on the origin
+
+[33mcommit c9ea941dab8e3446e49831f49cc652f10bce63b0[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Aug 18 12:40:21 2022 -0700
+
+    Get DELT2/3 origin points dynamically and them pass to moved via points if not used
+
+[33mcommit 902389e059d7ea49f7d87af0283731eaacd1e030[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Aug 18 11:47:56 2022 -0700
+
+    Added option for DELT2 to be optimised or place via point at origin
+
+[33mcommit b9e5ee0afc52ab2dcf7c4c2f5a6e17fdffbd8fef[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Aug 17 12:20:03 2022 -0700
+
+    Added flags for which DELTx to be optimised and if DELT3 via point to be placed at origin (better/phusiological result to match MA
+
+[33mcommit 5225ceba9d55880ee60a28d0a5138db2505b65d4[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Aug 17 10:10:04 2022 -0700
+
+    added flages to select which DELTx via point to optimise and if the function will be run from modify_RTSA_OPESIN_Geom.m
+
+[33mcommit a5b640d9e6c9ac9e004f720614fcfdcde74daafe[m[33m ([m[1;31morigin/viaPointOpt[m[33m, [m[1;32mviaPointOpt[m[33m)[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Aug 16 16:51:21 2022 -0700
+
+    Clean up and MA plot for DELT1/2/3. Conjoined via point issue needs to be resolved.
+
+[33mcommit 5d8924dcddb498b78763f84053b1cd3a35ea9901[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Aug 16 11:13:18 2022 -0700
+
+    Cleanup and create function to plot via point optim results
+
+[33mcommit ac44ca1c659251205e9db5030688ee1b8ef6d5c9[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Aug 15 17:16:44 2022 -0700
+
+    Tested across 5 joint angles in shoulder_elv. Works as expected and finds consistent solution (0.015 m bounds)
+
+[33mcommit 943d81125c6e3f22453b9fe35ddf3149a14061fc[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Mon Aug 15 11:47:42 2022 -0700
+
+    Update coordinate after adjusting via point and .finalizeConnections() is called - forws as expected for one angle evaluation
+
+[33mcommit a374ca8b0e658845788a01b1f249bd03f13ad552[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Sat Aug 13 14:59:20 2022 -0700
+
+    Inital tests still not right but better than before
+
+[33mcommit 7926f1f54af0f606363e16813f72c111941554c3[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Sat Aug 13 14:33:34 2022 -0700
+
+    Add ::Model.finalizeConnections() to update new via point lcoations to add to system you stupid boy
+
+[33mcommit b0b410eb0de4a036f4b5fbc844763a381f6a8d45[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Aug 12 16:22:30 2022 -0700
+
+    Included aditional settings to GA, not converging consistently to global maximum
+
+[33mcommit 403180f4e8dc0aa728cd610d9ff86c3726b38121[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Aug 11 17:19:04 2022 -0700
+
+    fucked, got somewhere then lost it. trying GA insteat of FMINCON
+
+[33mcommit 6e6807f82875540f5f48a167935498cad1c22a91[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Aug 11 09:28:09 2022 -0700
+
+    Added weights in obj funct J_momentArmDist for each joint poistion
+
+[33mcommit 994290634fda325f7c65018932863d88261d043d[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Aug 10 17:08:48 2022 -0700
+
+    Inserted comments
+
+[33mcommit c7775306b974aad02764565014189a7923872f9b[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Aug 10 16:18:23 2022 -0700
+
+    Include updateing of DELT via point locations. #NEEDS MORE TESTS#
+
+[33mcommit a290d12ab750227a871cd2a8bf6d00d479f0a7a7[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Aug 10 14:43:52 2022 -0700
+
+    Created convenience functions for via point position optim and initial test
+
+[33mcommit df2b300fb1f9d52172f86ea36354d81739896565[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Aug 10 12:36:56 2022 -0700
+
+    Added check for PathPointSet to only select via points in optimDeltViaPoint
+
+[33mcommit 3c6f8026d55d24926395f5def5b8485d021682fa[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Aug 10 11:06:47 2022 -0700
+
+    Added finilizeConnections() after removing muscles as later indexing was causing memory leak(?). #TESTED#
+
+[33mcommit 5d4f403288cfc58db981de4beab917a2781ad306[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Aug 9 16:55:07 2022 -0700
+
+    Added for loop to start optimisation run
+
+[33mcommit b000687565c155ad3b37ef51de9af484e312de07[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Tue Aug 9 16:21:17 2022 -0700
+
+    Start for optim DELT1/2/3 via points so MA match Ackland 2010
+
+[33mcommit ac1e8cb93b124aa4e09a70855bd7c9ca9ca3f7e3[m[33m ([m[1;31morigin/SSM_geom[m[33m, [m[1;32mSSM_geom[m[33m)[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Sat Aug 6 13:13:04 2022 -0700
+
+    Includes rediving viapoint location for DELT2/3 and TMAJ. Linear offset from generic model added to define viapoints
+
+[33mcommit a2cfbfced7d8bc3094533580cf0d7093e8a0f450[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Sat Aug 6 11:24:31 2022 -0700
+
+    Fixed trap point position (TRAP->TRP)
+
+[33mcommit 5b1e2b7b016cb3341d6313c0bce6150edd7b073a[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Aug 5 16:18:18 2022 -0700
+
+    Included SSM morphology condition in log outputs
+
+[33mcommit 8a7ed5b2317f6d1bbc31403a2e8c9735e7cbf1cc[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Aug 5 15:37:17 2022 -0700
+
+    Include SSM muscle position alterations with loops not option flag yet or included in log output
+
+[33mcommit 28ed8ed6351c79f69d1d79c5b8a0db65508b282c[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Aug 5 11:55:05 2022 -0700
+
+    Added loop for scapular morphology. Import glenoid rim points and .stl from aligned SSM models and defines the hemisphere
+
+[33mcommit c4c85585ad97d1b9667a10211588f6b86bc5c657[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Aug 4 16:35:25 2022 -0700
+
+    Initial test, reads in SSM geometry and does the expected calcs. Initial glenoid plane Now claced by regression before pcfit plane as better (?) - #CHECK#
+
+[33mcommit ee86992c147c6eb67ff47762e9c2a38fca78a1b8[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Jul 15 14:55:11 2022 -0700
+
+    Changed from tictoc to display run time at end
+
+[33mcommit aa23760c38a63ddc3aa5ea7b799835d971dfa754[m
+Merge: ac29649 ac4d87e
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Jul 15 14:18:18 2022 -0700
+
+    Merged run_parallel: Has option to either run sims in parallel or series, split nested function for geometries. Tested to strain file read/write with one iter in IPOPT
+
+[33mcommit ac4d87e78a5f855b5f5e5cc924367875c48f5b3f[m[33m ([m[1;31morigin/run_parallel[m[33m, [m[1;32mrun_parallel[m[33m)[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Jul 15 14:03:49 2022 -0700
+
+    Corrected for glenoidGeom/humerusGeom.m to use stlreadXYZ.m
+
+[33mcommit c331ebbce68405aca83dd1b01dbbabbbb3326cac[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Jul 15 13:24:20 2022 -0700
+
+    Created option to run simulation batch in parallel or series in modify_RSTA_OpenSim_Geom.m
+
+[33mcommit 16b7d0e033b155731d9afd62764c4bef3d00f605[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Jul 15 12:14:57 2022 -0700
+
+    Change RTSA_model_log to output individually and reset rng to 'shuffle' in each parfor
+
+[33mcommit b4190a40a0699f95f241e17cc89289c691119313[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Jul 15 09:56:05 2022 -0700
+
+    Fixed RTSA_model_log.txt tabbing
+
+[33mcommit dd79886873cbca6d08b105cf3418730735b019aa[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jul 14 16:12:25 2022 -0700
+
+    Test >2 perms on 2 workers. Monitor runAnalyzeTool.xml for read/write error?
+
+[33mcommit f257eb239aee20cede9b69de76582a75dc8d3708[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jul 14 13:22:12 2022 -0700
+
+    Create parameter matrix with all perms then divide and pass to parfor (better handling?)
+
+[33mcommit 36e08dae0ae5bbac412d3342a0e675c76c53100e[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Jul 13 17:41:17 2022 -0700
+
+    Remove statement of threads to CasADi and ready for first test to converge...
+
+[33mcommit da0d6311c27b0c6be0c87029800cc434a6f9e251[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Jul 13 17:04:35 2022 -0700
+
+    Add another pause after optimiser has ran to save out files
+
+[33mcommit 097a1ac0bf11c9e1c7ede97ba140d33076958d98[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Jul 13 16:48:44 2022 -0700
+
+    Add random 0.25-1 s pause to print out clean in parfor
+
+[33mcommit 2f997d2142d72be041031d61c75b3398efb7b166[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Jul 13 16:18:58 2022 -0700
+
+    Branch again to correct for parallel Matlab. Commented out pcplots and .xlsx write out.
+
+[33mcommit 22202e34de4b092181282c02272dfe7bc60b16e7[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Wed Jul 13 11:23:23 2022 -0700
+
+    Split modify_RTSA_OpenSim_Geom.m into sep functions to work with parallel
+
+[33mcommit 8a5ad438a4e1b7cdbed24677b912c40a8f76a4df[m
+Author: Erik Bedard <bedarder@gmail.com>
+Date:   Tue Jul 12 17:19:35 2022 -0700
+
+    Add set_parallel() to sellect thread number in solver
+
+[33mcommit ac2964947eef2e2fa28263470bb14a9f1f6ea890[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Jul 8 16:38:31 2022 -0700
+
+    changed name of stlread. to stlreadXYZ.m in ...\Pavlos\Research\Matlab
+
+[33mcommit 133e6b762def9f21e62d21232ed17d418633dc91[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Fri Jul 8 09:25:33 2022 -0700
+
+    Corrected postProcessingShoulerMODlOC.m to be flexible if RC muscles there or not
+
+[33mcommit 73d1778a040417ae49578597e9c2c5f6cc23b74c[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jul 7 16:10:14 2022 -0700
+
+    Create runRTSsim.m to run Moco after model creation. Runs - not fully tested
+
+[33mcommit 54ea08d837a93d4a71d24c8c2afa426f5c6c2698[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jul 7 12:34:04 2022 -0700
+
+    Added .xlsx readout of new models for each iteration
+
+[33mcommit cce800a993fad4110853567e4cb86a6f8fa42554[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jul 7 11:22:51 2022 -0700
+
+    Correct cup Ant/Inf version and cogruence error
+
+[33mcommit 3193bc91c3a2bb2232197660d51e9d3d81ee884c[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jul 7 10:20:43 2022 -0700
+
+    Correct +ive/-ive direction for hemi/cup. + Sup/Ant; -Inf/Post
+
+[33mcommit a84db76c84b5e4b136696b77ee1831a2ab7823c0[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jul 7 09:51:53 2022 -0700
+
+    Correct Sup/Inf <version> to <inclination>
+
+[33mcommit 8ae2a519a2dd18a0e3939419fe29371d4247a2b3[m
+Author: Pavlos Silvestros <pavlossilv@gmail.com>
+Date:   Thu Jun 30 15:26:52 2022 -0700
+
+    Initial Proj_RTSA_config_eval code, data and input
