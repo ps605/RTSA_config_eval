@@ -715,7 +715,7 @@ CoR_glen = CoR_glen + glenoid_plane_normals.y_n_r1*hemi_gle_offsets.y_prox_dist;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Z - Base offset %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if flag_correctLateral == true && flag_AthwalOr12mm == true
-    hemi_gle_offsets.z_base_off = correction_vector.in_glenoid(3);
+    hemi_gle_offsets.z_base_off = correction_vector.in_glenoid(3) + hemi_gle_offsets.z_base_off;
 end
 
 hemisphere_gle.XData = hemisphere_gle.XData + glenoid_plane_normals.z_n_r2(1)*hemi_gle_offsets.z_base_off;
