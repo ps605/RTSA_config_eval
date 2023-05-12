@@ -56,7 +56,7 @@ jrf_colours = [255,109,106;
     221,160,221]./255;
 
 axis_label_size = 18;
-line_width = 2.5;
+line_width = 2.0;
 
 jointF_to_plot = {'unrothum_on_scapula_in_scapula_offset_fx'...
     'unrothum_on_scapula_in_scapula_offset_fy',...
@@ -510,7 +510,7 @@ for i_mode = 1:numel(modes)
 
             idx_sim_table = n_idx_sim_table(i_trial);
 
-            if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+            if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1) && log_table.Date_Generated(idx_sim_table)<=datetime(2023,5,10)
                 line_style = '-';
                 % Reds
                 sd_colours = [254,153,41;
@@ -519,7 +519,16 @@ for i_mode = 1:numel(modes)
                     140,45,4]./255;
 
                 F_res_plus5(:,i_sd) = JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).F_res;
+            
+            elseif log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                line_style = '-';
+                % Pinks
+                sd_colours = [221,52,151;
+                    174,1,126;
+                    122,1,119;
+                    73,0,106]./255;
 
+                F_res_plus10(:,i_sd) = JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).F_res;
             else
                 line_style = '-';
                 % Blues
@@ -651,6 +660,19 @@ for i_mode = 1:numel(modes)
     spm = spm1d.stats.ttest_paired(F_res',F_res_plus5');
     spmi = spm.inference(0.05,'two_tailed', true);
     spmi.plot()
+
+    figure(34)
+    spm = spm1d.stats.ttest_paired(F_res',F_res_plus10');
+    spmi = spm.inference(0.05,'two_tailed', true);
+    spmi.plot()
+
+    A = [F_res'; F_res_plus5'; F_res_plus10'];
+    SUB = repmat([1:4]',3,1);
+    condition = [0,0,0,0,1,1,1,1,2,2,2,2]';
+    figure(35)
+    F  = spm1d.stats.anova1(A,condition, SUB);
+    Fi = F.inference(0.05);
+    Fi.plot()
 
 
     % Average morphology data
@@ -796,13 +818,20 @@ for i_mus = 1:3
 
                 idx_sim_table = n_idx_sim_table(i_trial);
 
-                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1) && log_table.Date_Generated(idx_sim_table)<=datetime(2023,5,10)
                     line_style = '-';
                     % Reds
                     sd_colours = [254,153,41;
                         236,112,20;
                         204,76,2;
                         140,45,4]./255;
+                elseif log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                    line_style = '-';
+                    % Pinks
+                    sd_colours = [221,52,151;
+                        174,1,126;
+                        122,1,119;
+                        73,0,106]./255;
                 else
                     line_style = '-';
                     % Blues
@@ -1031,13 +1060,20 @@ for i_mus = 1:3
 
                 idx_sim_table = n_idx_sim_table(i_trial);
 
-                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1) && log_table.Date_Generated(idx_sim_table)<=datetime(2023,5,10)
                     line_style = '-';
                     % Reds
                     sd_colours = [254,153,41;
                         236,112,20;
                         204,76,2;
                         140,45,4]./255;
+                elseif log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                line_style = '-';
+                % Pinks
+                sd_colours = [221,52,151;
+                    174,1,126;
+                    122,1,119;
+                    73,0,106]./255;
                 else
                     line_style = '-';
                     % Blues
@@ -1282,13 +1318,20 @@ for i_coord = 1:numel(coords_to_plot)
 
                     idx_sim_table = n_idx_sim_table(i_trial);
 
-                    if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                    if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1) && log_table.Date_Generated(idx_sim_table)<=datetime(2023,5,10)
                         line_style = '-';
                         % Reds
                         sd_colours = [254,153,41;
                             236,112,20;
                             204,76,2;
                             140,45,4]./255;
+                    elseif log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                        line_style = '-';
+                        % Pinks
+                        sd_colours = [221,52,151;
+                            174,1,126;
+                            122,1,119;
+                            73,0,106]./255;
                     else
                         line_style = '-';
                         % Blues
@@ -1349,13 +1392,14 @@ for i_mus = 1:3
 
                 idx_sim_table = n_idx_sim_table(i_trial);
 
-                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1) && log_table.Date_Generated(idx_sim_table)<=datetime(2023,5,10)
                     line_style = '-';
                     % Reds
                     sd_colours = [254,153,41;
                         236,112,20;
                         204,76,2;
                         140,45,4]./255;
+
                 else
                     line_style = '-';
                     % Blues
