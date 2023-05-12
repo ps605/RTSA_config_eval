@@ -16,6 +16,7 @@ flag_HairTouch      = false;
 flag_LateralReach   = false;
 flag_UpwardReach    = true;
 flag_AddDummyCoord  = true;
+
 % Import OpenSim 4.3 libraries
 import org.opensim.modeling.*
 
@@ -70,13 +71,14 @@ coords_to_plot = {
     'elv_angle'};
 
 modes = {
-    'm2',...
-    %     'm4',...
-    %     'm5',...
+%         'm4',...
+        'm2',...
+%         'm5',...
     %     'm6',...
     %     'm7',...
     %     'm9'
     };
+
 % in ascending order for colour scheme
 SDs = {'-3',...
     '-1',...
@@ -508,10 +510,25 @@ for i_mode = 1:numel(modes)
 
             idx_sim_table = n_idx_sim_table(i_trial);
 
-            if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1)
-                line_style = '-.';
+            if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                line_style = '-';
+                % Reds
+                sd_colours = [254,153,41;
+                    236,112,20;
+                    204,76,2;
+                    140,45,4]./255;
+
+                F_res_plus5(:,i_sd) = JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).F_res;
+
             else
                 line_style = '-';
+                % Blues
+                sd_colours = [222, 235, 247;
+                    158, 202, 225;
+                    66, 146, 198;
+                    8, 69, 148]./255;
+
+                F_res(:,i_sd) = JRA.(['sim_' log_table.Model_Hash{idx_sim_table}]).F_res;
             end
 
             for i_joint = 1:3
@@ -629,6 +646,12 @@ for i_mode = 1:numel(modes)
 
         end
     end
+
+    figure(33)
+    spm = spm1d.stats.ttest_paired(F_res',F_res_plus5');
+    spmi = spm.inference(0.05,'two_tailed', true);
+    spmi.plot()
+
 
     % Average morphology data
     figure(1)
@@ -773,10 +796,20 @@ for i_mus = 1:3
 
                 idx_sim_table = n_idx_sim_table(i_trial);
 
-                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1)
-                    line_style = '-.';
+                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                    line_style = '-';
+                    % Reds
+                    sd_colours = [254,153,41;
+                        236,112,20;
+                        204,76,2;
+                        140,45,4]./255;
                 else
                     line_style = '-';
+                    % Blues
+                    sd_colours = [222, 235, 247;
+                        158, 202, 225;
+                        66, 146, 198;
+                        8, 69, 148]./255;
                 end
 
                 figure(1)
@@ -998,10 +1031,20 @@ for i_mus = 1:3
 
                 idx_sim_table = n_idx_sim_table(i_trial);
 
-                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1)
-                    line_style = '-.';
+                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                    line_style = '-';
+                    % Reds
+                    sd_colours = [254,153,41;
+                        236,112,20;
+                        204,76,2;
+                        140,45,4]./255;
                 else
                     line_style = '-';
+                    % Blues
+                    sd_colours = [222, 235, 247;
+                        158, 202, 225;
+                        66, 146, 198;
+                        8, 69, 148]./255;
                 end
 
                 figure (1)
@@ -1239,10 +1282,20 @@ for i_coord = 1:numel(coords_to_plot)
 
                     idx_sim_table = n_idx_sim_table(i_trial);
 
-                    if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1)
-                        line_style = '-.';
+                    if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                        line_style = '-';
+                        % Reds
+                        sd_colours = [254,153,41;
+                            236,112,20;
+                            204,76,2;
+                            140,45,4]./255;
                     else
                         line_style = '-';
+                        % Blues
+                        sd_colours = [222, 235, 247;
+                            158, 202, 225;
+                            66, 146, 198;
+                            8, 69, 148]./255;
                     end
 
                     figure (1)
@@ -1296,10 +1349,20 @@ for i_mus = 1:3
 
                 idx_sim_table = n_idx_sim_table(i_trial);
 
-                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,1)
-                    line_style = '-.';
+                if log_table.Date_Generated(idx_sim_table)>=datetime(2023,5,10)
+                    line_style = '-';
+                    % Reds
+                    sd_colours = [254,153,41;
+                        236,112,20;
+                        204,76,2;
+                        140,45,4]./255;
                 else
                     line_style = '-';
+                    % Blues
+                    sd_colours = [222, 235, 247;
+                        158, 202, 225;
+                        66, 146, 198;
+                        8, 69, 148]./255;
                 end
 
 
