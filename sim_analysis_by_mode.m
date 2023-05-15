@@ -656,15 +656,44 @@ for i_mode = 1:numel(modes)
         end
     end
 
-    figure(33)
-    spm = spm1d.stats.ttest_paired(F_res',F_res_plus5');
-    spmi = spm.inference(0.05,'two_tailed', true);
-    spmi.plot()
+    %% SPM 
+    % inference:
+    alpha      = 0.05;
+    nTests     = 3;
+    p_critical = spm1d.util.p_critical_bonf(alpha, nTests);
 
-    figure(34)
-    spm = spm1d.stats.ttest_paired(F_res',F_res_plus10');
-    spmi = spm.inference(0.05,'two_tailed', true);
-    spmi.plot()
+    figure(33)
+    subplot(3,1,1)
+    t_baseV5 = spm1d.stats.ttest_paired(F_res',F_res_plus5');
+    t_baseV5i = t_baseV5.inference(p_critical,'two_tailed', true, 'interp', true);
+    t_baseV5i.plot()
+    ylim([-100,25]);
+    xticks([])
+    title('Baseline vs 5 mm','FontSize', 12)
+%     xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+    
+
+    figure(33)
+    subplot(3,1,2)
+    t_baseV10 = spm1d.stats.ttest_paired(F_res',F_res_plus10');
+    baseV10i = t_baseV10.inference(p_critical,'two_tailed', true, 'interp', true);
+    baseV10i.plot()
+    ylim([-100,25]);
+    xticks([])
+    title('Baseline vs 10 mm','FontSize', 12)
+%     xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+
+    figure(33)
+    subplot(3,1,3)
+    t_5V10 = spm1d.stats.ttest_paired(F_res_plus5',F_res_plus10');
+    t_5V10i = t_5V10.inference(p_critical,'two_tailed', true, 'interp', true);
+    t_5V10i.plot()
+    ylim([-100,25]);
+    title('5 mm vs 10 mm','FontSize', 12)
+    xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+
+
+    saveas(figure(33), [analysis_folder task_name '/SPM_mode_' modes{i_mode} '.tiff'],'tiff')
 
     A = [F_res'; F_res_plus5'; F_res_plus10'];
     SUB = repmat([1:4]',3,1);
@@ -673,6 +702,7 @@ for i_mode = 1:numel(modes)
     F  = spm1d.stats.anova1(A,condition, SUB);
     Fi = F.inference(0.05);
     Fi.plot()
+    xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
 
 
     % Average morphology data
