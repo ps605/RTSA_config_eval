@@ -15,7 +15,7 @@ track = MocoTrack();
 track.setModel(ModelProcessor(osim_model));
 
 % Set reference states and use them as guess
-track.setStatesReference(TableProcessor('..\..\OpenSim\Out\Moco\Analysis\paper_v02\Final\sim_U94wbx134tf\RSA_U94wbx134tf_StatesReporter_states.sto'))
+track.setStatesReference(TableProcessor('..\..\OpenSim\In\Moco\tracking_states\sim_U94wbx134tf\RSA_U94wbx134tf_StatesReporter_states.sto'))
 track.set_apply_tracked_states_to_guess(true)
 study = track.initialize();
 

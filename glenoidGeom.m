@@ -1,10 +1,14 @@
 function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral)
 %% Set up
+
+% What part of the glenoid will be used to calcuate glenoid plane? (global
+% or lower for RSA)
+flag_globalGlenoid = false;
+
 % Flag for which prox/dist correction to use.
 % True = 6.5 mm overhang assuming 29 mm baseplate on 42 mm glenosphere OR 7 mm overhang assuming 25 mm baseplate and 39 mm glenosphere.
 % Flase = 12 mm rule  inferior rim to central peg.
 flag_AthwalOr12mm = true;
-
 % Inferior overhang
 overhang = 0.007;
 % Lateral offset from inferior rim
@@ -43,12 +47,17 @@ hold on;
 
 
 %% Fit plane to glenoid rim points
+if flag_globalGlenoid == true
+    % Glenoid rim points X-Y-Z
+    glenoid_points = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '_rim_coords.txt'], ' ');
+    % Calculate the mean of the points
+    glenoid_barycentre = mean(glenoid_points);
+else
+    load('RSA_points.mat');
+    glenoid_points = RSA_points_round;
+    glenoid_barycentre = mean(glenoid_points);
 
-% Glenoid rim points X-Y-Z
-glenoid_points = importdata(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '_rim_coords.txt'], ' ');
-% Calculate the mean of the points
-glenoid_barycentre = mean(glenoid_points);
-
+end
 % Get points to define coordinate system - Y-axis
 % % % D = pdist(glenoid_points);
 % % % D = squareform(D);
