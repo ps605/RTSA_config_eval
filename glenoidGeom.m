@@ -50,7 +50,7 @@ hold on;
 if flag_globalGlenoid == true
 
     scapula_stl = stlread(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '.stl']);
-
+%     scapula_stl = stlread('..\..\SSM\SSM_Measure_forPavlos\source199k_scaled.stl');
     load('glenoid_idx_global.mat')
 
     glenoid_stl.Points = scapula_stl.Points(glenoid_idx,:);
@@ -72,8 +72,7 @@ if flag_globalGlenoid == true
     hold on;
     
     scatter3(scapula_stl.Points(glenoid_idx,1), scapula_stl.Points(glenoid_idx,2), scapula_stl.Points(glenoid_idx,3),'g')
-    scatter3(x(glenoid_idx), y(glenoid_idx), z(glenoid_idx),'b')
-
+    
     surf(xs+sphere_pcFit.Center(1), ys+sphere_pcFit.Center(2), zs+sphere_pcFit.Center(3), 'EdgeColor','none', 'FaceColor','g', 'FaceAlpha', 0.1)
     scatter3(sphere_pcFit.Center(1), sphere_pcFit.Center(2), sphere_pcFit.Center(3), 'filled', ' cyan')
     scatter3(glenoid_c(1), glenoid_c(2), glenoid_c(3), 'filled', 'cyan' )
@@ -93,7 +92,7 @@ else
 
     glenoid_normal = (sphere_pcFit.Center - glenoid_c)/norm(sphere_pcFit.Center - glenoid_c);
 
-    plane_delta = -sum(-glenoid_normal.*glenoid_c);
+    plane_delta = -sum(glenoid_normal.*glenoid_c);
     glenoid_plane = planeModel([glenoid_normal plane_delta]);
 
     [xs,ys,zs] = sphere(101);
