@@ -3,7 +3,7 @@ function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_corre
 
 % What part of the glenoid will be used to calcuate glenoid plane? (global
 % or lower for RSA)
-flag_globalGlenoid = true;
+flag_globalGlenoid = false;
 
 % Flag for which prox/dist correction to use.
 % True = 6.5 mm overhang assuming 29 mm baseplate on 42 mm glenosphere OR 7 mm overhang assuming 25 mm baseplate and 39 mm glenosphere.
@@ -88,6 +88,8 @@ else
     % sphere_pcFit = pcfitsphere(glenoid_pC, 0.1, 'MaxNumTrials',1e6);
     [sphere_pcFit.Center, sphere_pcFit.Radius]  = sphereFit(glenoid_stl.Points);
 
+    sphere_pcFit.Center=test_sphere_fit(glenoid_stl,sphere_pcFit);
+
     glenoid_c = mean(glenoid_stl.Points);
 
     glenoid_normal = (sphere_pcFit.Center - glenoid_c)/norm(sphere_pcFit.Center - glenoid_c);
@@ -128,50 +130,51 @@ end
 % % % % Invert so it point superiorly and normalise
 % % % axial_normal = -(bc_to_inferior_p/norm(bc_to_inferior_p));
 
-scatter3(glenoid_points(:,1), glenoid_points(:,2), glenoid_points(:,3), 'filled', 'o', 'cyan');
-% scatter3(glenoid_points(min_gl_p,1), glenoid_points(min_gl_p,2), glenoid_points(min_gl_p,3), 'filled', 'o', 'magenta');
-scatter3(glenoid_barycentre(:,1), glenoid_barycentre(:,2), glenoid_barycentre(:,3), 'filled', 'o', 'magenta');
-
-% Generate PointCloud of slected points and barycentre
-glenoid_pointCloud = pointCloud(vertcat(glenoid_points, glenoid_barycentre));
-
-% figure (2);
-% pcshow(glenoid_pointCloud, 'MarkerSize', 100)
-
-% Linear Regresion method to fit plane
-x_gp = glenoid_points(:,1);
-y_gp = glenoid_points(:,2);
-z_gp = glenoid_points(:,3);
-
-DM = [x_gp, y_gp, ones(size(z_gp))];
-B = DM\z_gp;
-
-% Create meshgrid of plane from Linear Regresion
-[X,Y] = meshgrid(linspace(min(x_gp),max(x_gp),50), linspace(min(y_gp),max(y_gp),50));
-Z = B(1)*X + B(2)*Y + B(3)*ones(size(X));
-
-% Create point cloud Linear Regression plane (consistensy with following code)
-plane_pointCloud = pointCloud([X(:), Y(:), Z(:)]);
-% Fit plane to the Linear Regresion plane points
-[glenoid_plane,~,~, ~] = pcfitplane(plane_pointCloud, 0.0001, 'MaxNumTrials', 1e6);
-
-% Get normal to handle it later
-% This is the Z-axis
-glenoid_normal = glenoid_plane.Normal;
-
-figure(10)
-
-% Generate plane mesh and plot using Ax + By + Gz + D = 0
-[gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
-gle_plane_mesh_data.z_plane = -1*(glenoid_plane.Parameters(1)*gle_plane_mesh_data.x_plane ...
-    + glenoid_plane.Parameters(2)*gle_plane_mesh_data.y_plane ...
-    + glenoid_plane.Parameters(4))/glenoid_plane.Parameters(3);
-
-% Plot Plane
-surf(gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane, gle_plane_mesh_data.z_plane,...
-    'FaceColor','g',...
-    'FaceAlpha', 0.25,...
-    'EdgeAlpha', 0)
+% % % % GET  RID????
+% % % % scatter3(glenoid_points(:,1), glenoid_points(:,2), glenoid_points(:,3), 'filled', 'o', 'cyan');
+% % % % % scatter3(glenoid_points(min_gl_p,1), glenoid_points(min_gl_p,2), glenoid_points(min_gl_p,3), 'filled', 'o', 'magenta');
+% % % % scatter3(glenoid_barycentre(:,1), glenoid_barycentre(:,2), glenoid_barycentre(:,3), 'filled', 'o', 'magenta');
+% % % % 
+% % % % % Generate PointCloud of slected points and barycentre
+% % % % glenoid_pointCloud = pointCloud(vertcat(glenoid_points, glenoid_barycentre));
+% % % % 
+% % % % % figure (2);
+% % % % % pcshow(glenoid_pointCloud, 'MarkerSize', 100)
+% % % % 
+% % % % % Linear Regresion method to fit plane
+% % % % x_gp = glenoid_points(:,1);
+% % % % y_gp = glenoid_points(:,2);
+% % % % z_gp = glenoid_points(:,3);
+% % % % 
+% % % % DM = [x_gp, y_gp, ones(size(z_gp))];
+% % % % B = DM\z_gp;
+% % % % 
+% % % % % Create meshgrid of plane from Linear Regresion
+% % % % [X,Y] = meshgrid(linspace(min(x_gp),max(x_gp),50), linspace(min(y_gp),max(y_gp),50));
+% % % % Z = B(1)*X + B(2)*Y + B(3)*ones(size(X));
+% % % % 
+% % % % % Create point cloud Linear Regression plane (consistensy with following code)
+% % % % plane_pointCloud = pointCloud([X(:), Y(:), Z(:)]);
+% % % % % Fit plane to the Linear Regresion plane points
+% % % % [glenoid_plane,~,~, ~] = pcfitplane(plane_pointCloud, 0.0001, 'MaxNumTrials', 1e6);
+% % % % 
+% % % % % Get normal to handle it later
+% % % % % This is the Z-axis
+% % % % glenoid_normal = glenoid_plane.Normal;
+% % % % 
+% % % % figure(10)
+% % % % 
+% % % % % Generate plane mesh and plot using Ax + By + Gz + D = 0
+% % % % [gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
+% % % % gle_plane_mesh_data.z_plane = -1*(glenoid_plane.Parameters(1)*gle_plane_mesh_data.x_plane ...
+% % % %     + glenoid_plane.Parameters(2)*gle_plane_mesh_data.y_plane ...
+% % % %     + glenoid_plane.Parameters(4))/glenoid_plane.Parameters(3);
+% % % % 
+% % % % % Plot Plane
+% % % % surf(gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane, gle_plane_mesh_data.z_plane,...
+% % % %     'FaceColor','g',...
+% % % %     'FaceAlpha', 0.25,...
+% % % %     'EdgeAlpha', 0)
 
 %% Calculate scapular plane
 % scap_pointCloud = pointCloud([x(:), y(:), z(:)]);
