@@ -57,11 +57,11 @@ if flag_globalGlenoid == true
     
     [sphere_pcFit.Center, sphere_pcFit.Radius]  = sphereFit(glenoid_stl.Points);
 
-    glenoid_c = mean(glenoid_stl.Points);
+    glenoid_barycentre = mean(glenoid_stl.Points);
 
-    glenoid_normal = (sphere_pcFit.Center - glenoid_c)/norm(sphere_pcFit.Center - glenoid_c);
+    glenoid_normal = (sphere_pcFit.Center - glenoid_barycentre)/norm(sphere_pcFit.Center - glenoid_barycentre);
 
-    plane_delta = -sum(glenoid_normal.*glenoid_c);
+    plane_delta = -sum(glenoid_normal.*glenoid_barycentre);
     glenoid_plane = planeModel([glenoid_normal plane_delta]);
 
     [xs,ys,zs] = sphere(101);
@@ -75,54 +75,94 @@ if flag_globalGlenoid == true
     
     surf(xs+sphere_pcFit.Center(1), ys+sphere_pcFit.Center(2), zs+sphere_pcFit.Center(3), 'EdgeColor','none', 'FaceColor','g', 'FaceAlpha', 0.1)
     scatter3(sphere_pcFit.Center(1), sphere_pcFit.Center(2), sphere_pcFit.Center(3), 'filled', ' cyan')
-    scatter3(glenoid_c(1), glenoid_c(2), glenoid_c(3), 'filled', 'cyan' )
-    line([glenoid_c(1) sphere_pcFit.Center(1)], [glenoid_c(2) sphere_pcFit.Center(2)], [glenoid_c(3) sphere_pcFit.Center(3)],'Color', 'g', 'LineWidth', 8)
+    scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'filled', 'cyan' )
+    line([glenoid_barycentre(1) sphere_pcFit.Center(1)], [glenoid_barycentre(2) sphere_pcFit.Center(2)], [glenoid_barycentre(3) sphere_pcFit.Center(3)],'Color', 'g', 'LineWidth', 8)
     plot(glenoid_plane, "Color",'g')    
 
 else
-   
+
     scapula_stl = stlread(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '.stl']);
     load('glenoid_idx_lower.mat')
 
+
     glenoid_stl.Points = scapula_stl.Points(glenoid_lower_idx,:);
-    % sphere_pcFit = pcfitsphere(glenoid_pC, 0.1, 'MaxNumTrials',1e6);
-    [sphere_pcFit.Center, sphere_pcFit.Radius]  = sphereFit(glenoid_stl.Points);
 
-    sphere_pcFit.Center=test_sphere_fit(glenoid_stl,sphere_pcFit);
+    % Fit plane to glenoid points
+    
+    % Linear Regression method to fit plane
+    x_gl = glenoid_stl.Points(:,1);
+    y_gl = glenoid_stl.Points(:,2);
+    z_gl = glenoid_stl.Points(:,3);
 
-    glenoid_c = mean(glenoid_stl.Points);
+    DM = [x_gl, y_gl, ones(size(z_gl))];
+    B = DM\z_gl;
 
-    glenoid_normal = (sphere_pcFit.Center - glenoid_c)/norm(sphere_pcFit.Center - glenoid_c);
+    % Create meshgrid of plane from Linear Regresion
+    [X,Y] = meshgrid(linspace(min(x_gl),max(x_gl),50), linspace(min(y_gl),max(y_gl),50));
+    Z = B(1)*X + B(2)*Y + B(3)*ones(size(X));
 
-    plane_delta = -sum(glenoid_normal.*glenoid_c);
-    glenoid_plane = planeModel([glenoid_normal plane_delta]);
+    % Create point cloud Linear Regression plane (consistensy with following code)
+    glenoid_plane_pointCloud = pointCloud([X(:), Y(:), Z(:)]);
+    % Fit plane to the Linear Regresion plane points
+    [glenoid_plane,~,~, ~] = pcfitplane(glenoid_plane_pointCloud, 0.0001, 'MaxNumTrials', 1e6);
 
+    % Generate plane mesh and plot using Ax + By + Gz + D = 0
+    [gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
+    gle_plane_mesh_data.z_plane = -1*(glenoid_plane.Parameters(1)*gle_plane_mesh_data.x_plane ...
+        + glenoid_plane.Parameters(2)*gle_plane_mesh_data.y_plane ...
+        + glenoid_plane.Parameters(4))/glenoid_plane.Parameters(3);
+
+    surf(gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane, gle_plane_mesh_data.z_plane,...
+        'FaceColor','y',...
+        'FaceAlpha', 0.25,...
+        'EdgeAlpha', 0)
+
+    %%%
+% % % % %     sphere_pcFit = pcfitsphere(glenoid_pC, 0.1, 'MaxNumTrials',1e6);
+% % % % %     [sphere_pcFit.Center, sphere_pcFit.Radius]  = sphereFit(glenoid_stl.Points);
+
+       
+    glenoid_barycentre = mean(glenoid_stl.Points);
+    glenoid_normal = glenoid_plane.Normal;
+
+    [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre);
+
+    glenSphere_lsq.Radius = 0.030;
+
+    % Initial guess - progection from center to 30 mm out
+    x0 = glenoid_barycentre + glenoid_normal*0.030;
+    x0(4) = glenSphere_lsq.Radius;
+
+    [x_opt] = test_sphere_fit(glenoid_stl, x0, glenoid_normal, glenoid_barycentre);
+    glenSphere_lsq.Center = x_opt(1:3);
+    glenSphere_lsq.Radius = x_opt(4);
+    
     [xs,ys,zs] = sphere(101);
-    xs = xs*sphere_pcFit.Radius(1);
-    ys = ys*sphere_pcFit.Radius(1);
-    zs = zs*sphere_pcFit.Radius(1);
+    xs = xs*glenSphere_lsq.Radius(1);
+    ys = ys*glenSphere_lsq.Radius(1);
+    zs = zs*glenSphere_lsq.Radius(1);
 
     hold on;
-    surf(xs+sphere_pcFit.Center(1), ys+sphere_pcFit.Center(2), zs+sphere_pcFit.Center(3), 'EdgeColor','none', 'FaceColor','r', 'FaceAlpha', 0.1)
+    surf(xs+glenSphere_lsq.Center(1), ys+glenSphere_lsq.Center(2), zs+glenSphere_lsq.Center(3), 'EdgeColor','none', 'FaceColor','g', 'FaceAlpha', 0.1)
     scatter3(scapula_stl.Points(glenoid_lower_idx,1), scapula_stl.Points(glenoid_lower_idx,2), scapula_stl.Points(glenoid_lower_idx,3),'r')
 
-    scatter3(sphere_pcFit.Center(1), sphere_pcFit.Center(2), sphere_pcFit.Center(3), 'filled', 'cyan')
-    scatter3(glenoid_c(1), glenoid_c(2), glenoid_c(3), 'filled', 'cyan' )
-    line([glenoid_c(1) sphere_pcFit.Center(1)], [glenoid_c(2) sphere_pcFit.Center(2)], [glenoid_c(3) sphere_pcFit.Center(3)],'Color', 'r', 'LineWidth', 8)
+    scatter3(glenSphere_lsq.Center(1), glenSphere_lsq.Center(2), glenSphere_lsq.Center(3), 'filled', 'cyan')
+    scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'filled', 'cyan')
+    line([glenoid_barycentre(1) glenSphere_lsq.Center(1)], [glenoid_barycentre(2) glenSphere_lsq.Center(2)], [glenoid_barycentre(3) glenSphere_lsq.Center(3)],'Color', 'r', 'LineWidth', 4)
     plot(glenoid_plane, "Color",'r')
 
 
 
 end
 % Get points to define coordinate system - Y-axis
-% % % D = pdist(glenoid_points);
+% % % D = pdist(glenoid_stl.Points);
 % % % D = squareform(D);
 % % % [~,I] = max(D(:));
 % % % [max_point_idx_1, max_point_idx_2] = ind2sub(size(D),I);
 % % % max_point_idx = [max_point_idx_1, max_point_idx_2];
 
-% % % [~, min_gl_p] = min(glenoid_points(:,2));
-% % % glenoid_inferior = glenoid_points(min_gl_p,:);
+% % % [~, min_gl_p] = min(glenoid_stl.Points(:,2));
+% % % glenoid_inferior = glenoid_stl.Points(min_gl_p,:);
 % % %
 % % % % Calculate vector between barrycentre and most inferior point
 % % % bc_to_inferior_p =  glenoid_inferior - glenoid_barycentre;
@@ -131,20 +171,20 @@ end
 % % % axial_normal = -(bc_to_inferior_p/norm(bc_to_inferior_p));
 
 % % % % GET  RID????
-% % % % scatter3(glenoid_points(:,1), glenoid_points(:,2), glenoid_points(:,3), 'filled', 'o', 'cyan');
-% % % % % scatter3(glenoid_points(min_gl_p,1), glenoid_points(min_gl_p,2), glenoid_points(min_gl_p,3), 'filled', 'o', 'magenta');
+% % % % scatter3(glenoid_stl.Points(:,1), glenoid_stl.Points(:,2), glenoid_stl.Points(:,3), 'filled', 'o', 'cyan');
+% % % % % scatter3(glenoid_stl.Points(min_gl_p,1), glenoid_stl.Points(min_gl_p,2), glenoid_stl.Points(min_gl_p,3), 'filled', 'o', 'magenta');
 % % % % scatter3(glenoid_barycentre(:,1), glenoid_barycentre(:,2), glenoid_barycentre(:,3), 'filled', 'o', 'magenta');
 % % % % 
 % % % % % Generate PointCloud of slected points and barycentre
-% % % % glenoid_pointCloud = pointCloud(vertcat(glenoid_points, glenoid_barycentre));
+% % % % glenoid_pointCloud = pointCloud(vertcat(glenoid_stl.Points, glenoid_barycentre));
 % % % % 
 % % % % % figure (2);
 % % % % % pcshow(glenoid_pointCloud, 'MarkerSize', 100)
 % % % % 
 % % % % % Linear Regresion method to fit plane
-% % % % x_gp = glenoid_points(:,1);
-% % % % y_gp = glenoid_points(:,2);
-% % % % z_gp = glenoid_points(:,3);
+% % % % x_gp = glenoid_stl.Points(:,1);
+% % % % y_gp = glenoid_stl.Points(:,2);
+% % % % z_gp = glenoid_stl.Points(:,3);
 % % % % 
 % % % % DM = [x_gp, y_gp, ones(size(z_gp))];
 % % % % B = DM\z_gp;
@@ -291,63 +331,6 @@ intersect_v = intersect_v/norm(intersect_v);
 intersect_v_angle = vrrotvec([0 1 0], intersect_v);
 intersect_v_angle_deg = rad2deg(intersect_v_angle(4));
 
-%% Check which way the Plane norm (Z axis) is pointing
-
-% Get the barycentre of glenoid verteces
-x_sca_mean = mean(x,'all');
-y_sca_mean = mean(y,'all');
-z_sca_mean = mean(z,'all');
-
-scap_barycentre = [x_sca_mean y_sca_mean z_sca_mean];
-
-scatter3(scap_barycentre(1), scap_barycentre(2), scap_barycentre(3),'cyan', 'filled','o')
-
-% Pass .stl x-y-z to structure to then export
-stl_scap = struct('x', x,...
-    'y', y,...
-    'z', z);
-
-% What is the angle between the norm and the vector from the norm origine to glenoid vertex barycentre
-
-% Vector from glenoid barycentre to humeral verteces barrycentre
-gle_bary_vec = scap_barycentre - glenoid_barycentre;
-
-% Connect with line to visualise vector
-line([glenoid_barycentre(1) scap_barycentre(1)],...
-    [glenoid_barycentre(2) scap_barycentre(2)],...
-    [glenoid_barycentre(3) scap_barycentre(3)], ...
-    'LineWidth',4,'Color','cyan');
-
-norm_check_angle = vrrotvec(gle_bary_vec, glenoid_normal);
-
-% If angle between vectors is 0<gonia<=90 flip normal about plane
-% This is the Z-axis
-if norm_check_angle(4) >= 0 && norm_check_angle(4) < pi/2
-
-    % Negate Z normal to flip about plane to point out of the glenoid
-    glenoid_normal = - glenoid_normal;
-    % Project point normal from plane to distance R along Z normal
-    glenoid_plane_normals.z_p = (glenoid_barycentre + R.*glenoid_normal);
-    scatter3(glenoid_plane_normals.z_p(1), glenoid_plane_normals.z_p(2), glenoid_plane_normals.z_p(3),'green', 'filled','o','MarkerEdgeColor','black')
-
-    % Connect with line to visualise normal and projection
-    line([glenoid_barycentre(1) glenoid_plane_normals.z_p(1)],...
-        [glenoid_barycentre(2) glenoid_plane_normals.z_p(2)],...
-        [glenoid_barycentre(3) glenoid_plane_normals.z_p(3)], ...
-        'LineWidth',4,'Color','green');
-
-else
-    % Project point normal from plane to distance R along Z normal
-    glenoid_plane_normals.z_p = (glenoid_barycentre + R.*glenoid_normal);
-    scatter3(glenoid_plane_normals.z_p(1), glenoid_plane_normals.z_p(2), glenoid_plane_normals.z_p(3),'green', 'filled','o','MarkerEdgeColor','black')
-
-    % Connect with line to visualise normal and projection
-    line([glenoid_barycentre(1) glenoid_plane_normals.z_p(1)],...
-        [glenoid_barycentre(2) glenoid_plane_normals.z_p(2)],...
-        [glenoid_barycentre(3) glenoid_plane_normals.z_p(3)], ...
-        'LineWidth',4,'Color','green');
-
-end
 
 % Plot Barycetntre where cup will be placed
 scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'black','filled','o')
@@ -552,11 +535,11 @@ if flag_AthwalOr12mm == true
 
     % Get smallest Euclidian distance of glenoid rim points from projected
     % point on -ive Y-axis. Not exact bur close ennough.
-    min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
+    min_rim_points = vecnorm((glenoid_stl.Points - p_point), 2 , 2);
     [~, inf_point_idx_rim] = min(min_rim_points);
 
     % Calculate distances
-    inf_point.rim = glenoid_points(inf_point_idx_rim, :);
+    inf_point.rim = glenoid_stl.Points(inf_point_idx_rim, :);
     d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
 
     inf_point.hemisphere = hemi_gle_points(inf_point_idx_hemi, :);
@@ -576,11 +559,11 @@ elseif flag_AthwalOr12mm == false
 
     % Get smallest Euclidian distance of glenoid rim points from projected
     % point on -ive Y-axis. Not exact bur close ennough
-    min_rim_points = vecnorm((glenoid_points - p_point), 2 , 2);
+    min_rim_points = vecnorm((glenoid_stl.Points - p_point), 2 , 2);
     [~, inf_point_idx_rim] = min(min_rim_points);
 
     % Calculate distances
-    inf_point.rim = glenoid_points(inf_point_idx_rim, :);
+    inf_point.rim = glenoid_stl.Points(inf_point_idx_rim, :);
     d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
 
     correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
@@ -704,7 +687,7 @@ glenoid_plane_normals.theta(3) = - ZYX_Euler_ang(1);
 % % % % options = optimset('MaxIter', 100, 'TolFun', 1e-4);
 % % % %
 % % % % % Cost function (distance)
-% % % % J_inferior = @(y_m)sqrt((glenoid_points(inf_point_idx_rim, 1) - y_m(1))^2 + (glenoid_points(inf_point_idx_rim, 2) - y_m(2))^2 + (glenoid_points(inf_point_idx_rim, 3) - y_m(3))^2);
+% % % % J_inferior = @(y_m)sqrt((glenoid_stl.Points(inf_point_idx_rim, 1) - y_m(1))^2 + (glenoid_stl.Points(inf_point_idx_rim, 2) - y_m(2))^2 + (glenoid_stl.Points(inf_point_idx_rim, 3) - y_m(3))^2);
 % % % % % Initial Condition (point on plane)
 % % % % y_m_0 = [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)];
 % % % %
