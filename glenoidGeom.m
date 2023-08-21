@@ -127,13 +127,13 @@ else
 
     [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre);
 
-    glenSphere_lsq.Radius = 0.030;
+    glenSphere_lsq.Radius = 0.020;
 
     % Initial guess - progection from center to 30 mm out
     x0 = glenoid_barycentre + glenoid_normal*0.030;
     x0(4) = glenSphere_lsq.Radius;
 
-    [x_opt] = test_sphere_fit(glenoid_stl, x0, glenoid_normal, glenoid_barycentre);
+    [x_opt] = glenoidSphereFitLS(glenoid_stl, x0, glenoid_normal, glenoid_barycentre);
     glenSphere_lsq.Center = x_opt(1:3);
     glenSphere_lsq.Radius = x_opt(4);
     
