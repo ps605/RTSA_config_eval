@@ -118,16 +118,13 @@ else
         'EdgeAlpha', 0)
 
     %%%
-% % % % %     sphere_pcFit = pcfitsphere(glenoid_pC, 0.1, 'MaxNumTrials',1e6);
-% % % % %     [sphere_pcFit.Center, sphere_pcFit.Radius]  = sphereFit(glenoid_stl.Points);
-
        
     glenoid_barycentre = mean(glenoid_stl.Points);
     glenoid_normal = glenoid_plane.Normal;
 
     [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre);
 
-    glenSphere_lsq.Radius = 0.020;
+    glenSphere_lsq.Radius = 0.030;
 
     % Initial guess - progection from center to 30 mm out
     x0 = glenoid_barycentre + glenoid_normal*0.030;
@@ -143,7 +140,7 @@ else
     zs = zs*glenSphere_lsq.Radius(1);
 
     hold on;
-    surf(xs+glenSphere_lsq.Center(1), ys+glenSphere_lsq.Center(2), zs+glenSphere_lsq.Center(3), 'EdgeColor','none', 'FaceColor','g', 'FaceAlpha', 0.1)
+    surf(xs+glenSphere_lsq.Center(1), ys+glenSphere_lsq.Center(2), zs+glenSphere_lsq.Center(3), 'EdgeColor','none', 'FaceColor','k', 'FaceAlpha', 0.1)
     scatter3(scapula_stl.Points(glenoid_lower_idx,1), scapula_stl.Points(glenoid_lower_idx,2), scapula_stl.Points(glenoid_lower_idx,3),'r')
 
     scatter3(glenSphere_lsq.Center(1), glenSphere_lsq.Center(2), glenSphere_lsq.Center(3), 'filled', 'cyan')
