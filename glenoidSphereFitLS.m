@@ -15,24 +15,27 @@ function [x_opt] = glenoidSphereFitLS(glenoid_stl, x0, glenoid_normal, glenoid_b
        radius_vec = (x0(1:3) - glenoid_c)/norm(x0(1:3) - glenoid_c);
         
         ceq = [];
+
         %Inequality constraint for glenoid plane normal (lateral pointing)
         %and sphere radius vector to also point laterally 
         c(1) = -dot(glenoid_normal, radius_vec);
+
         % Inequality constraint to lateralise the centre of the LS sphere
         % (unstable after ~0.68) sphere retur radius r = 0
         c(2) = -(norm(x0(1:3) - glenoid_c) - 0.5*abs(x0(4)));
+
     end
 
-
-n=size(glenoid_stl.Points,1); %number of data points
+% Number of data points
+n=size(glenoid_stl.Points,1); 
 
 x = glenoid_stl.Points(:,1);
 y = glenoid_stl.Points(:,2);
 z = glenoid_stl.Points(:,3);
 
 plot3(x,y,z,'o')
-%least square fit to obtain unknowns x0,y0,z0 and r
-%let the estimated variables be re,xe,ye and ze
+
+% Least square fit to obtain unknowns x0,y0,z0 and r
 
 options=optimset('MaxIter',1000000,'MaxFunEvals',1000000,'TolFun',1e-6);
 A = [];
@@ -44,7 +47,7 @@ ub = [];
 nonlcon = @(x0)centreCon(x0, glenoid_normal, glenoid_barycentre);
 x_opt=fmincon(@Objfun, ...
     x0, ...
-    A,b,Aeq,beq,lb,ub,[nonlcon], ...
+    A, b, Aeq, beq, lb, ub, nonlcon, ...
     options);
 
 end

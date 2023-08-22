@@ -89,7 +89,7 @@ if flag_globalGlenoid == true
     glenoid_barycentre = mean(glenoid_stl.Points);
     glenoid_normal = glenoid_plane.Normal;
 
-    [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre);
+    [glenoid_normal, stl_scap, glenoid_plane_normals] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre, R);
 
     glenSphere_lsq.Radius = 0.030;
 
@@ -107,14 +107,13 @@ if flag_globalGlenoid == true
     zs = zs*glenSphere_lsq.Radius(1);
 
     hold on;
-    surf(xs+glenSphere_lsq.Center(1), ys+glenSphere_lsq.Center(2), zs+glenSphere_lsq.Center(3), 'EdgeColor','none', 'FaceColor','k', 'FaceAlpha', 0.1)
-    scatter3(scapula_stl.Points(glenoid_idx,1), scapula_stl.Points(glenoid_idx,2), scapula_stl.Points(glenoid_idx,3),'r')
+    surf(xs+glenSphere_lsq.Center(1), ys+glenSphere_lsq.Center(2), zs+glenSphere_lsq.Center(3), 'EdgeColor','none', 'FaceColor','b', 'FaceAlpha', 0.1)
+    scatter3(scapula_stl.Points(glenoid_idx,1), scapula_stl.Points(glenoid_idx,2), scapula_stl.Points(glenoid_idx,3),'b')
 
     scatter3(glenSphere_lsq.Center(1), glenSphere_lsq.Center(2), glenSphere_lsq.Center(3), 'filled', 'cyan')
     scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'filled', 'cyan')
     line([glenoid_barycentre(1) glenSphere_lsq.Center(1)], [glenoid_barycentre(2) glenSphere_lsq.Center(2)], [glenoid_barycentre(3) glenSphere_lsq.Center(3)],'Color', 'r', 'LineWidth', 4)
-    plot(glenoid_plane, "Color",'r')
-
+  
 else
 
     scapula_stl = stlread(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '.stl']);
@@ -158,7 +157,7 @@ else
     glenoid_barycentre = mean(glenoid_stl.Points);
     glenoid_normal = glenoid_plane.Normal;
 
-    [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre);
+    [glenoid_normal, stl_scap, glenoid_plane_normals] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre, R);
 
     glenSphere_lsq.Radius = 0.030;
 
@@ -176,78 +175,14 @@ else
     zs = zs*glenSphere_lsq.Radius(1);
 
     hold on;
-    surf(xs+glenSphere_lsq.Center(1), ys+glenSphere_lsq.Center(2), zs+glenSphere_lsq.Center(3), 'EdgeColor','none', 'FaceColor','k', 'FaceAlpha', 0.1)
+    surf(xs+glenSphere_lsq.Center(1), ys+glenSphere_lsq.Center(2), zs+glenSphere_lsq.Center(3), 'EdgeColor','none', 'FaceColor','r', 'FaceAlpha', 0.1)
     scatter3(scapula_stl.Points(glenoid_lower_idx,1), scapula_stl.Points(glenoid_lower_idx,2), scapula_stl.Points(glenoid_lower_idx,3),'r')
 
     scatter3(glenSphere_lsq.Center(1), glenSphere_lsq.Center(2), glenSphere_lsq.Center(3), 'filled', 'cyan')
     scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'filled', 'cyan')
     line([glenoid_barycentre(1) glenSphere_lsq.Center(1)], [glenoid_barycentre(2) glenSphere_lsq.Center(2)], [glenoid_barycentre(3) glenSphere_lsq.Center(3)],'Color', 'r', 'LineWidth', 4)
-    plot(glenoid_plane, "Color",'r')
-
-
-
+   
 end
-% Get points to define coordinate system - Y-axis
-% % % D = pdist(glenoid_stl.Points);
-% % % D = squareform(D);
-% % % [~,I] = max(D(:));
-% % % [max_point_idx_1, max_point_idx_2] = ind2sub(size(D),I);
-% % % max_point_idx = [max_point_idx_1, max_point_idx_2];
-
-% % % [~, min_gl_p] = min(glenoid_stl.Points(:,2));
-% % % glenoid_inferior = glenoid_stl.Points(min_gl_p,:);
-% % %
-% % % % Calculate vector between barrycentre and most inferior point
-% % % bc_to_inferior_p =  glenoid_inferior - glenoid_barycentre;
-% % %
-% % % % Invert so it point superiorly and normalise
-% % % axial_normal = -(bc_to_inferior_p/norm(bc_to_inferior_p));
-
-% % % % GET  RID????
-% % % % scatter3(glenoid_stl.Points(:,1), glenoid_stl.Points(:,2), glenoid_stl.Points(:,3), 'filled', 'o', 'cyan');
-% % % % % scatter3(glenoid_stl.Points(min_gl_p,1), glenoid_stl.Points(min_gl_p,2), glenoid_stl.Points(min_gl_p,3), 'filled', 'o', 'magenta');
-% % % % scatter3(glenoid_barycentre(:,1), glenoid_barycentre(:,2), glenoid_barycentre(:,3), 'filled', 'o', 'magenta');
-% % % % 
-% % % % % Generate PointCloud of slected points and barycentre
-% % % % glenoid_pointCloud = pointCloud(vertcat(glenoid_stl.Points, glenoid_barycentre));
-% % % % 
-% % % % % figure (2);
-% % % % % pcshow(glenoid_pointCloud, 'MarkerSize', 100)
-% % % % 
-% % % % % Linear Regresion method to fit plane
-% % % % x_gp = glenoid_stl.Points(:,1);
-% % % % y_gp = glenoid_stl.Points(:,2);
-% % % % z_gp = glenoid_stl.Points(:,3);
-% % % % 
-% % % % DM = [x_gp, y_gp, ones(size(z_gp))];
-% % % % B = DM\z_gp;
-% % % % 
-% % % % % Create meshgrid of plane from Linear Regresion
-% % % % [X,Y] = meshgrid(linspace(min(x_gp),max(x_gp),50), linspace(min(y_gp),max(y_gp),50));
-% % % % Z = B(1)*X + B(2)*Y + B(3)*ones(size(X));
-% % % % 
-% % % % % Create point cloud Linear Regression plane (consistensy with following code)
-% % % % plane_pointCloud = pointCloud([X(:), Y(:), Z(:)]);
-% % % % % Fit plane to the Linear Regresion plane points
-% % % % [glenoid_plane,~,~, ~] = pcfitplane(plane_pointCloud, 0.0001, 'MaxNumTrials', 1e6);
-% % % % 
-% % % % % Get normal to handle it later
-% % % % % This is the Z-axis
-% % % % glenoid_normal = glenoid_plane.Normal;
-% % % % 
-% % % % figure(10)
-% % % % 
-% % % % % Generate plane mesh and plot using Ax + By + Gz + D = 0
-% % % % [gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
-% % % % gle_plane_mesh_data.z_plane = -1*(glenoid_plane.Parameters(1)*gle_plane_mesh_data.x_plane ...
-% % % %     + glenoid_plane.Parameters(2)*gle_plane_mesh_data.y_plane ...
-% % % %     + glenoid_plane.Parameters(4))/glenoid_plane.Parameters(3);
-% % % % 
-% % % % % Plot Plane
-% % % % surf(gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane, gle_plane_mesh_data.z_plane,...
-% % % %     'FaceColor','g',...
-% % % %     'FaceAlpha', 0.25,...
-% % % %     'EdgeAlpha', 0)
 
 %% Calculate scapular plane
 % scap_pointCloud = pointCloud([x(:), y(:), z(:)]);
@@ -363,6 +298,7 @@ intersect_v = intersect_v/norm(intersect_v);
 % Check for orientation of vector with respect to Y axis
 intersect_v_angle = vrrotvec([0 1 0], intersect_v);
 intersect_v_angle_deg = rad2deg(intersect_v_angle(4));
+
 
 
 % Plot Barycetntre where cup will be placed
