@@ -54,7 +54,8 @@ if flag_globalGlenoid == true
 
     glenoid_stl.Points = scapula_stl.Points(glenoid_idx,:);
 
-    % Fit plane to glenoid points
+    % Fit plane to glenoid points. This is not the "true" glenoid plane as
+    % that is calculated from the LS sphere later
 
     % Linear Regression method to fit plane
     x_gl = glenoid_stl.Points(:,1);
@@ -87,6 +88,7 @@ if flag_globalGlenoid == true
     %%%
 
     glenoid_barycentre = mean(glenoid_stl.Points);
+    % Initial normal to correct for position of LS sphere
     glenoid_normal = glenoid_plane.Normal;
 
     [glenoid_normal, stl_scap, glenoid_plane_normals] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre, R);
@@ -100,6 +102,12 @@ if flag_globalGlenoid == true
     [x_opt] = glenoidSphereFitLS(glenoid_stl, x0, glenoid_normal, glenoid_barycentre);
     glenSphere_lsq.Center = x_opt(1:3);
     glenSphere_lsq.Radius = x_opt(4);
+
+    % Normalised radial line of LS sphere
+    glenoid_normal = (glenSphere_lsq.Center - glenoid_barycentre)/norm(glenSphere_lsq.Center - glenoid_barycentre);
+    % Redefine glenoid plane with LS normal at barycentre
+    plane_delta = - sum(glenoid_normal.*glenoid_barycentre);
+    glenoid_plane = planeModel([glenoid_normal plane_delta]);
 
     [xs,ys,zs] = sphere(101);
     xs = xs*glenSphere_lsq.Radius(1);
@@ -122,7 +130,8 @@ else
 
     glenoid_stl.Points = scapula_stl.Points(glenoid_lower_idx,:);
 
-    % Fit plane to glenoid points
+    % Fit plane to glenoid points. This is not the "true" glenoid plane as
+    % that is calculated from the LS sphere later
 
     % Linear Regression method to fit plane
     x_gl = glenoid_stl.Points(:,1);
@@ -148,13 +157,14 @@ else
         + glenoid_plane.Parameters(4))/glenoid_plane.Parameters(3);
 
     surf(gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane, gle_plane_mesh_data.z_plane,...
-        'FaceColor','y',...
+        'FaceColor','g',...
         'FaceAlpha', 0.25,...
         'EdgeAlpha', 0)
 
     %%%
 
     glenoid_barycentre = mean(glenoid_stl.Points);
+    % Initial normal to correct for position of LS sphere
     glenoid_normal = glenoid_plane.Normal;
 
     [glenoid_normal, stl_scap, glenoid_plane_normals] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre, R);
@@ -168,6 +178,12 @@ else
     [x_opt] = glenoidSphereFitLS(glenoid_stl, x0, glenoid_normal, glenoid_barycentre);
     glenSphere_lsq.Center = x_opt(1:3);
     glenSphere_lsq.Radius = x_opt(4);
+
+    % Normalised radial line of LS sphere
+    glenoid_normal = (glenSphere_lsq.Center - glenoid_barycentre)/norm(glenSphere_lsq.Center - glenoid_barycentre);
+    % Redefine glenoid plane with LS normal at barycentre
+    plane_delta = - sum(glenoid_normal.*glenoid_barycentre);
+    glenoid_plane = planeModel([glenoid_normal plane_delta]);
 
     [xs,ys,zs] = sphere(101);
     xs = xs*glenSphere_lsq.Radius(1);
