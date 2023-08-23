@@ -1,4 +1,4 @@
-function [glenoid_normal, stl_scap, glenoid_plane_normals] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre, R)
+function [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre)
 %% Check which way the Plane norm (Z axis) is pointing
 % Get the barycentre of glenoid verteces
 x_sca_mean = mean(x,'all');
@@ -33,26 +33,6 @@ if norm_check_angle(4) >= 0 && norm_check_angle(4) < pi/2
 
     % Negate Z normal to flip about plane to point out of the glenoid
     glenoid_normal = - glenoid_normal;
-    % Project point normal from plane to distance R along Z normal
-    glenoid_plane_normals.z_p = (glenoid_barycentre + R.*glenoid_normal);
-% %     scatter3(glenoid_plane_normals.z_p(1), glenoid_plane_normals.z_p(2), glenoid_plane_normals.z_p(3),'green', 'filled','o','MarkerEdgeColor','black')
-% % 
-% %     % Connect with line to visualise normal and projection
-% %     line([glenoid_barycentre(1) glenoid_plane_normals.z_p(1)],...
-% %         [glenoid_barycentre(2) glenoid_plane_normals.z_p(2)],...
-% %         [glenoid_barycentre(3) glenoid_plane_normals.z_p(3)], ...
-% %         'LineWidth',4,'Color','green');
-
-else
-    % Project point normal from plane to distance R along Z normal
-    glenoid_plane_normals.z_p = (glenoid_barycentre + R.*glenoid_normal);
-% %     scatter3(glenoid_plane_normals.z_p(1), glenoid_plane_normals.z_p(2), glenoid_plane_normals.z_p(3),'green', 'filled','o','MarkerEdgeColor','black')
-% % 
-% %     % Connect with line to visualise normal and projection
-% %     line([glenoid_barycentre(1) glenoid_plane_normals.z_p(1)],...
-% %         [glenoid_barycentre(2) glenoid_plane_normals.z_p(2)],...
-% %         [glenoid_barycentre(3) glenoid_plane_normals.z_p(3)], ...
-% %         'LineWidth',4,'Color','green');
 
 end
 end
