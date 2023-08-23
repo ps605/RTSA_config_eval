@@ -3,7 +3,9 @@ function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_corre
 
 % What part of the glenoid will be used to calcuate glenoid plane? (global
 % or lower for RSA)
-flag_globalGlenoid = true;
+flag_globalGlenoid = false;
+% Use global glenoid norm calculation for lower RSA positioning? (Clinical)
+flag_global4LowerGlenoid = true;
 
 % Flag for which prox/dist correction to use.
 % True = 6.5 mm overhang assuming 29 mm baseplate on 42 mm glenosphere OR 7 mm overhang assuming 25 mm baseplate and 39 mm glenosphere.
@@ -47,7 +49,7 @@ hold on;
 
 
 %% Fit plane to glenoid rim points
-if flag_globalGlenoid == true
+if flag_globalGlenoid == true && flag_global4LowerGlenoid == false
 
     scapula_stl = stlread(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '.stl']);
     load('glenoid_idx_global.mat')
@@ -137,7 +139,7 @@ if flag_globalGlenoid == true
     scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'filled', 'cyan')
     line([glenoid_barycentre(1) glenSphere_lsq.Center(1)], [glenoid_barycentre(2) glenSphere_lsq.Center(2)], [glenoid_barycentre(3) glenSphere_lsq.Center(3)],'Color', 'g', 'LineWidth', 4)
   
-else
+elseif flag_globalGlenoid == false && flag_global4LowerGlenoid == false
 
     scapula_stl = stlread(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '.stl']);
     load('glenoid_idx_lower.mat')
@@ -202,7 +204,7 @@ else
 
     glenoid_plane_normals.z_p = glenoid_barycentre + R*glenoid_normal;
     scatter3(glenoid_plane_normals.z_p(1), glenoid_plane_normals.z_p(2), glenoid_plane_normals.z_p(3), 'filled', 'g', 'MarkerEdgeColor', 'black')
-    
+
     % Generate sphere mesh
     [xs,ys,zs] = sphere(101);
     xs = xs*glenSphere_lsq.Radius(1);
@@ -227,6 +229,150 @@ else
     scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'filled', 'cyan')
     line([glenoid_barycentre(1) glenSphere_lsq.Center(1)], [glenoid_barycentre(2) glenSphere_lsq.Center(2)], [glenoid_barycentre(3) glenSphere_lsq.Center(3)],'Color', 'g', 'LineWidth', 4)
    
+
+elseif flag_globalGlenoid == false && flag_global4LowerGlenoid == true
+    
+    %% Calculate glenoid normal from global glenoid surface 
+    % These calculations will be used later to pass to the correction of
+    % the LOWER glenoid following RSA placement (lower) of glenosphere
+    scapula_stl = stlread(['..\..\SSM\Scapulas\stl_aligned\' model_SSM '.stl']);
+    load('glenoid_idx_global.mat')
+
+    glenoid_stl.Points = scapula_stl.Points(glenoid_idx,:);
+
+    % Fit plane to glenoid points. This is not the "true" glenoid plane as
+    % that is calculated from the LS sphere later
+
+    % Linear Regression method to fit plane
+    x_gl = glenoid_stl.Points(:,1);
+    y_gl = glenoid_stl.Points(:,2);
+    z_gl = glenoid_stl.Points(:,3);
+
+    DM = [x_gl, y_gl, ones(size(z_gl))];
+    B = DM\z_gl;
+
+    % Create meshgrid of plane from Linear Regresion
+    [X,Y] = meshgrid(linspace(min(x_gl),max(x_gl),50), linspace(min(y_gl),max(y_gl),50));
+    Z = B(1)*X + B(2)*Y + B(3)*ones(size(X));
+
+    % Create point cloud Linear Regression plane (consistensy with following code)
+    glenoid_plane_pointCloud = pointCloud([X(:), Y(:), Z(:)]);
+    % Fit plane to the Linear Regresion plane points
+    [glenoid_plane,~,~, ~] = pcfitplane(glenoid_plane_pointCloud, 0.0001, 'MaxNumTrials', 1e6);
+
+    %%%
+
+    glenoid_barycentre = mean(glenoid_stl.Points);
+    % Initial normal to correct for position of LS sphere
+    glenoid_normal = glenoid_plane.Normal;
+
+    [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre);
+
+    glenSphere_lsq.Radius = 0.030;
+
+    % Initial guess - progection from center to 30 mm out
+    x0 = glenoid_barycentre + glenoid_normal*0.030;
+    x0(4) = glenSphere_lsq.Radius;
+
+    [x_opt] = glenoidSphereFitLS(glenoid_stl, x0, glenoid_normal, glenoid_barycentre);
+    glenSphere_lsq.Center = x_opt(1:3);
+    glenSphere_lsq.Radius = x_opt(4);
+
+    % Normalised radial line of LS sphere
+    glenoid_normal_global_glenoid = (glenSphere_lsq.Center - glenoid_barycentre)/norm(glenSphere_lsq.Center - glenoid_barycentre);
+    % Redefine glenoid plane with LS normal at barycentre
+    plane_delta_global_glenoid = - sum(glenoid_normal.*glenoid_barycentre);
+    glenoid_plane_global_glenoid = planeModel([glenoid_normal plane_delta_global_glenoid]);
+
+
+    %% Continue with calculation of lower glenoid glenoid plane and normals
+
+    load('glenoid_idx_lower.mat')
+
+    glenoid_stl.Points = scapula_stl.Points(glenoid_lower_idx,:);
+
+    % Fit plane to glenoid points. This is not the "true" glenoid plane as
+    % that is calculated from the LS sphere later
+
+    % Linear Regression method to fit plane
+    x_gl = glenoid_stl.Points(:,1);
+    y_gl = glenoid_stl.Points(:,2);
+    z_gl = glenoid_stl.Points(:,3);
+
+    DM = [x_gl, y_gl, ones(size(z_gl))];
+    B = DM\z_gl;
+
+    % Create meshgrid of plane from Linear Regresion
+    [X,Y] = meshgrid(linspace(min(x_gl),max(x_gl),50), linspace(min(y_gl),max(y_gl),50));
+    Z = B(1)*X + B(2)*Y + B(3)*ones(size(X));
+
+    % Create point cloud Linear Regression plane (consistensy with following code)
+    glenoid_plane_pointCloud = pointCloud([X(:), Y(:), Z(:)]);
+    % Fit plane to the Linear Regresion plane points
+    [glenoid_plane,~,~, ~] = pcfitplane(glenoid_plane_pointCloud, 0.0001, 'MaxNumTrials', 1e6);
+
+    % %     % Generate plane mesh and plot using Ax + By + Gz + D = 0
+    % %     [gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
+    % %     gle_plane_mesh_data.z_plane = -1*(glenoid_plane.Parameters(1)*gle_plane_mesh_data.x_plane ...
+    % %         + glenoid_plane.Parameters(2)*gle_plane_mesh_data.y_plane ...
+    % %         + glenoid_plane.Parameters(4))/glenoid_plane.Parameters(3);
+    % %
+    % %     surf(gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane, gle_plane_mesh_data.z_plane,...
+    % %         'FaceColor','b',...
+    % %         'FaceAlpha', 0.25,...
+    % %         'EdgeAlpha', 0)
+
+    %%%
+
+    glenoid_barycentre = mean(glenoid_stl.Points);
+    % Initial normal to correct for position of LS sphere
+    glenoid_normal = glenoid_plane.Normal;
+
+    [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre);
+
+    glenSphere_lsq.Radius = 0.030;
+
+    % Initial guess - progection from center to 30 mm out
+    x0 = glenoid_barycentre + glenoid_normal*0.030;
+    x0(4) = glenSphere_lsq.Radius;
+
+    [x_opt] = glenoidSphereFitLS(glenoid_stl, x0, glenoid_normal, glenoid_barycentre);
+    glenSphere_lsq.Center = x_opt(1:3);
+    glenSphere_lsq.Radius = x_opt(4);
+
+    % Normalised radial line of LS sphere
+    glenoid_normal = (glenSphere_lsq.Center - glenoid_barycentre)/norm(glenSphere_lsq.Center - glenoid_barycentre);
+    % Redefine glenoid plane with LS normal at barycentre
+    plane_delta = - sum(glenoid_normal.*glenoid_barycentre);
+    glenoid_plane = planeModel([glenoid_normal plane_delta]);
+
+    glenoid_plane_normals.z_p = glenoid_barycentre + R*glenoid_normal;
+    scatter3(glenoid_plane_normals.z_p(1), glenoid_plane_normals.z_p(2), glenoid_plane_normals.z_p(3), 'filled', 'g', 'MarkerEdgeColor', 'black')
+
+    % Generate sphere mesh
+    [xs,ys,zs] = sphere(101);
+    xs = xs*glenSphere_lsq.Radius(1);
+    ys = ys*glenSphere_lsq.Radius(1);
+    zs = zs*glenSphere_lsq.Radius(1);
+
+    % Generate plane mesh using Ax + By + Gz + D = 0
+    [gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
+    gle_plane_mesh_data.z_plane = -1*(glenoid_plane.Parameters(1)*gle_plane_mesh_data.x_plane ...
+        + glenoid_plane.Parameters(2)*gle_plane_mesh_data.y_plane ...
+        + glenoid_plane.Parameters(4))/glenoid_plane.Parameters(3);
+
+    hold on;
+
+    surf(gle_plane_mesh_data.x_plane, gle_plane_mesh_data.y_plane, gle_plane_mesh_data.z_plane,...
+        'FaceColor','b',...
+        'FaceAlpha', 0.25,...
+        'EdgeAlpha', 0)
+    surf(xs+glenSphere_lsq.Center(1), ys+glenSphere_lsq.Center(2), zs+glenSphere_lsq.Center(3), 'EdgeColor','none', 'FaceColor','r', 'FaceAlpha', 0.1)
+    scatter3(scapula_stl.Points(glenoid_lower_idx,1), scapula_stl.Points(glenoid_lower_idx,2), scapula_stl.Points(glenoid_lower_idx,3),'r')
+    scatter3(glenSphere_lsq.Center(1), glenSphere_lsq.Center(2), glenSphere_lsq.Center(3), 'filled', 'r', 'MarkerEdgeColor','black')
+    scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'filled', 'cyan')
+    line([glenoid_barycentre(1) glenSphere_lsq.Center(1)], [glenoid_barycentre(2) glenSphere_lsq.Center(2)], [glenoid_barycentre(3) glenSphere_lsq.Center(3)],'Color', 'g', 'LineWidth', 4)
+
 end
 
 %% Calculate scapular plane
@@ -440,7 +586,7 @@ end
 
 %% Calculate version and inclination correction angles from fossa vector angle; And 12 mm rule from most inferior point on glenoid Y-axis
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Version %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Inclination %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% YZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fossa_vector onto glenoid YZ plane (glenoid_plane_normals.x_n)
 % Constraint function (plane)
@@ -482,7 +628,7 @@ line([glenoid_barycentre(1) fossa_point_f_YZ(1)],...
     [glenoid_barycentre(3) fossa_point_f_YZ(3)], ...
     'LineWidth',4,'Color','g');
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Inclination %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Version %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% XZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fossa_vector onto glenoid XZ plane (glenoid_plane_normals.y_n)
 delta = -sum(glenoid_barycentre.*glenoid_plane_normals.y_n);
