@@ -5,7 +5,7 @@ function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_corre
 % or lower for RSA)
 flag_globalGlenoid = false;
 % Use global glenoid norm calculation for lower RSA positioning? (Clinical)
-flag_global4LowerGlenoid = true;
+flag_global4LowerGlenoid = false;
 
 % Flag for which prox/dist correction to use.
 % True = 6.5 mm overhang assuming 29 mm baseplate on 42 mm glenosphere OR 7 mm overhang assuming 25 mm baseplate and 39 mm glenosphere.
@@ -262,28 +262,34 @@ elseif flag_globalGlenoid == false && flag_global4LowerGlenoid == true
 
     %%%
 
-    glenoid_barycentre = mean(glenoid_stl.Points);
+    glenoid_barycentre_global = mean(glenoid_stl.Points);
     % Initial normal to correct for position of LS sphere
     glenoid_normal = glenoid_plane.Normal;
 
-    [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre);
+    [glenoid_normal, stl_scap] = checkGlenoidNorm(x, y, z, glenoid_normal, glenoid_barycentre_global);
 
     glenSphere_lsq.Radius = 0.030;
 
     % Initial guess - progection from center to 30 mm out
-    x0 = glenoid_barycentre + glenoid_normal*0.030;
+    x0 = glenoid_barycentre_global + glenoid_normal*0.030;
     x0(4) = glenSphere_lsq.Radius;
 
-    [x_opt] = glenoidSphereFitLS(glenoid_stl, x0, glenoid_normal, glenoid_barycentre);
+    [x_opt] = glenoidSphereFitLS(glenoid_stl, x0, glenoid_normal, glenoid_barycentre_global);
     glenSphere_lsq.Center = x_opt(1:3);
     glenSphere_lsq.Radius = x_opt(4);
 
     % Normalised radial line of LS sphere
-    glenoid_normal_global_glenoid = (glenSphere_lsq.Center - glenoid_barycentre)/norm(glenSphere_lsq.Center - glenoid_barycentre);
+    glenoid_normal_global = (glenSphere_lsq.Center - glenoid_barycentre_global)/norm(glenSphere_lsq.Center - glenoid_barycentre_global);
     % Redefine glenoid plane with LS normal at barycentre
-    plane_delta_global_glenoid = - sum(glenoid_normal.*glenoid_barycentre);
-    glenoid_plane_global_glenoid = planeModel([glenoid_normal plane_delta_global_glenoid]);
+    plane_delta_global_glenoid = - sum(glenoid_normal_global.*glenoid_barycentre_global);
+    glenoid_plane_global = planeModel([glenoid_normal_global plane_delta_global_glenoid]);
 
+    % Generate plane mesh using Ax + By + Gz + D = 0 (for use when cashing
+    % calculation of angles using global glenoid)
+    [gle_plane_global_mesh_data.x_plane, gle_plane_global_mesh_data.y_plane] = meshgrid(-0.1:0.01:0.1);
+    gle_plane_global_mesh_data.z_plane = -1*(glenoid_plane_global.Parameters(1)*gle_plane_global_mesh_data.x_plane ...
+        + glenoid_plane_global.Parameters(2)*gle_plane_global_mesh_data.y_plane ...
+        + glenoid_plane_global.Parameters(4))/glenoid_plane_global.Parameters(3);
 
     %% Continue with calculation of lower glenoid glenoid plane and normals
 
@@ -418,8 +424,9 @@ fossa_vector = principal_cmp(:,1)';
 % fossa_point_i = [x(fossa_base.vertices(9)), y(fossa_base.vertices(9)), z(fossa_base.vertices(9))];
 % fossa_point_f = fossa_point_i + fossa_vector.*0.1;
 fossa_point_f = glenoid_barycentre + fossa_vector.*R;
-
-
+if flag_globalGlenoid == false && flag_global4LowerGlenoid == true
+    fossa_point_f_global_glenoid = glenoid_barycentre_global + fossa_vector.*R;
+end
 
 % scatter3(x(fossa_base.vertices(:)), y(fossa_base.vertices(:)), z(fossa_base.vertices(:)), 'cyan', 'filled', 'MarkerEdgeColor', 'black');
 % line([fossa_point_i(1) fossa_point_f(1)], [fossa_point_i(2) fossa_point_f(2)], [fossa_point_i(3) fossa_point_f(3)], 'LineWidth',4,'Color','cyan');
@@ -468,47 +475,98 @@ if bary_plane >= 1e-4
 end
 
 %% Calculate vector of glenoid and scapula plane intersection
+if flag_globalGlenoid == false && flag_global4LowerGlenoid == true
+    %% Calculate glenoid normal from global glenoid surface 
+    [~, intersect_v] = plane_intersect(glenoid_plane_global.Parameters(1:3),...
+        [gle_plane_global_mesh_data.x_plane(1) gle_plane_global_mesh_data.y_plane(1) gle_plane_global_mesh_data.z_plane(1)],...
+        scap_plane.Parameters(1:3),...
+        [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
 
-[~, intersect_v] = plane_intersect(glenoid_plane.Parameters(1:3),...
-    [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)],...
-    scap_plane.Parameters(1:3),...
-    [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
+    % Normalise intersection vector
+    intersect_v = intersect_v/norm(intersect_v);
 
-% Normalise intersection vector
-intersect_v = intersect_v/norm(intersect_v);
+    % Check for orientation of vector with respect to Y axis
+    intersect_v_angle = vrrotvec([0 1 0], intersect_v);
+    intersect_v_angle_deg = rad2deg(intersect_v_angle(4));
 
-% Project point from barycentre along intersect axis for visualisation
-% pl_p = glenoid_barycentre + R*intersect_v;
-
-% % % Connect with line to visualise normal and projection
-% %     line([glenoid_barycentre(1) pl_p(1)],...
-% %         [glenoid_barycentre(2) pl_p(2)],...
-% %         [glenoid_barycentre(3) pl_p(3)], ...
-% %         'LineWidth',4,'Color','green');
-
-% Check for orientation of vector with respect to Y axis
-intersect_v_angle = vrrotvec([0 1 0], intersect_v);
-intersect_v_angle_deg = rad2deg(intersect_v_angle(4));
-
-
-
-% Plot Barycetntre where cup will be placed
-scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'black','filled','o')
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Check if plane norm and glenoid_inferior_on_plane are perpendicular
-%vec_max_glen_points = (glenoid_max_points(1,:) - glenoid_max_points(2,:))/norm(glenoid_max_points(1,:) - glenoid_max_points(2,:));
-
-if dot(intersect_v, glenoid_normal) < 1e-10
-    % NEED to make sure axis is pointingg superiorly
-    if intersect_v_angle_deg < 90 && intersect_v_angle_deg > - 90
-        glenoid_plane_y_n = intersect_v;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Check if plane norm and glenoid_inferior_on_plane are perpendicular
+   
+    if dot(intersect_v, glenoid_normal_global) < 1e-10
+        % NEED to make sure axis is pointing superiorly
+        if intersect_v_angle_deg < 90 && intersect_v_angle_deg > - 90
+            glenoid_plane_y_n_global = intersect_v;
+        else
+            glenoid_plane_y_n_global = -intersect_v;
+        end
     else
-        glenoid_plane_y_n = -intersect_v;
+        disp(' Error: Glenoid plane Y and Z axes not perpendicular');
+        keyboard
     end
-elseif dot(vec_max_glen_points, glenoid_normal) >= 1e-10
-    disp(' Error: Glenoid plane Y and Z axes not perpendicular (dot(bc_to_inf_glen, glenoid_normal) >= 1e-10)');
-    keyboard
+    
+    clear intersect_v
+
+    %% Continue with calculation of lower glenoid glenoid plane and normals
+    [~, intersect_v] = plane_intersect(glenoid_plane.Parameters(1:3),...
+        [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)],...
+        scap_plane.Parameters(1:3),...
+        [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
+
+    % Normalise intersection vector
+    intersect_v = intersect_v/norm(intersect_v);
+
+    % Check for orientation of vector with respect to Y axis
+    intersect_v_angle = vrrotvec([0 1 0], intersect_v);
+    intersect_v_angle_deg = rad2deg(intersect_v_angle(4));
+
+    % Plot Barycetntre where cup will be placed
+    scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'black','filled','o')
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Check if plane norm and glenoid_inferior_on_plane are perpendicular
+   
+    if dot(intersect_v, glenoid_normal) < 1e-10
+        % NEED to make sure axis is pointing superiorly
+        if intersect_v_angle_deg < 90 && intersect_v_angle_deg > - 90
+            glenoid_plane_y_n = intersect_v;
+        else
+            glenoid_plane_y_n = -intersect_v;
+        end
+    else
+        disp(' Error: Glenoid plane Y and Z axes not perpendicular');
+        keyboard
+    end
+
+else
+    [~, intersect_v] = plane_intersect(glenoid_plane.Parameters(1:3),...
+        [gle_plane_mesh_data.x_plane(1) gle_plane_mesh_data.y_plane(1) gle_plane_mesh_data.z_plane(1)],...
+        scap_plane.Parameters(1:3),...
+        [sca_plane_mesh_data.x_plane(1) sca_plane_mesh_data.y_plane(1) sca_plane_mesh_data.z_plane(1)]);
+
+    % Normalise intersection vector
+    intersect_v = intersect_v/norm(intersect_v);
+
+    % Check for orientation of vector with respect to Y axis
+    intersect_v_angle = vrrotvec([0 1 0], intersect_v);
+    intersect_v_angle_deg = rad2deg(intersect_v_angle(4));
+
+    % Plot Barycetntre where cup will be placed
+    scatter3(glenoid_barycentre(1), glenoid_barycentre(2), glenoid_barycentre(3), 'black','filled','o')
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CHECK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Check if plane norm and glenoid_inferior_on_plane are perpendicular
+   
+    if dot(intersect_v, glenoid_normal) < 1e-10
+        % NEED to make sure axis is pointing superiorly
+        if intersect_v_angle_deg < 90 && intersect_v_angle_deg > - 90
+            glenoid_plane_y_n = intersect_v;
+        else
+            glenoid_plane_y_n = -intersect_v;
+        end
+    else
+        disp(' Error: Glenoid plane Y and Z axes not perpendicular');
+        keyboard
+    end
 end
 %% Handle hemisphere at glenoid plane
 
@@ -531,7 +589,6 @@ hemisphere_gle = surf(X1,Y1,Z1,...
     'EdgeColor', [0 0 0 ],...
     'EdgeAlpha', 0.1);
 axis equal
-
 
 % Quck workaround to rotate - Use the graphic object handler and then
 % extract the point data X-Y-Z
@@ -561,6 +618,12 @@ glenoid_plane_normals.y_n = glenoid_plane_y_n; % Superior/inferior
 glenoid_plane_normals.z_n = glenoid_normal; % Out of plane
 glenoid_plane_normals.x_n = -cross(glenoid_plane_normals.z_n,glenoid_plane_normals.y_n); % Anterior/Posterior
 
+if flag_globalGlenoid == false && flag_global4LowerGlenoid == true
+    glenoid_plane_normals.y_n_global = glenoid_plane_y_n_global;
+    glenoid_plane_normals.z_n_global = glenoid_normal_global;
+    glenoid_plane_normals.x_n_global = -cross(glenoid_plane_normals.z_n_global, glenoid_plane_normals.y_n_global); % Anterior/Posterior
+end
+
 % Plot axis of final norm from barycentre
 glenoid_plane_normals.x_p = glenoid_barycentre + glenoid_plane_normals.x_n(1:3)*R;
 scatter3(glenoid_plane_normals.x_p(1),glenoid_plane_normals.x_p(2), glenoid_plane_normals.x_p(3),'red','filled','o','MarkerEdgeColor','black')
@@ -585,6 +648,25 @@ end
 % variable: glenoid_plane_normals
 
 %% Calculate version and inclination correction angles from fossa vector angle; And 12 mm rule from most inferior point on glenoid Y-axis
+
+% Cache data from lower glenoid calculations in order to use global glenoid data then
+% switch back to lower values in variables
+if flag_globalGlenoid == false && flag_global4LowerGlenoid == true
+    
+    glenoid_barycentre_cached = glenoid_barycentre;
+    glenoid_barycentre = glenoid_barycentre_global;
+
+    glenoid_plane_normals_cache.x_n = glenoid_plane_normals.x_n;
+    glenoid_plane_normals_cache.y_n = glenoid_plane_normals.y_n;
+    glenoid_plane_normals_cache.z_n = glenoid_plane_normals.z_n;
+
+    glenoid_plane_normals.x_n = glenoid_plane_normals.x_n_global;
+    glenoid_plane_normals.y_n = glenoid_plane_normals.y_n_global;
+    glenoid_plane_normals.z_n = glenoid_plane_normals.z_n_global;
+
+    fossa_point_f_cache = fossa_point_f;
+    fossa_point_f = fossa_point_f_global_glenoid
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Inclination %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% YZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -669,6 +751,19 @@ line([glenoid_barycentre(1) fossa_point_f_XZ(1)],...
     [glenoid_barycentre(2) fossa_point_f_XZ(2)],...
     [glenoid_barycentre(3) fossa_point_f_XZ(3)], ...
     'LineWidth',4,'Color','g');
+
+% Return cached data from lower glenoid calculations to variables
+if flag_globalGlenoid == false && flag_global4LowerGlenoid == true
+    
+    glenoid_barycentre = glenoid_barycentre_cached;
+
+    glenoid_plane_normals.x_n = glenoid_plane_normals_cache.x_n;
+    glenoid_plane_normals.y_n = glenoid_plane_normals_cache.y_n;
+    glenoid_plane_normals.z_n = glenoid_plane_normals_cache.z_n;
+
+    fossa_point_f = fossa_point_f_cache;
+
+end
 
 %%%%%%%%%%%%%%%%%%%%%%% Clean up correction angles %%%%%%%%%%%%%%%%%%%%%%%%
 correction_angles.x_sup_inf_incl        = rad2deg(fossa_correction_ang.YZ(4));
