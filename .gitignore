@@ -2,3 +2,4 @@
 *.log
 *.txt
 *.xlsx
+_tracked_states.sto

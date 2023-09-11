@@ -1,4 +1,4 @@
-function runRTSAtrack(model_file, flag_keepRC, task_name, GHJ_in_parent, GHJ_in_child,  hemi_gle_offsets, hemi_cup_offsets, R, rhash, model_SSM)
+function runRTSAtrack(model_file, task_name, GHJ_in_parent, GHJ_in_child,  hemi_gle_offsets, hemi_cup_offsets, R, rhash, model_SSM)
 %% Set-up
 
 % Import OpenSim 4.3 libraries
@@ -14,8 +14,14 @@ track = MocoTrack();
 % Pass Model (system dynamics) to Problem
 track.setModel(ModelProcessor(osim_model));
 
-% Set reference states and use them as guess
-track.setStatesReference(TableProcessor('..\..\OpenSim\In\Moco\tracking_states\sim_U94wbx134tf\RSA_U94wbx134tf_StatesReporter_states.sto'))
+% Set reference states and use them as guess (these are the the predictive
+% simulations of the average scapula)
+if strcmp(task_name, 'UpwardReach')
+    track.setStatesReference(TableProcessor('..\..\OpenSim\In\Moco\tracking_states\sim_U94wbx134tf\RSA_U94wbx134tf_StatesReporter_states.sto'))
+elseif strcmp(task_name, 'LateralReach')
+    track.setStatesReference(TableProcessor('..\..\OpenSim\In\Moco\tracking_states\sim_J40xoh155cm\RSA_J40xoh155cm_StatesReporter_states.sto'))
+end
+
 track.set_apply_tracked_states_to_guess(true)
 study = track.initialize();
 
@@ -240,24 +246,6 @@ solver = study.updSolver();
 casadiSolver = MocoCasADiSolver.safeDownCast(solver);
 casadiSolver.set_optim_convergence_tolerance(1e-1);
 casadiSolver.set_optim_constraint_tolerance(1e-3);
-
-
-% % % % Create an initial guess
-% % % in_guess=solver.createGuess();
-% % % in_guess.randomizeAdd();
-% % % solver.setGuess(in_guess);
-
-% Set guess from previous (~ good) solution. This will need
-% alterations when other conditions are testeed/
-% if flag_keepRC == true
-%     casadiSolver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_1.sto');
-% elseif flag_keepRC == false && strcmp(task_name, 'LateralReach')
-%     casadiSolver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_LatReach_RC_0.sto');
-% elseif flag_keepRC == false && strcmp(task_name, 'UpwardReach')
-%     casadiSolver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_UpwardReach_RC_0.sto');
-% elseif flag_keepRC == false && strcmp(task_name, 'HairTouch')
-%     casadiSolver.setGuessFile('..\..\OpenSim\In\Moco\initial_guess\initial_guess_HairTouch_RC_0.sto');
-% end
 
 %% Solve
 

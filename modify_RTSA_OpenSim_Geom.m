@@ -43,7 +43,7 @@ design_param.glenoid_prox_dist          = {0};
 design_param.glenoid_ant_post           = {0};
 
 design_param.glenoid_sup_inf_incl       = {0};
-design_param.gelnoid_ant_retro_version  = {0};
+design_param.glenoid_ant_retro_version  = {0};
 
 design_param.humerus_base_off           = {0.001}; % keep to 1 mm to avoid penetrating the humeral .stl with the cup .stl
 design_param.humerus_prox_dist          = {0};
@@ -96,7 +96,7 @@ param_matrix= allcomb( ...
     design_param.glenoid_prox_dist, ...
     design_param.glenoid_ant_post, ...
     design_param.glenoid_sup_inf_incl, ...
-    design_param.gelnoid_ant_retro_version,...
+    design_param.glenoid_ant_retro_version,...
     design_param.humerus_base_off,...
     design_param.humerus_prox_dist,...
     design_param.humerus_ant_post,...
@@ -144,11 +144,23 @@ flag_ReplaceMuscles     = true;
 % Run Moco after model is defined?
 flag_runSim             = true;
 
-% Correct morphology's Version / Inclination angles and 12 mm rule
-flag_correctVersion     = false;
-flag_correctInclination = true;
-flag_correctProxDist    = true;
-flag_correctLateral     = true;
+% True =  7 mm overhang assuming 25 mm baseplate and 39 mm glenosphere.
+% False = 12 mm rule  inferior rim to central peg.
+flag_AthwalOr12mm = true;
+
+if flag_AthwalOr12mm ==true
+    % Correct morphology's Version / Inclination angles and 12 mm rule
+    flag_correctVersion     = false;
+    flag_correctInclination = true;
+    flag_correctProxDist    = true;
+    flag_correctLateral     = true;
+else
+    % Correct morphology's Version / Inclination angles and 12 mm rule
+    flag_correctVersion     = false;
+    flag_correctInclination = false;
+    flag_correctProxDist    = false;
+    flag_correctLateral     = false;
+end
 
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt        = false;
@@ -158,6 +170,7 @@ if flag_viaPointOpt == true
     flag_DELT2              = true; % Optimises or Deletes via-point
     flag_DELT3              = true; % Optimises or Deletes via-point
 end
+
 %% Pass setup parameters and prepare models/simulations
 if flag_useParallel == true
 
@@ -236,7 +249,7 @@ if flag_useParallel == true
         % data.
 
         % Define parametric implant on .stl anatomy & extract parameters in global
-        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral);
+        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral, flag_AthwalOr12mm);
 
         % Define parametric implant on .stl anatomy & extract parameters in global
         humerus = humerusGeom(R, hemi_cup_offsets, rhash);
@@ -331,7 +344,7 @@ elseif flag_useParallel == false
         % data.
 
         % Define parametric implant on .stl anatomy & extract parameters in global
-        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral);
+        scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral, flag_AthwalOr12mm);
 
         % Define parametric implant on .stl anatomy & extract parameters in global
         humerus = humerusGeom(R, hemi_cup_offsets, rhash);
@@ -376,7 +389,6 @@ elseif flag_useParallel == false
         % Run OpenSim moco for predictive simulation
         if flag_runSim == true
             runRTSAtrack(model_file,...
-                flag_keepRC,...
                 task_name,...
                 GHJ_in_parent,...
                 GHJ_in_child,...

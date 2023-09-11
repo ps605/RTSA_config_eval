@@ -1,23 +1,20 @@
-function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral)
+function scapula = glenoidGeom(R, hemi_gle_offsets, model_SSM, rhash, flag_correctVersion, flag_correctInclination, flag_correctProxDist, flag_correctLateral, flag_AthwalOr12mm)
 
 %% Flags 
 % What part of the glenoid will be used to calcuate glenoid plane? (global
 % [= true] or lower [= flase] for RSA)
-flag_globalGlenoid = false;
-% Use global glenoid norm calculation for lower RSA positioning? (Clinical Study Jaylan will focus on)
-flag_global4LowerGlenoid = true;
+flag_globalGlenoid = true;
+% Use global glenoid norm calculation for lower RSA positioning? (Clinical
+% Study Jaylan will focus on) INCLUDE flag_AthwalOr12mm = true
+flag_global4LowerGlenoid = false;
 
-% Flag for which prox/dist correction to use.
-% True = 6.5 mm overhang assuming 29 mm baseplate on 42 mm glenosphere OR 7 mm overhang assuming 25 mm baseplate and 39 mm glenosphere.
-% False = 12 mm rule  inferior rim to central peg.
-flag_AthwalOr12mm = true;
+% Inferior overhang (used in Athwal for calculation otherwise just
+% visualisation)
+overhang = 0.007;
+% Lateral offset from inferior rim (used in Athwal for calculation otherwise just
+% visualisation)
+offset = 0.002;
 
-if flag_AthwalOr12mm == true
-    % Inferior overhang
-    overhang = 0.007;
-    % Lateral offset from inferior rim
-    offset = 0.002;
-end
 %% Set up
 % Load in and configure points of Scapula .stl
 % NOTE: not the most efficient way of handling the .stl
@@ -738,7 +735,7 @@ correction_angles.y_ant_retro_version   = rad2deg(fossa_correction_ang.XZ(4));
 % identifies inferior most point on the hemisphere from the rim
 if flag_AthwalOr12mm == true
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%% 6.5 mm rule Athwal %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%% Athwal Rule %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Project a point inferiorly along glenoid -ive Y-axis
     p_point = glenoid_barycentre-glenoid_plane_normals.y_n*R*2;
 
@@ -772,9 +769,17 @@ elseif flag_AthwalOr12mm == false
     % Get mesh data for the hemisphere from Visualisation Object. This will
     % then be continuesly updated through "hemisphere" Surface variable
 
+    % Project a point inferiorly along glenoid -ive Y-axis
+    p_point = glenoid_barycentre-glenoid_plane_normals.y_n*R*2;
+
     hemi_gle_mesh_data.X = hemisphere_gle.XData;
     hemi_gle_mesh_data.Y = hemisphere_gle.YData;
     hemi_gle_mesh_data.Z = hemisphere_gle.ZData;
+
+    hemi_gle_points = [hemi_gle_mesh_data.X(:), hemi_gle_mesh_data.Y(:), hemi_gle_mesh_data.Z(:)];
+
+    min_hemi_points = vecnorm((hemi_gle_points - p_point), 2 , 2);
+    [~, inf_point_idx_hemi] = min(min_hemi_points);
 
     % Get smallest Euclidian distance of glenoid rim points from projected
     % point on -ive Y-axis. Not exact bur close ennough
@@ -785,8 +790,11 @@ elseif flag_AthwalOr12mm == false
     inf_point.rim = glenoid_stl.Points(inf_point_idx_rim, :);
     d_inferior.rim = norm(inf_point.rim - glenoid_barycentre);
 
-    correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
+    inf_point.hemisphere = hemi_gle_points(inf_point_idx_hemi, :);
+    d_inferior.hemisphere =  norm(inf_point.hemisphere - inf_point.rim );
 
+    correction_displacement.y_prox_dist = d_inferior.rim - 0.012;
+    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% NOTE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Prox/Dist %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
