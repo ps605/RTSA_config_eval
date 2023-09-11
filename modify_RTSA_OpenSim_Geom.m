@@ -8,7 +8,7 @@
 % supero/inferial and base offset) and orientation (antero/postero,
 % supero/infero version) of the components. When geometric modification
 % have been completed on each anatomy and the implant component positions
-% are defined the parametic approximation of the components are exported as
+% are defined, the parametic approximation of the components are exported as
 % .stl and then the two anatomies and implant componets are registered in
 % the global coordinate system. The newly created shoulder joint CoR in the
 % scapula (parent body) and humerus (child body) are exported and redefined
@@ -45,7 +45,7 @@ design_param.glenoid_ant_post           = {0};
 design_param.glenoid_sup_inf_incl       = {0};
 design_param.gelnoid_ant_retro_version  = {0};
 
-design_param.humerus_base_off           = {0.001};
+design_param.humerus_base_off           = {0.001}; % keep to 1 mm to avoid penetrating the humeral .stl with the cup .stl
 design_param.humerus_prox_dist          = {0};
 design_param.humerus_ant_post           = {0};
 
@@ -142,7 +142,7 @@ flag_keepRC             = false;
 flag_ReplaceMuscles     = true;
 
 % Run Moco after model is defined?
-flag_runSim             = false;
+flag_runSim             = true;
 
 % Correct morphology's Version / Inclination angles and 12 mm rule
 flag_correctVersion     = false;
@@ -153,10 +153,11 @@ flag_correctLateral     = true;
 % Optimise DELT1, DELT2 and DELT3 via points
 flag_viaPointOpt        = false;
 
-flag_DELT1              = true; % Optimises position of via-point
-flag_DELT2              = true; % Optimises or Deletes via-point
-flag_DELT3              = true; % Optimises or Deletes via-point
-
+if flag_viaPointOpt == true
+    flag_DELT1              = true; % Optimises position of via-point
+    flag_DELT2              = true; % Optimises or Deletes via-point
+    flag_DELT3              = true; % Optimises or Deletes via-point
+end
 %% Pass setup parameters and prepare models/simulations
 if flag_useParallel == true
 

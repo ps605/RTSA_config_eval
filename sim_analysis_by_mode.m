@@ -13,8 +13,8 @@ clc
 flag_AnalysisTool   = false;
 flag_NormTime       = true;
 flag_HairTouch      = false;
-flag_LateralReach   = false;
-flag_UpwardReach    = true;
+flag_LateralReach   = true;
+flag_UpwardReach    = false;
 flag_AddDummyCoord  = true;
 
 % Import OpenSim 4.3 libraries
@@ -86,12 +86,12 @@ SDs = {'-3',...
     '3'
     };
 
-analysis_folder = '../../OpenSim/Out/Moco/Analysis/ISTA_v01/';
+analysis_folder = '../../OpenSim/Out/Moco/Analysis/paper_v02_revision/';
 
 % List simulation folders
 %sims = dir([analysis_folder '/sim_*']);
 
-log_table = readtable([analysis_folder 'RTSA_model_log_ISTA_v01.csv']); % 'RTSA_model_log_table_final_rerun_20230404.csv'
+log_table = readtable([analysis_folder 'RTSA_model_log_table_JOR_20230404.csv']); % 'RTSA_model_log_table_final_rerun_20230404.csv'
 
 if flag_HairTouch == true
 
@@ -656,112 +656,112 @@ for i_mode = 1:numel(modes)
         end
     end
 
-    %% SPM 
-    % inference:
-    alpha      = 0.05;
-    nTests     = 3;
-    p_critical = spm1d.util.p_critical_bonf(alpha, nTests);
-
-    figure(33)
-    subplot(3,1,1)
-    t_baseV5 = spm1d.stats.ttest_paired(F_res',F_res_plus5');
-    t_baseV5i = t_baseV5.inference(p_critical,'two_tailed', true, 'interp', true);
-    t_baseV5i.plot()
-    ylim([-100,25]);
-    xticks([])
-    title('Baseline vs 5 mm','FontSize', 12)
-%     xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
-    
-
-    figure(33)
-    subplot(3,1,2)
-    t_baseV10 = spm1d.stats.ttest_paired(F_res',F_res_plus10');
-    baseV10i = t_baseV10.inference(p_critical,'two_tailed', true, 'interp', true);
-    baseV10i.plot()
-    ylim([-100,25]);
-    xticks([])
-    title('Baseline vs 10 mm','FontSize', 12)
-%     xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
-
-    figure(33)
-    subplot(3,1,3)
-    t_5V10 = spm1d.stats.ttest_paired(F_res_plus5',F_res_plus10');
-    t_5V10i = t_5V10.inference(p_critical,'two_tailed', true, 'interp', true);
-    t_5V10i.plot()
-    ylim([-100,25]);
-    title('5 mm vs 10 mm','FontSize', 12)
-    xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
-
-
-    saveas(figure(33), [analysis_folder task_name '/SPM_mode_' modes{i_mode} '.tiff'],'tiff')
-
-    A = [F_res'; F_res_plus5'; F_res_plus10'];
-    SUB = repmat([1:4]',3,1);
-    condition = [0,0,0,0,1,1,1,1,2,2,2,2]';
-    figure(35)
-    F  = spm1d.stats.anova1(A,condition, SUB);
-    Fi = F.inference(0.05);
-    Fi.plot()
-    xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
-
-
-    % Average morphology data
-    figure(1)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
-    figure(2)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
-    figure(3)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
-    figure(4)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).F_res(:, 1), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
-
-    figure(5)
-    fr_av = sqrt(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3).^2)./...
-        (sqrt(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1).^2) + sqrt(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2).^2));
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, fr_av, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
-
-    figure(6)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
-    figure(7)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, elv_angle_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
-    figure(8)
-    plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_rot_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
-
-
-    figure(1)
-    set(gca,'FontWeight', 'bold')
-    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(1), [analysis_folder task_name '/Fx_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
-    figure(2)
-    set(gca,'FontWeight', 'bold')
-    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(2), [analysis_folder task_name '/Fy_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
-    figure(3)
-    set(gca,'FontWeight', 'bold')
-    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(3), [analysis_folder task_name '/Fz_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
-    figure(4)
-    set(gca,'FontWeight', 'bold')
-    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(4), [analysis_folder task_name '/Fres_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
-    figure(5)
-    set(gca,'FontWeight', 'bold')
-    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(5), [analysis_folder task_name '/FR_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
-    figure(6)
-    set(gca,'FontWeight', 'bold')
-    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(6), [analysis_folder task_name '/shoulder_elv_norm_mode_' modes{i_mode} '.tiff'],'tiff')
-    figure(7)
-    set(gca,'FontWeight', 'bold')
-    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(7), [analysis_folder task_name '/elv_angle_norm_mode_' modes{i_mode} '.tiff'],'tiff')
-    figure(8)
-    set(gca,'FontWeight', 'bold')
-    %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
-    saveas(figure(8), [analysis_folder task_name '/shoulder_rotation_norm_mode_' modes{i_mode} '.tiff'],'tiff')
-
-    close all
+% % %     %% SPM 
+% % %     % inference:
+% % %     alpha      = 0.05;
+% % %     nTests     = 3;
+% % %     p_critical = spm1d.util.p_critical_bonf(alpha, nTests);
+% % % 
+% % %     figure(33)
+% % %     subplot(3,1,1)
+% % %     t_baseV5 = spm1d.stats.ttest_paired(F_res',F_res_plus5');
+% % %     t_baseV5i = t_baseV5.inference(p_critical,'two_tailed', true, 'interp', true);
+% % %     t_baseV5i.plot()
+% % %     ylim([-100,25]);
+% % %     xticks([])
+% % %     title('Baseline vs 5 mm','FontSize', 12)
+% % % %     xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+% % %     
+% % % 
+% % %     figure(33)
+% % %     subplot(3,1,2)
+% % %     t_baseV10 = spm1d.stats.ttest_paired(F_res',F_res_plus10');
+% % %     baseV10i = t_baseV10.inference(p_critical,'two_tailed', true, 'interp', true);
+% % %     baseV10i.plot()
+% % %     ylim([-100,25]);
+% % %     xticks([])
+% % %     title('Baseline vs 10 mm','FontSize', 12)
+% % % %     xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+% % % 
+% % %     figure(33)
+% % %     subplot(3,1,3)
+% % %     t_5V10 = spm1d.stats.ttest_paired(F_res_plus5',F_res_plus10');
+% % %     t_5V10i = t_5V10.inference(p_critical,'two_tailed', true, 'interp', true);
+% % %     t_5V10i.plot()
+% % %     ylim([-100,25]);
+% % %     title('5 mm vs 10 mm','FontSize', 12)
+% % %     xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+% % % 
+% % % 
+% % %     saveas(figure(33), [analysis_folder task_name '/SPM_mode_' modes{i_mode} '.tiff'],'tiff')
+% % % 
+% % %     A = [F_res'; F_res_plus5'; F_res_plus10'];
+% % %     SUB = repmat([1:4]',3,1);
+% % %     condition = [0,0,0,0,1,1,1,1,2,2,2,2]';
+% % %     figure(35)
+% % %     F  = spm1d.stats.anova1(A,condition, SUB);
+% % %     Fi = F.inference(0.05);
+% % %     Fi.plot()
+% % %     xlabel('Movement Duration (%)','FontWeight', 'bold','FontSize', axis_label_size);
+% % % 
+% % % 
+% % %     % Average morphology data
+% % %     figure(1)
+% % %     plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+% % %     figure(2)
+% % %     plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+% % %     figure(3)
+% % %     plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+% % %     figure(4)
+% % %     plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).F_res(:, 1), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+% % % 
+% % %     figure(5)
+% % %     fr_av = sqrt(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 3).^2)./...
+% % %         (sqrt(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 1).^2) + sqrt(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, 2).^2));
+% % %     plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, fr_av, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+% % % 
+% % %     figure(6)
+% % %     plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_elv_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+% % %     figure(7)
+% % %     plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, elv_angle_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+% % %     figure(8)
+% % %     plot(JRA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).time, shoulder_rot_theta.(['sim_' log_table.Model_Hash{idx_ave_morph}]), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+% % % 
+% % % 
+% % %     figure(1)
+% % %     set(gca,'FontWeight', 'bold')
+% % %     %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+% % %     saveas(figure(1), [analysis_folder task_name '/Fx_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+% % %     figure(2)
+% % %     set(gca,'FontWeight', 'bold')
+% % %     %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+% % %     saveas(figure(2), [analysis_folder task_name '/Fy_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+% % %     figure(3)
+% % %     set(gca,'FontWeight', 'bold')
+% % %     %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+% % %     saveas(figure(3), [analysis_folder task_name '/Fz_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+% % %     figure(4)
+% % %     set(gca,'FontWeight', 'bold')
+% % %     %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+% % %     saveas(figure(4), [analysis_folder task_name '/Fres_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+% % %     figure(5)
+% % %     set(gca,'FontWeight', 'bold')
+% % %     %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+% % %     saveas(figure(5), [analysis_folder task_name '/FR_vs_NORM_mode_' modes{i_mode} '.tiff'],'tiff')
+% % %     figure(6)
+% % %     set(gca,'FontWeight', 'bold')
+% % %     %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+% % %     saveas(figure(6), [analysis_folder task_name '/shoulder_elv_norm_mode_' modes{i_mode} '.tiff'],'tiff')
+% % %     figure(7)
+% % %     set(gca,'FontWeight', 'bold')
+% % %     %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+% % %     saveas(figure(7), [analysis_folder task_name '/elv_angle_norm_mode_' modes{i_mode} '.tiff'],'tiff')
+% % %     figure(8)
+% % %     set(gca,'FontWeight', 'bold')
+% % %     %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
+% % %     saveas(figure(8), [analysis_folder task_name '/shoulder_rotation_norm_mode_' modes{i_mode} '.tiff'],'tiff')
+% % % 
+% % %     close all
 
 end
 
@@ -873,7 +873,7 @@ for i_mus = 1:3
 
                 figure(1)
                 plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time,...
-                    TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus), ...
+                    TF.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus) - TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus), ...
                     'LineWidth', line_width,...
                     'Color', sd_colours(i_sd,:), ...
                     'LineStyle', line_style)
@@ -883,7 +883,7 @@ for i_mus = 1:3
         end
 
         figure(1)
-        plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+%         plot(TF.(['sim_' log_table.Model_Hash{i_sim}]).time, TF.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus), 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 
         xlabel('Movement Duration (%)','FontWeight', 'bold', 'FontSize', axis_label_size);
         ylabel('Tendon Force (N)', 'FontWeight', 'bold', 'FontSize', axis_label_size);
@@ -1373,7 +1373,7 @@ for i_coord = 1:numel(coords_to_plot)
 
                     figure (1)
                     plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time,...
-                        MA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000, ...
+                        MA.(['sim_' log_table.Model_Hash{idx_sim_table}]).data(:, i_mus)*1000 - MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus)*1000, ...
                         'LineWidth', line_width,...
                         'Color', sd_colours(i_sd,:),...
                         'LineStyle', line_style)
@@ -1383,7 +1383,7 @@ for i_coord = 1:numel(coords_to_plot)
                 end
             end
             figure(1)
-            plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus)*1000, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
+%             plot(MA.(['sim_' log_table.Model_Hash{i_sim}]).time, MA.(['sim_' log_table.Model_Hash{idx_ave_morph}]).data(:, i_mus)*1000, 'LineWidth', line_width, 'Color', 'black','LineStyle','-.')
 
             xlabel('Movement Duration (%)','FontWeight', 'bold', 'FontSize', axis_label_size);
             ylabel('Muscle Moment Arm (mm)', 'FontWeight', 'bold', 'FontSize', axis_label_size);

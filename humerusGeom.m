@@ -138,7 +138,7 @@ bary_plane = resection_plane.Parameters(1)*resection_barycentre(1) +...
     resection_plane.Parameters(4);
 
 if bary_plane >= 1e-4
-    disp('You fucked up')
+    disp('Barycentre not on plane')
     keyboard
 end
 

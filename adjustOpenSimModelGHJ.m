@@ -17,7 +17,7 @@ import org.opensim.modeling.*
 model_name = 'FullShoulderModel_glC_viaRTSA.osim'; %'FullShoulderModelglC_understand_jointDefs_implant.osim';_viaRTSA
 
 % Flags
-flag_AddDummyCoord = false;
+flag_AddDummyCoord = false; % To be able to calculate moment arms similarly to Ackland (verification)
 
 % To change JCS position and relative geometry
 conds_GHJ_geom.tran = [
@@ -53,12 +53,12 @@ clear i_coord
 %% Add CoordinateActuators (or Reserve) depending if muscles are used in % simulation (torque_flag == false)
 if flag_useTorque==true
 
-    %     % Remove Muscles and replace with Actuators
-    %     createTorqueDrivenModel(osim_model,...
-    %         coords_to_actuate,...
-    %         actuator_values,...
-    %         actuator_controls,...
-    %         '_torque');
+        % Remove Muscles and replace with Actuators
+        createTorqueDrivenModel(osim_model,...
+            coords_to_actuate,...
+            actuator_values,...
+            actuator_controls,...
+            '_torque');
 
 else
 

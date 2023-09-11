@@ -239,7 +239,7 @@ problem.addGoal(MocoControlGoal('effort',10));
 solver = study.updSolver();
 casadiSolver = MocoCasADiSolver.safeDownCast(solver);
 casadiSolver.set_optim_convergence_tolerance(1e-1);
-% casadiSolver.set_optim_constraint_tolerance(1e-3);
+casadiSolver.set_optim_constraint_tolerance(1e-3);
 
 
 % % % % Create an initial guess
