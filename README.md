@@ -4,7 +4,7 @@
 
 ![converged_RTSA_C95kco121ij_gif](https://user-images.githubusercontent.com/30126218/193943443-6037a2a0-08df-469d-99ed-ceb3e39c7210.gif)
 
-[Silvestros P., Athwal G.S and Giles J.W., 2023; Journal of Orthopaedic Research (Under Review)]
+Silvestros P., Athwal G.S and Giles J.W., 2024; Journal of Orthopaedic Research (https://onlinelibrary.wiley.com/doi/full/10.1002/jor.25801)
 
 This is a project that aims to improve surgical pre-operative planning technology by progressing for pure geometrical surgery planning to functional and biomechanical outcome based planning.
 
@@ -14,6 +14,8 @@ They are many variables that influence a surgeon's decisions when performing a R
 2) construct (i.e. implant) size
 3) construct placement
 4) construct orientation on the scapula and humerus. 
+
+![Image](https://github.com/user-attachments/assets/4ad628c2-3c07-42a6-af60-d88535942c46)
 
 All these decisions alter the mechanical system of the shoulder joint (center of rotation, muscle function and joint loading) all of which have complicated interactions that influence the capability of the shoulder to perform functional tasks.
 
